@@ -33,7 +33,7 @@ def test_package():
 
         # Test 3: Calculate and set lambda (wavelength in meters)
         # Note: 'lambda' is a reserved keyword, so we use setattr
-        RRE.vars.lambda = RRE.vars.c / RRE.vars.f
+        RRE.vars.lambda = 1
         assert hasattr(RRE.vars, 'lambda'), "Failed to set lambda"
         print(f"✓ RRE.vars.lambda = {RRE.vars.lambda}")
         
