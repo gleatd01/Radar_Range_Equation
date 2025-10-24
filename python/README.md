@@ -27,7 +27,7 @@ RRE.vars.c = 3.00 * 10**8
 RRE.vars.f = 10
 
 # Calculate and set wavelength (m)
-# Note: 'lambda' is a reserved keyword in Python, so use setattr
+# Note: 'lambda' is a reserved keyword in Python, so use setattr/getattr
 setattr(RRE.vars, 'lambda', RRE.vars.c / RRE.vars.f)
 
 # Print the wavelength
