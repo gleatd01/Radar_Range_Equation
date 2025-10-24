@@ -1,0 +1,23 @@
+name: radar_range_equation
+description: A set of radar range equation tools for Flutter/Dart applications
+version: 0.1.0
+homepage: https://github.com/gleatd01/Radar_Range_Equation
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  # Add dependencies here when needed
+  # For example:
+  # flutter:
+  #   sdk: flutter
+
+dev_dependencies:
+  lints: ^3.0.0
+  test: ^1.24.0
+
+# For information on the generic Dart part of this file, see the
+# following page: https://dart.dev/tools/pub/pubspec
+
+# The following section is specific to Flutter packages.
+# flutter:
