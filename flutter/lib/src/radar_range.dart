@@ -21,7 +21,7 @@ import 'dart:math';
 /// ```dart
 /// final maxRange = calculateMaxRange(
 ///   transmitPower: 1000,           // 1 kW
-///   antennaGain: 1000,              // 30 dBi
+///   antennaGain: 1000,              // 30 dB
 ///   wavelength: 0.03,               // 10 GHz
 ///   radarCrossSection: 1.0,         // 1 m²
 ///   minDetectableSignal: 1e-13,     // -100 dBm
@@ -50,7 +50,7 @@ double calculateMaxRange({
 
   final maxRange = pow(numerator / denominator, 0.25);
 
-  return maxRange.toDouble();
+  return maxRange as double;
 }
 
 /// Calculate the received power from a target at a given range.
@@ -100,5 +100,5 @@ double calculateReceivedPower({
 
   final receivedPower = numerator / denominator;
 
-  return receivedPower.toDouble();
+  return receivedPower as double;
 }
