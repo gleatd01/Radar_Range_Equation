@@ -23,7 +23,7 @@ Homepage = "https://github.com/gleatd01/Radar_Range_Equation/"
 Issues = "https://github.com/gleatd01/Radar_Range_Equation/issues"
 
 [tool.hatch.build.targets.wheel]
-sources = ["python/src"]
+sources = ["python/src/radar_range_equation/"]
 
 [tool.hatch.build]
 directory = "python/build"
