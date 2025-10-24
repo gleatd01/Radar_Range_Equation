@@ -21,9 +21,5 @@ jobs:
           # Optional - x64 or x86 architecture, defaults to x64
           architecture: 'x64'
       # You can test your matrix by printing the current Python version
-      - name: Display Python version
-        run: python -c "import sys; print(sys.version)"
-      - name: Install dependencies
-        run: |
-          python3 -m pip install --upgrade build
-          python3 -m build
+      - name: Install Hatch
+        uses: pypa/hatch@install
