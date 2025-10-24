@@ -21,3 +21,9 @@ license-files = ["LICEN[CS]E*"]
 [project.urls]
 Homepage = "https://github.com/gleatd01/Radar_Range_Equation/"
 Issues = "https://github.com/gleatd01/Radar_Range_Equation/issues"
+
+[tool.hatch.build.targets.wheel]
+sources = ["/python/src"]
+
+[tool.hatch.build]
+directory = "/python/build"
