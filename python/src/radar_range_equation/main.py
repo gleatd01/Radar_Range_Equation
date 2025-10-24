@@ -7,7 +7,7 @@ class Variables:
     """
     A class to hold variables that can be dynamically assigned and redefined.
     """
-        def __init__(self, **overrides):
+    def __init__(self, **overrides):
         # Default physical constants and other useful defaults
         self.c = convert_to(speed_of_light, [units.meter, units.seconds])          # speed of light (m/s)
         self.k = 1.38e-23           # Boltzmann constant (J/K) — example
