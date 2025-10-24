@@ -3,7 +3,7 @@ requires = ["hatchling >= 1.26"]
 build-backend = "hatchling.build"
 
 [project]
-name = "radar-range-equation"
+name = "Radar_Range_Equation"
 version = "2025.10.24dev1"
 authors = [
   { name="Taylor", email="taylor@buzzedtop.com" },
