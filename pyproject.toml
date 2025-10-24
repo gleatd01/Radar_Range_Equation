@@ -3,7 +3,7 @@ requires = ["hatchling >= 1.26"]
 build-backend = "hatchling.build"
 
 [project]
-name = "Radar_Range_Equation"
+name = "radar-range-equation"
 version = "2025.10.24dev1"
 authors = [
   { name="Taylor", email="taylor@buzzedtop.com" },
@@ -16,14 +16,14 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 license = "MIT"
-license-files = ["LICEN[CS]E*"]
+license-files = ["LICENSE*", "LICENCE*"]
 
 [project.urls]
 Homepage = "https://github.com/gleatd01/Radar_Range_Equation/"
 Issues = "https://github.com/gleatd01/Radar_Range_Equation/issues"
 
 [tool.hatch.build.targets.wheel]
-sources = ["/python/src"]
+sources = ["python/src"]
 
 [tool.hatch.build]
-directory = "/python/build"
+directory = "python/build"
