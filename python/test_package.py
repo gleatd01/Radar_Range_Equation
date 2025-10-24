@@ -33,17 +33,17 @@ def test_package():
 
         # Test 3: Calculate and set lambda (wavelength in meters)
         # Note: 'lambda' is a reserved keyword, so we use setattr
-        RRE.vars.lambda = 1
-        assert hasattr(RRE.vars, 'lambda'), "Failed to set lambda"
-        print(f"✓ RRE.vars.lambda = {RRE.vars.lambda}")
+        RRE.vars.lambda_ = 1
+        assert hasattr(RRE.vars, 'lambda_'), "Failed to set lambda"
+        print(f"✓ RRE.vars.lambda_ = {RRE.vars.lambda_}")
         
         # Test 4: Use the redefine_variable function
         new_wavelength = 0.03
-        RRE.redefine_variable('lambda', new_wavelength)
-        lambda_value = getattr(RRE.vars, 'lambda')
+        RRE.redefine_variable('lambda_', new_wavelength)
+        lambda_value = getattr(RRE.vars, 'lambda_')
         assert lambda_value == new_wavelength, f"Expected lambda={new_wavelength}, got {lambda_value}"
         print(f"✓ RRE.redefine_variable('lambda', {new_wavelength}) works correctly")
-        print(f"✓ RRE.vars.lambda = {lambda_value}")
+        print(f"✓ RRE.vars.lambda_ = {lambda_value}")
 
         print("\n✓ All tests passed!")
         return 0
