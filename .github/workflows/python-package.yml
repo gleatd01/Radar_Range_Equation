@@ -32,5 +32,4 @@ jobs:
       - name: Upload package
         run: |
           python3 -m pip install --upgrade twine
-          ls
-          #python3 -m twine upload dist/*
+          python3 -m twine upload dist/*
