@@ -29,3 +29,8 @@ jobs:
         run: pip install dist/*.whl sympy numpy pandas
       - name: Test package
         run: python python/test_package.py
+      - name: Upload package
+        run: |
+          python3 -m pip install --upgrade twine
+          ls
+          #python3 -m twine upload dist/*
