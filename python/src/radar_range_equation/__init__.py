@@ -2,6 +2,6 @@
 
 __version__ = "2025.10.24dev1"
 
-from .main import Variables, vars, redefine_variable
+from .main import vars, redefine_variable, solve, convert_to_db, equations
 
-__all__ = ["Variables", "vars", "redefine_variable"]
+__all__ = ["vars", "redefine_variable", "solve", "convert_to_db", "equations"]
