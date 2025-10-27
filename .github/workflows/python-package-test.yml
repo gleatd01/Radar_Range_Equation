@@ -1,11 +1,14 @@
 # This workflow will install Python dependencies, run tests and lint with a variety of Python versions
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
 
-name: Python package
+name: Python package test
 
 on:
-  push:
+  pull_request:
     branches:
+      - main
+  push:
+    branches-ignore:
       - main
 
 jobs:
@@ -29,7 +32,7 @@ jobs:
         uses: pypa/hatch@install
       - name: Set version
         run: |
-          VERSION=$(date -u +"%Y.%m.%d")
+          VERSION=$(date -u +"%Y.%m.%d").dev1
           echo "Building version: $VERSION"
           sed -i "s/version = \"0.0.0\"/version = \"$VERSION\"/" pyproject.toml
       - name: Build package
@@ -38,7 +41,3 @@ jobs:
         run: pip install dist/*.whl
       - name: Test package
         run: python python/test_package.py
-      - name: Upload package
-        run: |
-          python3 -m pip install --upgrade twine
-          python3 -m twine upload dist/*
