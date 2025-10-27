@@ -38,13 +38,31 @@ class vars:
     sigma = Symbol('sigma')  # radar cross section (symbolic)
 
 class equations:
-    A_e = sympy.Eq(vars.A_e, vars.eta * vars.D_h * vars.D_v)
-    wavelength = sympy.Eq(vars.wavelength, vars.c / vars.f)
-    G_t = sympy.Eq(vars.G_t, 4 * sympy.pi * vars.A_e / (vars.wavelength ** 2))
-    Linear_to_dB = sympy.Eq(vars.x, 10 * sympy.log(vars.x) / sympy.log(10))
-    R4 = sympy.Eq(vars.R**4, (vars.P_t * vars.G_t ** 2 * vars.wavelength ** 2 * vars.sigma) / ( (4 * sympy.pi) ** 3 * vars.S_min ))
-    P_t = sympy.Eq(vars.P_t, ((4 * sympy.pi) ** 3 * vars.S_min * vars.R ** 4) / (vars.G_t ** 2 * vars.wavelength ** 2 * vars.sigma))
+    # Create purely symbolic names (no vars.*) to keep equations symbolic for later substitution
+    c_sym = Symbol('c')
+    f_sym = Symbol('f')
+    eta_sym = Symbol('eta')
+    D_h_sym = Symbol('D_h')
+    D_v_sym = Symbol('D_v')
+    x_sym = Symbol('x')
+    R_sym = Symbol('R')
+    A_e_sym = Symbol('A_e')
+    wavelength_sym = Symbol('lambda')
+    G_t_sym = Symbol('G_t')
+    P_t_sym = Symbol('P_t')
+    sigma_sym = Symbol('sigma')
+    S_min_sym = Symbol('S_min')
+    R_max_sym = Symbol('R_max')
+    pi_sym = Symbol('pi')
 
+    # Symbolic equations without vars prefix
+    A_e = sympy.Eq(A_e_sym, eta_sym * D_h_sym * D_v_sym)
+    wavelength = sympy.Eq(wavelength_sym, c_sym / f_sym)
+    G_t = sympy.Eq(G_t_sym, 4 * sympy.pi * A_e_sym / (wavelength_sym ** 2))
+    Linear_to_dB = sympy.Eq(x_sym, 10 * sympy.log(x_sym) / sympy.log(10))
+    R4 = sympy.Eq(R_sym**4, (P_t_sym * G_t_sym**2 * wavelength_sym**2 * sigma_sym) / ((4 * sympy.pi)**3 * S_min_sym))
+    P_t = sympy.Eq(P_t_sym, ((4 * pi_sym)**3 * S_min_sym * R_sym**4) / (G_t_sym**2 * wavelength_sym**2 * sigma_sym))
+    R_max = sympy.Eq(R_max_sym, sympy.Pow((P_t_sym * (G_t_sym**2) * (wavelength_sym**2) * sigma_sym) / ((4 * pi_sym)**3 * S_min_sym), sympy.Rational(1, 4), evaluate=False), evaluate=False)
 class solve:
     def __init__():
         pass
@@ -63,8 +81,45 @@ class solve:
         return value
     
     def P_t():
-        value = ((vars.pi4) ** 3 * vars.S_min * vars.R ** 4) / (vars.G_t ** 2 * vars.wavelength ** 2 * vars.sigma)
-        return value
+        sym_expr = sympy.solve(equations.P_t, equations.P_t.lhs)[0]
+        def _s(v):
+            return v if isinstance(v, sympy.Basic) else sympy.Float(v)
+        subs_map = {
+            equations.S_min_sym: _s(vars.S_min),
+            equations.R_sym: _s(vars.R),
+            equations.G_t_sym: _s(vars.G_t),
+            equations.wavelength_sym: _s(vars.wavelength),
+            equations.sigma_sym: _s(vars.sigma),
+            equations.pi_sym: _s(vars.pi)
+        }
+        value_sym = sym_expr.subs(subs_map)
+        value_simpl = sympy.simplify(value_sym)
+        # Return as a native Python float
+        return float(value_simpl.evalf())
+    
+    def R_max():
+        # Use the symbolic R_max equation, substitute current variable values
+        # and then evaluate numerically. This preserves the symbolic derivation
+        # while returning a clean numeric result (no leftover 2**(1/4) factors).
+        sym_expr = sympy.solve(equations.R_max, equations.R_max.lhs)[0]
+
+        # Helper to convert Python numbers to sympy Floats but leave sympy types alone
+        def _s(v):
+            return v if isinstance(v, sympy.Basic) else sympy.Float(v)
+
+        subs_map = {
+            equations.P_t_sym: _s(vars.P_t),
+            equations.G_t_sym: _s(vars.G_t),
+            equations.wavelength_sym: _s(vars.wavelength),
+            equations.sigma_sym: _s(vars.sigma),
+            equations.pi_sym: _s(vars.pi),
+            equations.S_min_sym: _s(vars.S_min)
+        }
+
+        value_sym = sym_expr.subs(subs_map)
+        value_simpl = sympy.simplify(value_sym)
+        # Return as a native Python float
+        return float(value_simpl.evalf())
 
 def convert_to_db(value_linear):
     """
@@ -75,6 +130,16 @@ def convert_to_db(value_linear):
         float: The value in decibels (dB).
     """
     return np.log(value_linear)/np.log(10)*10
+
+def convert_m_to_mi(value_meters):
+    """
+    Converts meters to miles.
+    Args:
+        value_meters (float): The value in meters.
+    Returns:
+        float: The value in miles.
+    """
+    return value_meters / 1609.34
 
 def redefine_variable(var_name, new_value):
     """
@@ -89,7 +154,7 @@ def redefine_variable(var_name, new_value):
 if __name__ == '__main__':  # Only runs when the script is executed directly
     # Operate on local module objects instead of importing the package to avoid circular/package import issues
     # Use setattr to set 'lambda' since it's a reserved keyword
-    vars.f = 1300e6
+    vars.f = 1300*10**6
     pprint(f"Frequency (RRE.vars.f): {vars.f} Hz")
     pprint(f"Speed of Light (RRE.vars.c): {vars.c} m/s")
     vars.wavelength = solve.wavelength()
@@ -97,27 +162,47 @@ if __name__ == '__main__':  # Only runs when the script is executed directly
     vars.D_h = 12
     vars.D_v = 4
     vars.A_e = solve.A_e()
-    pprint(equations.A_e)
     pprint(f"Effective Aperture (RRE.vars.A_e): {vars.A_e} m²")
-    pprint(equations.wavelength)
     pprint(f"Wavelength (RRE.vars.wavelength): {vars.wavelength} m")
-
-    pprint({equations.G_t})
     vars.G_t = solve.G_t()
-
-
     vars.G_t_dB = convert_to_db(vars.G_t)
-
     pprint(f"Transmit Antenna Gain (RRE.vars.G_t): {vars.G_t}")
     pprint(equations.Linear_to_dB)
     pprint(f"Transmit Antenna Gain in dB (RRE.vars.G_t_dB): {vars.G_t_dB} dB")
-    pprint(equations.P_t)
-    vars.S_min = 10e-13
+
+    vars.S_min = 10**-13
     pprint(f"Minimum Detectable Signal (RRE.vars.S_min): {vars.S_min} W")
     vars.sigma = 1
     pprint(f"Radar Cross Section (RRE.vars.sigma): {vars.sigma} m²")
     vars.R = 200
     pprint(f"Range (RRE.vars.R): {vars.R} m")
-    pprint(f"Range to the Fourth Power (RRE.vars.R**4): {vars.R**4} m⁴")
+    pprint(equations.P_t)
     vars.P_t = solve.P_t()
     pprint(f"Transmit Power (RRE.vars.P_t): {vars.P_t} W")
+
+    #vars.P_t = 200e3
+    #pprint(f"Updated Transmit Power (RRE.vars.P_t): {vars.P_t} W")
+    #vars.sigma = 2
+    #pprint(f"Updated Radar Cross Section (RRE.vars.sigma): {vars.sigma} m²")
+    #vars.f = 2.9e9
+    #pprint(f"Updated Frequency (RRE.vars.f): {vars.f} Hz")
+    #pprint(f"Frequency in GHz: {vars.f / 1e9} GHz")
+    #vars.D_h = 2.7
+    #pprint(f"Updated Horizontal Antenna Dimension (RRE.vars.D_h): {vars.D_h} m")
+    #vars.D_v = 5
+    #pprint(f"Updated Vertical Antenna Dimension (RRE.vars.D_v): {vars.D_v} m")
+    #vars.eta = 0.6
+    #vars.A_e = solve.A_e()
+    #pprint(f"Updated Effective Aperture (RRE.vars.A_e): {vars.A_e} m²")
+    #vars.wavelength = solve.wavelength()
+    #pprint(f"Updated Wavelength (RRE.vars.wavelength): {vars.wavelength} m")
+    #vars.S_min = 10**-12
+    #pprint(f"Updated Minimum Detectable Signal (RRE.vars.S_min): {vars.S_min} W")
+    #vars.G_t = solve.G_t()
+    #vars.G_t_dB = convert_to_db(vars.G_t)
+    #pprint(f"Updated Transmit Antenna Gain (RRE.vars.G_t): {vars.G_t}")
+    #pprint(f"Updated Transmit Antenna Gain in dB (RRE.vars.G_t_dB): {vars.G_t_dB} dB")
+    #pprint(equations.R_max)
+    #vars.R_max = solve.R_max()
+    #pprint(f"Maximum Range (RRE.vars.R_max): {vars.R_max} m")
+    #pprint(f"Maximum Range in miles: {convert_m_to_mi(vars.R_max)} miles")

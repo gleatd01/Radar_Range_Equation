@@ -27,7 +27,7 @@ jobs:
       - name: Build package
         run: hatch build
       - name: Install package
-        run: pip install dist/*.whl sympy numpy pandas
+        run: pip install dist/*.whl
       - name: Test package
         run: python python/test_package.py
       - name: Upload package
