@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "Radar_Range_Equation"
-version = "2025.10.24dev2"
+version = "2025.10.26"
 authors = [
   { name="Taylor", email="taylor@buzzedtop.com" },
 ]
@@ -17,6 +17,12 @@ classifiers = [
 ]
 license = "MIT"
 license-files = ["LICENSE*", "LICENCE*"]
+dependencies = [
+  "scipy",
+  "numpy",
+  "sympy",
+  "pint",
+]
 
 [project.urls]
 Homepage = "https://github.com/gleatd01/Radar_Range_Equation/"
