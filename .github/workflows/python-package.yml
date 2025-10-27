@@ -31,7 +31,7 @@ jobs:
         run: |
           VERSION=$(date -u +"%Y.%m.%d")
           echo "Building version: $VERSION"
-          sed -i "s/version = \"0.0.0\"/version = \"$VERSION\"/" pyproject.toml
+          sed -i "s/^version = \"0.0.0\"/version = \"$VERSION\"/" pyproject.toml
       - name: Build package
         run: hatch build
       - name: Install package

@@ -32,9 +32,9 @@ jobs:
         uses: pypa/hatch@install
       - name: Set version
         run: |
-          VERSION=$(date -u +"%Y.%m.%d").dev1
+          VERSION=$(date -u +"%Y.%m.%d.dev1")
           echo "Building version: $VERSION"
-          sed -i "s/version = \"0.0.0\"/version = \"$VERSION\"/" pyproject.toml
+          sed -i "s/^version = \"0.0.0\"/version = \"$VERSION\"/" pyproject.toml
       - name: Build package
         run: hatch build
       - name: Install package
