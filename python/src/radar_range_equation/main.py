@@ -141,6 +141,16 @@ def convert_m_to_mi(value_meters):
     """
     return value_meters / 1609.34
 
+def convert_w_to_kw(value_watts):
+    """
+    Converts watts to kilowatts.
+    Args:
+        value_watts (float): The value in watts.
+    Returns:
+        float: The value in kilowatts.
+    """
+    return value_watts / 1000.0
+
 def redefine_variable(var_name, new_value):
     """
     Redefines a global variable within the 'vars' namespace.
@@ -154,31 +164,44 @@ def redefine_variable(var_name, new_value):
 if __name__ == '__main__':  # Only runs when the script is executed directly
     # Operate on local module objects instead of importing the package to avoid circular/package import issues
     # Use setattr to set 'lambda' since it's a reserved keyword
-    vars.f = 1300*10**6
-    pprint(f"Frequency (RRE.vars.f): {vars.f} Hz")
-    pprint(f"Speed of Light (RRE.vars.c): {vars.c} m/s")
-    vars.wavelength = solve.wavelength()
-    vars.eta = 0.65
-    vars.D_h = 12
-    vars.D_v = 4
-    vars.A_e = solve.A_e()
-    pprint(f"Effective Aperture (RRE.vars.A_e): {vars.A_e} m²")
-    pprint(f"Wavelength (RRE.vars.wavelength): {vars.wavelength} m")
-    vars.G_t = solve.G_t()
-    vars.G_t_dB = convert_to_db(vars.G_t)
-    pprint(f"Transmit Antenna Gain (RRE.vars.G_t): {vars.G_t}")
-    pprint(equations.Linear_to_dB)
-    pprint(f"Transmit Antenna Gain in dB (RRE.vars.G_t_dB): {vars.G_t_dB} dB")
+    # vars.f = 1300*10**6
+    # pprint(f"Frequency (RRE.vars.f): {vars.f} Hz")
+    # pprint(f"Speed of Light (RRE.vars.c): {vars.c} m/s")
+    # vars.wavelength = solve.wavelength()
+    # vars.eta = 0.65
+    # vars.D_h = 12
+    # vars.D_v = 4
+    # vars.A_e = solve.A_e()
+    # pprint(f"Effective Aperture (RRE.vars.A_e): {vars.A_e} m²")
+    # pprint(f"Wavelength (RRE.vars.wavelength): {vars.wavelength} m")
+    # vars.G_t = solve.G_t()
+    # vars.G_t_dB = convert_to_db(vars.G_t)
+    # pprint(f"Transmit Antenna Gain (RRE.vars.G_t): {vars.G_t}")
+    # pprint(equations.Linear_to_dB)
+    # pprint(f"Transmit Antenna Gain in dB (RRE.vars.G_t_dB): {vars.G_t_dB} dB")
 
-    vars.S_min = 10**-13
-    pprint(f"Minimum Detectable Signal (RRE.vars.S_min): {vars.S_min} W")
-    vars.sigma = 1
-    pprint(f"Radar Cross Section (RRE.vars.sigma): {vars.sigma} m²")
-    vars.R = 200
-    pprint(f"Range (RRE.vars.R): {vars.R} m")
-    pprint(equations.P_t)
+    # vars.S_min = 10**-13
+    # pprint(f"Minimum Detectable Signal (RRE.vars.S_min): {vars.S_min} W")
+    # vars.sigma = 1
+    # pprint(f"Radar Cross Section (RRE.vars.sigma): {vars.sigma} m²")
+    # vars.R = 200
+    # pprint(f"Range (RRE.vars.R): {vars.R} m")
+    # pprint(equations.P_t)
+    # vars.P_t = solve.P_t()
+    # pprint(f"Transmit Power (RRE.vars.P_t): {vars.P_t} W")
+
+    vars.wavelength = 0.6977
+    vars.A_e = 157.6
+    vars.G_t = 4.07*10**3
+    vars.S_min = 1.5*10**-16
+    vars.R = 3.844*10**8
+    vars.sigma = 6.64*10**11
     vars.P_t = solve.P_t()
     pprint(f"Transmit Power (RRE.vars.P_t): {vars.P_t} W")
+    pprint(f"Transmit Power in kW: {convert_w_to_kw(vars.P_t)} kW")
+    A = ((4*vars.pi)**3 *  vars.S_min * (vars.R)**4) / (vars.G_t**2 * vars.wavelength**2 * vars.sigma)
+    pprint(f"Manual calculation of P_t: {A} W")
+    pprint(f"Transmit Power in kW: {convert_w_to_kw(A)} kW")
 
     #vars.P_t = 200e3
     #pprint(f"Updated Transmit Power (RRE.vars.P_t): {vars.P_t} W")
