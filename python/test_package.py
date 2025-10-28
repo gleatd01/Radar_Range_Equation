@@ -17,6 +17,8 @@ def test_package():
     try:
         # Import the package
         import radar_range_equation as RRE
+        import sympy
+        from sympy import pprint
         print("✓ Package imported successfully")
 
         # Test 1: Set c (speed of light in m/s)
