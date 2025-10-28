@@ -46,6 +46,30 @@ def test_package():
         print(f"✓ RRE.vars.lambda_ = {lambda_value}")
 
         print("\n✓ All tests passed!")
+
+        vars.f = 430*10**6  # Frequency in Hz
+        vars.eta = .6
+        vars.D = convert_ft_to_m(60)  # Antenna diameter in meters
+        vars.R = 3.844*10**8  # Range in meters (example: distance to the Moon)
+        vars.sigma = 6.64*10**11
+        vars.A_e = solve.A_e_circ()
+        vars.S_min = 1.5*10**-16
+        vars.wavelength = solve.wavelength()
+        pprint(vars.A_e)
+        vars.G_t = solve.G_t()
+        pprint(vars.G_t)
+        pprint(equations.P_t)
+        vars.P_t = solve.P_t()
+        pprint(vars.P_t)
+    
+        vars.A=1.738*10**6  # Antenna radius in meters
+        vars.sigma = solve.sigma_sphere()
+        pprint(vars.sigma)
+    
+        vars.sigma = 6.64*10**11
+        vars.A = solve.A_sphere()
+        pprint(vars.A)
+    
         return 0
 
     except ImportError as e:
