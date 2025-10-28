@@ -47,24 +47,24 @@ def test_package():
 
         print("\n✓ All tests passed!")
 
-        vars.f = 430*10**6  # Frequency in Hz
-        vars.eta = .6
-        vars.D = convert_ft_to_m(60)  # Antenna diameter in meters
-        vars.R = 3.844*10**8  # Range in meters (example: distance to the Moon)
-        vars.sigma = 6.64*10**11
-        vars.A_e = solve.A_e_circ()
-        vars.S_min = 1.5*10**-16
-        vars.wavelength = solve.wavelength()
-        pprint(vars.A_e)
-        vars.G_t = solve.G_t()
-        pprint(vars.G_t)
-        pprint(equations.P_t)
-        vars.P_t = solve.P_t()
-        pprint(vars.P_t)
+        RRE.vars.f = 430*10**6  # Frequency in Hz
+        RRE.vars.eta = .6
+        RRE.vars.D = RRE.convert_ft_to_m(60)  # Antenna diameter in meters
+        RRE.vars.R = 3.844*10**8  # Range in meters (example: distance to the Moon)
+        RRE.vars.sigma = 6.64*10**11
+        RRE.vars.A_e = RRE.solve.A_e_circ()
+        RRE.vars.S_min = 1.5*10**-16
+        RRE.vars.wavelength = RRE.solve.wavelength()
+        pprint(RRE.vars.A_e)
+        RRE.vars.G_t = RRE.solve.G_t()
+        pprint(RRE.vars.G_t)
+        pprint(RRE.equations.P_t)
+        RRE.vars.P_t = RRE.solve.P_t()
+        pprint(RRE.vars.P_t)
     
-        vars.A=1.738*10**6  # Antenna radius in meters
-        vars.sigma = solve.sigma_sphere()
-        pprint(vars.sigma)
+        RRE.vars.A=1.738*10**6  # Antenna radius in meters
+        RRE.vars.sigma = RRE.solve.sigma_sphere()
+        pprint(RRE.vars.sigma)
     
         vars.sigma = 6.64*10**11
         vars.A = solve.A_sphere()
