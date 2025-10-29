@@ -1,84 +1,59 @@
 #!/usr/bin/env python3
-"""
-Test script to verify the Radar_Range_Equation package after installation.
+"""Lightweight smoke test for the radar_range_equation package.
 
-This script tests the basic functionality of the package by:
-1. Setting the speed of light (c)
-2. Setting the frequency (f)
-3. Calculating and setting the wavelength (lambda = c/f)
-4. Printing the result
+This script performs a few small, well-defined checks against the
+public API exported by `radar_range_equation` to ensure the package
+imports and basic functions behave as expected.
 """
 
 import sys
+from math import isclose
 
 
 def test_package():
-    """Test the basic functionality of the radar_range_equation package."""
+    """Run a few assertions against the package API.
+
+    Returns 0 on success, 1 on failure.
+    """
     try:
-        # Import the package
         import radar_range_equation as RRE
-        import sympy
-        from sympy import pprint
-        print("✓ Package imported successfully")
 
-        # Test 1: Set c (speed of light in m/s)
-        RRE.vars.c = 3.00 * 10**8
-        assert hasattr(RRE.vars, 'c'), "Failed to set c"
-        assert RRE.vars.c == 3.00 * 10**8, f"Expected c=3.00e8, got {RRE.vars.c}"
-        print(f"✓ RRE.vars.c = {RRE.vars.c}")
+        print("✓ Imported radar_range_equation")
 
-        # Test 2: Set f (frequency in Hz)
-        RRE.vars.f = 10
-        assert hasattr(RRE.vars, 'f'), "Failed to set f"
-        assert RRE.vars.f == 10, f"Expected f=10, got {RRE.vars.f}"
-        print(f"✓ RRE.vars.f = {RRE.vars.f}")
+        # Basic exported symbols
+        for name in ("vars", "equations", "solve", "convert_ft_to_m", "redefine_variable"):
+            assert hasattr(RRE, name), f"Missing exported symbol: {name}"
+        print("✓ Public symbols present")
 
-        # Test 3: Calculate and set lambda (wavelength in meters)
-        # Note: 'lambda' is a reserved keyword, so we use setattr
-        RRE.vars.lambda_ = 1
-        assert hasattr(RRE.vars, 'lambda_'), "Failed to set lambda"
-        print(f"✓ RRE.vars.lambda_ = {RRE.vars.lambda_}")
-        
-        # Test 4: Use the redefine_variable function
-        new_wavelength = 0.03
-        RRE.redefine_variable('lambda_', new_wavelength)
-        lambda_value = getattr(RRE.vars, 'lambda_')
-        assert lambda_value == new_wavelength, f"Expected lambda={new_wavelength}, got {lambda_value}"
-        print(f"✓ RRE.redefine_variable('lambda', {new_wavelength}) works correctly")
-        print(f"✓ RRE.vars.lambda_ = {lambda_value}")
+        # Test a simple conversion helper
+        meters = RRE.convert_ft_to_m(1)
+        assert isclose(meters, 0.3048, rel_tol=1e-12), f"convert_ft_to_m(1) -> {meters}"
+        print(f"✓ convert_ft_to_m(1) = {meters}")
 
-        print("\n✓ All tests passed!")
+        # Test redefining a variable in the vars namespace
+        # Use a non-reserved name that the package exposes: 'f' and 'wavelength'
+        RRE.redefine_variable('f', 10.0)
+        assert hasattr(RRE.vars, 'f'), "vars.f not present after redefine"
+        assert float(RRE.vars.f) == 10.0, f"Expected vars.f == 10.0, got {RRE.vars.f}"
+        print(f"✓ vars.f set to {RRE.vars.f}")
 
-        RRE.vars.f = 430*10**6  # Frequency in Hz
-        RRE.vars.eta = .6
-        RRE.vars.D = RRE.convert_ft_to_m(60)  # Antenna diameter in meters
-        RRE.vars.R = 3.844*10**8  # Range in meters (example: distance to the Moon)
-        RRE.vars.sigma = 6.64*10**11
-        RRE.vars.A_e = RRE.solve.A_e_circ()
-        RRE.vars.S_min = 1.5*10**-16
-        RRE.vars.wavelength = RRE.solve.wavelength()
-        pprint(RRE.vars.A_e)
-        RRE.vars.G_t = RRE.solve.G_t()
-        pprint(RRE.vars.G_t)
-        pprint(RRE.equations.P_t)
-        RRE.vars.P_t = RRE.solve.P_t()
-        pprint(RRE.vars.P_t)
-    
-        RRE.vars.A=1.738*10**6  # Antenna radius in meters
-        RRE.vars.sigma = RRE.solve.sigma_sphere()
-        pprint(RRE.vars.sigma)
-    
-        vars.sigma = 6.64*10**11
-        vars.A = solve.A_sphere()
-        pprint(vars.A)
-    
+        # Compute wavelength from c and f using the provided solver
+        # Set c and f to known numeric values, then call solve.wavelength()
+        RRE.redefine_variable('c', 3.0e8)
+        RRE.redefine_variable('f', 2.0e8)
+        wl = RRE.solve.wavelength()
+        expected = 3.0e8 / 2.0e8
+        assert isclose(wl, expected, rel_tol=1e-12), f"wavelength {wl} != expected {expected}"
+        print(f"✓ solve.wavelength() = {wl}")
+
+        print("\n✓ All smoke tests passed")
         return 0
 
     except ImportError as e:
-        print(f"✗ Failed to import package: {e}")
+        print(f"✗ ImportError: {e}")
         return 1
     except AssertionError as e:
-        print(f"✗ Test failed: {e}")
+        print(f"✗ Assertion failed: {e}")
         return 1
     except Exception as e:
         print(f"✗ Unexpected error: {e}")
