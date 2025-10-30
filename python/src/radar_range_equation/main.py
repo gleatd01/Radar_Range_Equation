@@ -1,6 +1,7 @@
 import sympy
 import scipy
 import numpy as np
+import math
 import sympy.physics.units as units
 from sympy import symbols, Symbol, pprint
 from sympy.physics.units import convert_to
@@ -335,6 +336,109 @@ class convert: # add alias con for convenience
         return value / conversion_factors.get(source_unit.lower(), 1)
     
 con = convert()  # alias for convenience
+
+# --- Angle Estimation Functions ---
+
+def v_phi(phi, phi_s, Theta):
+    """Calculates the Gaussian beam approximation.
+    
+    Args:
+        phi: Angle in degrees
+        phi_s: Center angle in degrees
+        Theta: Beam parameter
+        
+    Returns:
+        Gaussian beam approximation value
+    """
+    return math.exp(-Theta * (phi - phi_s)**2)
+
+def calculate_Theta(theta_B):
+    """Calculates the Theta parameter from the 3-dB beamwidth.
+    
+    Args:
+        theta_B: 3-dB beamwidth in degrees
+        
+    Returns:
+        Theta parameter
+    """
+    return (4 * math.log(2)) / (theta_B**2)
+
+def v_phi_full(phi, phi_s, theta_B):
+    """Calculates v(phi) using theta_B directly.
+    
+    Args:
+        phi: Angle in degrees
+        phi_s: Center angle in degrees
+        theta_B: 3-dB beamwidth in degrees
+        
+    Returns:
+        Beam approximation value
+    """
+    return math.exp((-4 * math.log(0.5) * (phi - phi_s)**2) / (theta_B**2))
+
+def estimate_phi_hat(Delta, Sigma, theta_B, phi_s):
+    """Calculates the linear processor angle estimate.
+    
+    Args:
+        Delta: Delta signal
+        Sigma: Sigma signal
+        theta_B: 3-dB beamwidth in degrees
+        phi_s: Center angle in degrees
+        
+    Returns:
+        Angle estimate in degrees
+    """
+    return (Delta / Sigma) * (theta_B**2 / (8 * math.log(2) * phi_s))
+
+def sigma_phi_amplitude(theta_B, S_N, phi_s):
+    """Calculates the angle standard deviation for amplitude comparison.
+    
+    Args:
+        theta_B: 3-dB beamwidth in degrees
+        S_N: Signal-to-Noise ratio (linear, not dB)
+        phi_s: Center angle in degrees
+        
+    Returns:
+        Angle standard deviation in degrees
+    """
+    return (theta_B**2 * math.sqrt(1 / S_N)) / (8 * math.sqrt(2) * phi_s * math.log(2))
+
+def sigma_phi_phase(lambda_, d, S_N):
+    """Calculates the angle standard deviation for phase comparison.
+    
+    Args:
+        lambda_: Wavelength in meters
+        d: Antenna separation in meters
+        S_N: Signal-to-Noise ratio (linear, not dB)
+        
+    Returns:
+        Angle standard deviation in radians
+    """
+    return (lambda_ / (2 * math.pi * d)) * math.sqrt(1 / S_N)
+
+def sigma_phi_time(c, d, B):
+    """Calculates the angle standard deviation for time comparison.
+    
+    Args:
+        c: Speed of light in m/s
+        d: Antenna separation in meters
+        B: Bandwidth in Hz
+        
+    Returns:
+        Angle standard deviation in radians
+    """
+    return c / (d * B)
+
+def db_to_linear(value_db):
+    """Converts SNR from dB to linear.
+    
+    Args:
+        value_db: Value in dB
+        
+    Returns:
+        Linear value
+    """
+    return 10**(value_db / 10)
 
 def redefine_variable(var_name, new_value):
     """
