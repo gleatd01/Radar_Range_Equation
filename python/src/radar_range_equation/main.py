@@ -37,6 +37,14 @@ class vars:
     S_min = Symbol('S_min')             # minimum detectable signal (symbolic)
     sigma = Symbol('sigma')             # radar cross section (symbolic)
     theta_B = Symbol('theta_B')         # beamwidth (symbolic)
+    R_max = Symbol('R_max')             # maximum range (symbolic)
+    #R(hat)_max
+    latex = False  # Set to True for LaTeX-style variable names
+    if latex == True:
+        R_hat_max = Symbol(r"\hat{R}_{max}")  # normalized maximum range (symbolic/latex)
+    else:
+        R_hat_max = Symbol("R\u0302_max")     # normalized maximum range (symbolic)
+
 
 class equations:
     # Create purely symbolic names (no vars.*) to keep equations symbolic for later substitution
@@ -136,55 +144,67 @@ class solve:
         # Return as a native Python float
         return float(value_simpl.evalf())
 
-def convert_to_degrees(value_radians):
-    """
-    Converts radians to degrees.
-    Args:
-        value_radians (float): The value in radians.
-    Returns:
-        float: The value in degrees.
-    """
-    return value_radians * (180 / np.pi)
+class convert: # add alias con for convenience
+    pass
+    
+    def rad_to_deg(value_radians):
+        return value_radians * (180 / np.pi)
+    
+    def deg_to_rad(value_degrees):
+        return value_degrees * (np.pi / 180)
+    
+    def lin_to_db(value_linear):
+        return np.log(value_linear)/np.log(10)*10
+    
+    def m_to_mi(value_meters):
+        return value_meters / 1609.34
+    
+    def w_to(value_w, target_unit):
+        conversion_factors = {
+            'kw': 1 / 1000.0,
+            'mw': 1 * 10**6
+        }
+        return value_w * conversion_factors.get(target_unit.lower(), 1)
 
-def convert_to_db(value_linear):
-    """
-    Converts a linear scale value to decibels (dB).
-    Args:
-        value_linear (float): The value in linear scale.
-    Returns:
-        float: The value in decibels (dB).
-    """
-    return np.log(value_linear)/np.log(10)*10
+    def w_from(value, source_unit):
+        conversion_factors = {
+            'kw': 1 / 1000.0,
+            'mw': 1 * 10**6
+        }           
+        return value / conversion_factors.get(source_unit.lower(), 1)
+    
+    def ft_to_m(value_feet):
+        return value_feet * 0.3048
 
-def convert_m_to_mi(value_meters):
-    """
-    Converts meters to miles.
-    Args:
-        value_meters (float): The value in meters.
-    Returns:
-        float: The value in miles.
-    """
-    return value_meters / 1609.34
+    def hz_to(value_hz, target_unit):
+        conversion_factors = {
+            'khz': 1 * 10**3,
+            'mhz': 1 * 10**6,
+            'ghz': 1 * 10**9
+        }
+        return value_hz / conversion_factors.get(target_unit.lower(), 1)
+    
+    def hz_from(value, source_unit):
+        conversion_factors = {
+            'khz': 1 * 10**3,
+            'mhz': 1 * 10**6,
+            'ghz': 1 * 10**9
+        }
+        return value * conversion_factors.get(source_unit.lower(), 1)
+    
+    def m_to(value_meters, target_unit):
+        conversion_factors = {
+            'km': 1 / 1000.0
+        }
+        return value_meters * conversion_factors.get(target_unit.lower(), 1)
 
-def convert_w_to_kw(value_watts):
-    """
-    Converts watts to kilowatts.
-    Args:
-        value_watts (float): The value in watts.
-    Returns:
-        float: The value in kilowatts.
-    """
-    return value_watts / 1000.0
-
-def convert_ft_to_m(value_feet):
-    """
-    Converts feet to meters.
-    Args:
-        value_feet (float): The value in feet.
-    Returns:
-        float: The value in meters.
-    """
-    return value_feet * 0.3048
+    def m_from(value, source_unit):
+        conversion_factors = {
+            'km': 1 / 1000.0
+        }
+        return value / conversion_factors.get(source_unit.lower(), 1)
+    
+con = convert()  # alias for convenience
 
 def redefine_variable(var_name, new_value):
     """
@@ -197,25 +217,23 @@ def redefine_variable(var_name, new_value):
 # Demonstration of usage from a separate script or module:
 
 if __name__ == '__main__':  # Only runs when the script is executed directly
-    vars.f = 430*10**6  # Frequency in Hz
-    vars.eta = .6
-    vars.D = convert_ft_to_m(60)  # Antenna diameter in meters
-    vars.R = 3.844*10**8  # Range in meters (example: distance to the Moon)
-    vars.sigma = 6.64*10**11
-    vars.A_e = solve.A_e_circ()
-    vars.S_min = 1.5*10**-16
-    vars.wavelength = solve.wavelength()
-    pprint(vars.A_e)
-    vars.G_t = solve.G_t()
-    pprint(vars.G_t)
-    pprint(equations.P_t)
-    vars.P_t = solve.P_t()
-    pprint(vars.P_t)
-
-    vars.A=1.738*10**6  # Antenna radius in meters
-    vars.sigma = solve.sigma_sphere()
-    pprint(vars.sigma)
-
-    vars.sigma = 6.64*10**11
-    vars.A = solve.A_sphere()
-    pprint(vars.A)
+    v = vars()
+    v.f_bu = Symbol('f_bu')
+    pprint(v.f_bu)
+    v.f_bu = convert.hz_from(1510, 'mhz')
+    pprint(convert.hz_to(v.f_bu, 'mhz'))
+    v.f_bd = Symbol('f_bd')
+    pprint(v.f_bd)
+    v.f_bd = convert.hz_from(1490, 'mhz')
+    pprint(convert.hz_to(v.f_bd, 'mhz'))
+    v.f_r = Symbol('f_r')
+    pprint(v.f_r)
+    v.f_r=.5*(v.f_bu+v.f_bd)
+    pprint(convert.hz_to(v.f_r, 'mhz'))
+    v.f_d = Symbol('f_d')
+    pprint(v.f_d)
+    v.f_d = .5*(v.f_bd-v.f_bu)
+    pprint(convert.hz_to(v.f_d, 'mhz'))
+    # plain word with space
+    v.deltaf = Symbol('delta f')
+    pprint(v.deltaf)
