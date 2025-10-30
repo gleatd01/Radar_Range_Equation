@@ -20,34 +20,34 @@ print("\n--- AMPLITUDE COMPARISON ---\n")
 
 # Calculate Theta from 3-dB beamwidth
 theta_B = 10.0  # degrees
-Theta = RRE.calculate_Theta(theta_B)
+Theta = RRE.solve.calculate_Theta(theta_B)
 print(f"3-dB beamwidth (theta_B): {theta_B} degrees")
 print(f"Calculated Theta parameter: {Theta:.6f}")
 
 # Gaussian beam approximation
 phi = 5.0  # degrees
 phi_s = 5.0  # degrees (center angle)
-v = RRE.v_phi(phi, phi_s, Theta)
+v = RRE.solve.v_phi(phi, phi_s, Theta)
 print(f"\nGaussian beam approximation v_phi({phi}, {phi_s}, {Theta:.4f}): {v:.6f}")
 
 # Full beam approximation
-v_full = RRE.v_phi_full(phi, phi_s, theta_B)
+v_full = RRE.solve.v_phi_full(phi, phi_s, theta_B)
 print(f"Full beam approximation v_phi_full({phi}, {phi_s}, {theta_B}): {v_full:.6f}")
 
 # Linear processor angle estimate
 Delta = 1.0
 Sigma = 1.0
-phi_hat = RRE.estimate_phi_hat(Delta, Sigma, theta_B, phi_s)
+phi_hat = RRE.solve.estimate_phi_hat(Delta, Sigma, theta_B, phi_s)
 print(f"\nLinear processor angle estimate:")
 print(f"  Delta: {Delta}, Sigma: {Sigma}")
 print(f"  phi_hat: {phi_hat:.4f} degrees")
 
 # Angle standard deviation (Amplitude)
 S_N_dB = 10  # dB
-S_N_linear = RRE.db_to_linear(S_N_dB)
+S_N_linear = RRE.solve.db_to_linear(S_N_dB)
 print(f"\nSignal-to-Noise Ratio: {S_N_dB} dB (linear: {S_N_linear:.2f})")
 
-sigma_phi_amp = RRE.sigma_phi_amplitude(theta_B, S_N_linear, phi_s)
+sigma_phi_amp = RRE.solve.sigma_phi_amplitude(theta_B, S_N_linear, phi_s)
 print(f"Angle standard deviation (amplitude comparison): {sigma_phi_amp:.4f} degrees")
 
 # Calculate phi_s needed for a target sigma_phi
@@ -68,12 +68,12 @@ print(f"Wavelength (lambda): {lambda_:.3f} m")
 
 # Convert SNR from dB to linear
 S_N_dB_2 = 8  # dB
-S_N_linear_2 = RRE.db_to_linear(S_N_dB_2)
+S_N_linear_2 = RRE.solve.db_to_linear(S_N_dB_2)
 print(f"\nSignal-to-Noise Ratio: {S_N_dB_2} dB (linear: {S_N_linear_2:.2f})")
 
 # Angle standard deviation (Phase)
 d = 2.0  # Antenna separation, meters
-sigma_phi_phase_rad = RRE.sigma_phi_phase(lambda_, d, S_N_linear_2)
+sigma_phi_phase_rad = RRE.solve.sigma_phi_phase(lambda_, d, S_N_linear_2)
 sigma_phi_phase_deg = sigma_phi_phase_rad * (180 / math.pi)
 print(f"\nAntenna separation: {d} m")
 print(f"Angle standard deviation (phase comparison):")
@@ -92,7 +92,7 @@ print("\n--- TIME COMPARISON ---\n")
 
 # Angle standard deviation (Time)
 B = 200e6  # Bandwidth, 200 MHz
-sigma_phi_time_rad = RRE.sigma_phi_time(c, d, B)
+sigma_phi_time_rad = RRE.solve.sigma_phi_time(c, d, B)
 sigma_phi_time_deg = sigma_phi_time_rad * (180 / math.pi)
 print(f"Bandwidth: {B/1e6:.0f} MHz")
 print(f"Antenna separation: {d} m")

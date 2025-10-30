@@ -83,6 +83,15 @@ class equations:
     f_0_sym = Symbol('f_0')
     deltaf_sym = Symbol('Delta f')
     v_sym = Symbol('v')
+    # Angle estimation symbols
+    phi_sym = Symbol('phi')
+    phi_s_sym = Symbol('phi_s')
+    Theta_sym = Symbol('Theta')
+    Delta_sym = Symbol('Delta')
+    Sigma_sym = Symbol('Sigma')
+    S_N_sym = Symbol('S_N')
+    d_sym = Symbol('d')
+    B_sym = Symbol('B')
 
     # Symbolic equations without vars prefix
     A_e = sympy.Eq(A_e_sym, eta_sym * D_h_sym * D_v_sym)
@@ -99,6 +108,15 @@ class equations:
     f_0 = sympy.Eq(f_0_sym, 2*f_m_sym*deltaf_sym)
     f_r = sympy.Eq(f_r_sym, .5*(f_bu_sym+f_bd_sym))
     f_d = sympy.Eq(f_d_sym, .5*(f_bu_sym-f_bd_sym))
+    # Angle estimation equations
+    Theta = sympy.Eq(Theta_sym, (4 * sympy.log(2)) / (theta_B_sym**2))
+    v_phi = sympy.Eq(v_sym, sympy.exp(-Theta_sym * (phi_sym - phi_s_sym)**2))
+    v_phi_full = sympy.Eq(v_sym, sympy.exp((4 * sympy.log(2) * (phi_sym - phi_s_sym)**2) / (theta_B_sym**2)))
+    phi_hat = sympy.Eq(phi_sym, (Delta_sym / Sigma_sym) * (theta_B_sym**2 / (8 * sympy.log(2) * phi_s_sym)))
+    sigma_phi_amp = sympy.Eq(sigma_sym, (theta_B_sym**2 * sympy.sqrt(1 / S_N_sym)) / (8 * sympy.sqrt(2) * phi_s_sym * sympy.log(2)))
+    sigma_phi_phase = sympy.Eq(sigma_sym, (wavelength_sym / (2 * sympy.pi * d_sym)) * sympy.sqrt(1 / S_N_sym))
+    sigma_phi_time = sympy.Eq(sigma_sym, c_sym / (d_sym * B_sym))
+    dB_to_linear = sympy.Eq(x_sym, 10**(x_sym / 10))
 
 class solve:
     def __init__():
@@ -274,6 +292,110 @@ class solve:
         value_simpl = sympy.simplify(value_sym)
         # Return as a native Python float
         return float(value_simpl.evalf())
+    
+    # Angle estimation solve methods
+    def calculate_Theta(theta_B):
+        """Calculates the Theta parameter from the 3-dB beamwidth.
+        
+        Args:
+            theta_B: 3-dB beamwidth in degrees
+            
+        Returns:
+            Theta parameter
+        """
+        return (4 * math.log(2)) / (theta_B**2)
+    
+    def v_phi(phi, phi_s, Theta):
+        """Calculates the Gaussian beam approximation.
+        
+        Args:
+            phi: Angle in degrees
+            phi_s: Center angle in degrees
+            Theta: Beam parameter
+            
+        Returns:
+            Gaussian beam approximation value
+        """
+        return math.exp(-Theta * (phi - phi_s)**2)
+    
+    def v_phi_full(phi, phi_s, theta_B):
+        """Calculates v(phi) using theta_B directly.
+        
+        Args:
+            phi: Angle in degrees
+            phi_s: Center angle in degrees
+            theta_B: 3-dB beamwidth in degrees
+            
+        Returns:
+            Beam approximation value
+        """
+        # Note: -4 * log(0.5) = 4 * log(2) (mathematically equivalent)
+        # Using 4 * log(2) for better performance
+        return math.exp((4 * math.log(2) * (phi - phi_s)**2) / (theta_B**2))
+    
+    def estimate_phi_hat(Delta, Sigma, theta_B, phi_s):
+        """Calculates the linear processor angle estimate.
+        
+        Args:
+            Delta: Delta signal
+            Sigma: Sigma signal
+            theta_B: 3-dB beamwidth in degrees
+            phi_s: Center angle in degrees
+            
+        Returns:
+            Angle estimate in degrees
+        """
+        return (Delta / Sigma) * (theta_B**2 / (8 * math.log(2) * phi_s))
+    
+    def sigma_phi_amplitude(theta_B, S_N, phi_s):
+        """Calculates the angle standard deviation for amplitude comparison.
+        
+        Args:
+            theta_B: 3-dB beamwidth in degrees
+            S_N: Signal-to-Noise ratio (linear, not dB)
+            phi_s: Center angle in degrees
+            
+        Returns:
+            Angle standard deviation in degrees
+        """
+        return (theta_B**2 * math.sqrt(1 / S_N)) / (8 * math.sqrt(2) * phi_s * math.log(2))
+    
+    def sigma_phi_phase(lambda_, d, S_N):
+        """Calculates the angle standard deviation for phase comparison.
+        
+        Args:
+            lambda_: Wavelength in meters
+            d: Antenna separation in meters
+            S_N: Signal-to-Noise ratio (linear, not dB)
+            
+        Returns:
+            Angle standard deviation in radians
+        """
+        return (lambda_ / (2 * math.pi * d)) * math.sqrt(1 / S_N)
+    
+    def sigma_phi_time(c, d, B):
+        """Calculates the angle standard deviation for time comparison.
+        
+        Args:
+            c: Speed of light in m/s
+            d: Antenna separation in meters
+            B: Bandwidth in Hz
+            
+        Returns:
+            Angle standard deviation in radians
+        """
+        return c / (d * B)
+    
+    def db_to_linear(value_db):
+        """Converts SNR from dB to linear.
+        
+        Args:
+            value_db: Value in dB
+            
+        Returns:
+            Linear value
+        """
+        return 10**(value_db / 10)
 
 class convert: # add alias con for convenience
     pass
@@ -336,111 +458,6 @@ class convert: # add alias con for convenience
         return value / conversion_factors.get(source_unit.lower(), 1)
     
 con = convert()  # alias for convenience
-
-# --- Angle Estimation Functions ---
-
-def v_phi(phi, phi_s, Theta):
-    """Calculates the Gaussian beam approximation.
-    
-    Args:
-        phi: Angle in degrees
-        phi_s: Center angle in degrees
-        Theta: Beam parameter
-        
-    Returns:
-        Gaussian beam approximation value
-    """
-    return math.exp(-Theta * (phi - phi_s)**2)
-
-def calculate_Theta(theta_B):
-    """Calculates the Theta parameter from the 3-dB beamwidth.
-    
-    Args:
-        theta_B: 3-dB beamwidth in degrees
-        
-    Returns:
-        Theta parameter
-    """
-    return (4 * math.log(2)) / (theta_B**2)
-
-def v_phi_full(phi, phi_s, theta_B):
-    """Calculates v(phi) using theta_B directly.
-    
-    Args:
-        phi: Angle in degrees
-        phi_s: Center angle in degrees
-        theta_B: 3-dB beamwidth in degrees
-        
-    Returns:
-        Beam approximation value
-    """
-    # Note: -4 * log(0.5) = 4 * log(2) (mathematically equivalent)
-    # Using 4 * log(2) for better performance
-    return math.exp((4 * math.log(2) * (phi - phi_s)**2) / (theta_B**2))
-
-def estimate_phi_hat(Delta, Sigma, theta_B, phi_s):
-    """Calculates the linear processor angle estimate.
-    
-    Args:
-        Delta: Delta signal
-        Sigma: Sigma signal
-        theta_B: 3-dB beamwidth in degrees
-        phi_s: Center angle in degrees
-        
-    Returns:
-        Angle estimate in degrees
-    """
-    return (Delta / Sigma) * (theta_B**2 / (8 * math.log(2) * phi_s))
-
-def sigma_phi_amplitude(theta_B, S_N, phi_s):
-    """Calculates the angle standard deviation for amplitude comparison.
-    
-    Args:
-        theta_B: 3-dB beamwidth in degrees
-        S_N: Signal-to-Noise ratio (linear, not dB)
-        phi_s: Center angle in degrees
-        
-    Returns:
-        Angle standard deviation in degrees
-    """
-    return (theta_B**2 * math.sqrt(1 / S_N)) / (8 * math.sqrt(2) * phi_s * math.log(2))
-
-def sigma_phi_phase(lambda_, d, S_N):
-    """Calculates the angle standard deviation for phase comparison.
-    
-    Args:
-        lambda_: Wavelength in meters
-        d: Antenna separation in meters
-        S_N: Signal-to-Noise ratio (linear, not dB)
-        
-    Returns:
-        Angle standard deviation in radians
-    """
-    return (lambda_ / (2 * math.pi * d)) * math.sqrt(1 / S_N)
-
-def sigma_phi_time(c, d, B):
-    """Calculates the angle standard deviation for time comparison.
-    
-    Args:
-        c: Speed of light in m/s
-        d: Antenna separation in meters
-        B: Bandwidth in Hz
-        
-    Returns:
-        Angle standard deviation in radians
-    """
-    return c / (d * B)
-
-def db_to_linear(value_db):
-    """Converts SNR from dB to linear.
-    
-    Args:
-        value_db: Value in dB
-        
-    Returns:
-        Linear value
-    """
-    return 10**(value_db / 10)
 
 def redefine_variable(var_name, new_value):
     """
