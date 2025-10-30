@@ -374,7 +374,9 @@ def v_phi_full(phi, phi_s, theta_B):
     Returns:
         Beam approximation value
     """
-    return math.exp((-4 * math.log(0.5) * (phi - phi_s)**2) / (theta_B**2))
+    # Note: -4 * log(0.5) = 4 * log(2) (mathematically equivalent)
+    # Using 4 * log(2) for better performance
+    return math.exp((4 * math.log(2) * (phi - phi_s)**2) / (theta_B**2))
 
 def estimate_phi_hat(Delta, Sigma, theta_B, phi_s):
     """Calculates the linear processor angle estimate.
