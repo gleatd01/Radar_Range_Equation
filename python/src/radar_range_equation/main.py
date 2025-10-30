@@ -38,6 +38,14 @@ class vars:
     sigma = Symbol('sigma')             # radar cross section (symbolic)
     theta_B = Symbol('theta_B')         # beamwidth (symbolic)
     R_max = Symbol('R_max')             # maximum range (symbolic)
+    R_un = Symbol('R_un')                   # unnormalized range (symbolic)
+    f_m = Symbol('f_m')                   # modulation frequency (symbolic)
+    f_bu = Symbol('f_bu')                 # upper band frequency (symbolic)
+    f_bd = Symbol('f_bd')                 # lower band frequency (symbolic)
+    f_r = Symbol('f_r')                   # radar operating frequency (symbolic)
+    f_d = Symbol('f_d')                   # frequency deviation (symbolic)
+    deltaf = Symbol('Delta f')            # frequency difference (symbolic, with space)
+    v = Symbol('v')                     # velocity (symbolic)
     #R(hat)_max
     latex = False  # Set to True for LaTeX-style variable names
     if latex == True:
@@ -45,6 +53,7 @@ class vars:
     else:
         R_hat_max = Symbol("R\u0302_max")     # normalized maximum range (symbolic)
 
+v = vars()  # Create a global instance of vars for easy access
 
 class equations:
     # Create purely symbolic names (no vars.*) to keep equations symbolic for later substitution
@@ -64,6 +73,15 @@ class equations:
     R_max_sym = Symbol('R_max')
     pi_sym = Symbol('pi')
     theta_B_sym = Symbol('theta_B')
+    R_un_sym = Symbol('R_un')
+    f_m_sym = Symbol('f_m')
+    f_bu_sym = Symbol('f_bu')
+    f_bd_sym = Symbol('f_bd')
+    f_r_sym = Symbol('f_r')
+    f_d_sym = Symbol('f_d')
+    f_0_sym = Symbol('f_0')
+    deltaf_sym = Symbol('Delta f')
+    v_sym = Symbol('v')
 
     # Symbolic equations without vars prefix
     A_e = sympy.Eq(A_e_sym, eta_sym * D_h_sym * D_v_sym)
@@ -74,6 +92,13 @@ class equations:
     P_t = sympy.Eq(P_t_sym, ((4 * pi_sym)**3 * S_min_sym * R_sym**4) / (G_t_sym**2 * wavelength_sym**2 * sigma_sym))
     R_max = sympy.Eq(R_max_sym, sympy.Pow((P_t_sym * (G_t_sym**2) * (wavelength_sym**2) * sigma_sym) / ((4 * pi_sym)**3 * S_min_sym), sympy.Rational(1, 4), evaluate=False), evaluate=False)
     theta_B = sympy.Eq(theta_B_sym, 65 * sympy.pi / 180 * (wavelength_sym / D_h_sym))
+    R = sympy.Eq(R_sym, (c_sym*f_r_sym)/(4*f_m_sym*deltaf_sym))
+    v = sympy.Eq(v_sym, -(c_sym/f_sym)*(f_d_sym/2))
+    f_m = sympy.Eq(f_m_sym, c_sym/(2*R_un_sym))
+    f_0 = sympy.Eq(f_0_sym, 2*f_m_sym*deltaf_sym)
+    f_r = sympy.Eq(f_r_sym, .5*(f_bu_sym+f_bd_sym))
+    f_d = sympy.Eq(f_d_sym, .5*(f_bu_sym-f_bd_sym))
+
 class solve:
     def __init__():
         pass
@@ -137,6 +162,111 @@ class solve:
             equations.sigma_sym: _s(vars.sigma),
             equations.pi_sym: _s(vars.pi),
             equations.S_min_sym: _s(vars.S_min)
+        }
+
+        value_sym = sym_expr.subs(subs_map)
+        value_simpl = sympy.simplify(value_sym)
+        # Return as a native Python float
+        return float(value_simpl.evalf())
+    
+    def R():
+        sym_expr = sympy.solve(equations.R, equations.R.lhs)[0]
+
+        # Helper to convert Python numbers to sympy Floats but leave sympy types alone
+        def _s(v):
+            return v if isinstance(v, sympy.Basic) else sympy.Float(v)
+
+        subs_map = {
+            equations.c_sym: _s(vars.c),
+            equations.f_r_sym: _s(vars.f_r),
+            equations.f_m_sym: _s(vars.f_m),
+            equations.deltaf_sym: _s(vars.deltaf)
+        }
+
+        value_sym = sym_expr.subs(subs_map)
+        value_simpl = sympy.simplify(value_sym)
+        # Return as a native Python float
+        return float(value_simpl.evalf())
+    
+    def v():
+        sym_expr = sympy.solve(equations.v, equations.v.lhs)[0]
+
+        # Helper to convert Python numbers to sympy Floats but leave sympy types alone
+        def _s(v):
+            return v if isinstance(v, sympy.Basic) else sympy.Float(v)
+
+        subs_map = {
+            equations.c_sym: _s(vars.c),
+            equations.f_sym: _s(vars.f),
+            equations.f_d_sym: _s(vars.f_d)
+        }
+
+        value_sym = sym_expr.subs(subs_map)
+        value_simpl = sympy.simplify(value_sym)
+        # Return as a native Python float
+        return float(value_simpl.evalf())
+    
+    def f_m():
+        sym_expr = sympy.solve(equations.f_m, equations.f_m.lhs)[0]
+
+        # Helper to convert Python numbers to sympy Floats but leave sympy types alone
+        def _s(v):
+            return v if isinstance(v, sympy.Basic) else sympy.Float(v)
+
+        subs_map = {
+            equations.c_sym: _s(vars.c),
+            equations.R_un_sym: _s(vars.R_un)
+        }
+
+        value_sym = sym_expr.subs(subs_map)
+        value_simpl = sympy.simplify(value_sym)
+        # Return as a native Python float
+        return float(value_simpl.evalf())
+    
+    def f_r():
+        sym_expr = sympy.solve(equations.f_r, equations.f_r.lhs)[0]
+
+        # Helper to convert Python numbers to sympy Floats but leave sympy types alone
+        def _s(v):
+            return v if isinstance(v, sympy.Basic) else sympy.Float(v)
+
+        subs_map = {
+            equations.f_bu_sym: _s(vars.f_bu),
+            equations.f_bd_sym: _s(vars.f_bd)
+        }
+
+        value_sym = sym_expr.subs(subs_map)
+        value_simpl = sympy.simplify(value_sym)
+        # Return as a native Python float
+        return float(value_simpl.evalf())
+    
+    def f_d():
+        sym_expr = sympy.solve(equations.f_d, equations.f_d.lhs)[0]
+
+        # Helper to convert Python numbers to sympy Floats but leave sympy types alone
+        def _s(v):
+            return v if isinstance(v, sympy.Basic) else sympy.Float(v)
+
+        subs_map = {
+            equations.f_bu_sym: _s(vars.f_bu),
+            equations.f_bd_sym: _s(vars.f_bd)
+        }
+
+        value_sym = sym_expr.subs(subs_map)
+        value_simpl = sympy.simplify(value_sym)
+        # Return as a native Python float
+        return float(value_simpl.evalf())
+    
+    def f_0():
+        sym_expr = sympy.solve(equations.f_0, equations.f_0.lhs)[0]
+
+        # Helper to convert Python numbers to sympy Floats but leave sympy types alone
+        def _s(v):
+            return v if isinstance(v, sympy.Basic) else sympy.Float(v)
+
+        subs_map = {
+            equations.f_m_sym: _s(vars.f_m),
+            equations.deltaf_sym: _s(vars.deltaf)
         }
 
         value_sym = sym_expr.subs(subs_map)
