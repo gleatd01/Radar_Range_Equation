@@ -21,14 +21,14 @@ def test_package():
         print("✓ Imported radar_range_equation")
 
         # Basic exported symbols
-        for name in ("vars", "equations", "solve", "convert_ft_to_m", "redefine_variable"):
+        for name in ("vars", "equations", "solve", "convert", "redefine_variable"):
             assert hasattr(RRE, name), f"Missing exported symbol: {name}"
         print("✓ Public symbols present")
 
         # Test a simple conversion helper
         meters = RRE.convert.ft_to_m(1)
-        assert isclose(meters, 0.3048, rel_tol=1e-12), f"convert_ft_to_m(1) -> {meters}"
-        print(f"✓ convert_ft_to_m(1) = {meters}")
+        assert isclose(meters, 0.3048, rel_tol=1e-12), f"convert.ft_to_m(1) -> {meters}"
+        print(f"✓ convert.ft_to_m(1) = {meters}")
 
         # Test redefining a variable in the vars namespace
         # Use a non-reserved name that the package exposes: 'f' and 'wavelength'
