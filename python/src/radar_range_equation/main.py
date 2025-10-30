@@ -1,6 +1,7 @@
 import sympy
 import scipy
 import numpy as np
+import math
 import sympy.physics.units as units
 from sympy import symbols, Symbol, pprint
 from sympy.physics.units import convert_to
@@ -46,6 +47,15 @@ class vars:
     f_d = Symbol('f_d')                   # frequency deviation (symbolic)
     deltaf = Symbol('Delta f')            # frequency difference (symbolic, with space)
     v = Symbol('v')                     # velocity (symbolic)
+    # Angle estimation variables
+    phi = Symbol('phi')                 # angle (symbolic)
+    phi_s = Symbol('phi_s')             # center angle (symbolic)
+    Theta = Symbol('Theta')             # beam parameter (symbolic)
+    Delta = Symbol('Delta')             # delta signal (symbolic)
+    Sigma = Symbol('Sigma')             # sigma signal (symbolic)
+    S_N = Symbol('S_N')                 # signal-to-noise ratio (symbolic)
+    d = Symbol('d')                     # antenna separation (symbolic)
+    B = Symbol('B')                     # bandwidth (symbolic)
     #R(hat)_max
     latex = False  # Set to True for LaTeX-style variable names
     if latex == True:
@@ -82,6 +92,15 @@ class equations:
     f_0_sym = Symbol('f_0')
     deltaf_sym = Symbol('Delta f')
     v_sym = Symbol('v')
+    # Angle estimation symbols
+    phi_sym = Symbol('phi')
+    phi_s_sym = Symbol('phi_s')
+    Theta_sym = Symbol('Theta')
+    Delta_sym = Symbol('Delta')
+    Sigma_sym = Symbol('Sigma')
+    S_N_sym = Symbol('S_N')
+    d_sym = Symbol('d')
+    B_sym = Symbol('B')
 
     # Symbolic equations without vars prefix
     A_e = sympy.Eq(A_e_sym, eta_sym * D_h_sym * D_v_sym)
@@ -98,6 +117,15 @@ class equations:
     f_0 = sympy.Eq(f_0_sym, 2*f_m_sym*deltaf_sym)
     f_r = sympy.Eq(f_r_sym, .5*(f_bu_sym+f_bd_sym))
     f_d = sympy.Eq(f_d_sym, .5*(f_bu_sym-f_bd_sym))
+    # Angle estimation equations
+    Theta = sympy.Eq(Theta_sym, (4 * sympy.log(2)) / (theta_B_sym**2))
+    v_phi = sympy.Eq(v_sym, sympy.exp(-Theta_sym * (phi_sym - phi_s_sym)**2))
+    v_phi_full = sympy.Eq(v_sym, sympy.exp((4 * sympy.log(2) * (phi_sym - phi_s_sym)**2) / (theta_B_sym**2)))
+    phi_hat = sympy.Eq(phi_sym, (Delta_sym / Sigma_sym) * (theta_B_sym**2 / (8 * sympy.log(2) * phi_s_sym)))
+    sigma_phi_amp = sympy.Eq(sigma_sym, (theta_B_sym**2 * sympy.sqrt(1 / S_N_sym)) / (8 * sympy.sqrt(2) * phi_s_sym * sympy.log(2)))
+    sigma_phi_phase = sympy.Eq(sigma_sym, (wavelength_sym / (2 * sympy.pi * d_sym)) * sympy.sqrt(1 / S_N_sym))
+    sigma_phi_time = sympy.Eq(sigma_sym, c_sym / (d_sym * B_sym))
+    dB_to_linear = sympy.Eq(x_sym, 10**(x_sym / 10))
 
 class solve:
     def __init__():
@@ -273,6 +301,89 @@ class solve:
         value_simpl = sympy.simplify(value_sym)
         # Return as a native Python float
         return float(value_simpl.evalf())
+    
+    # Angle estimation solve methods
+    def calculate_Theta():
+        """Calculates the Theta parameter from the 3-dB beamwidth.
+        
+        Uses vars.theta_B
+        
+        Returns:
+            Theta parameter
+        """
+        return (4 * math.log(2)) / (vars.theta_B**2)
+    
+    def v_phi():
+        """Calculates the Gaussian beam approximation.
+        
+        Uses vars.phi, vars.phi_s, vars.Theta
+        
+        Returns:
+            Gaussian beam approximation value
+        """
+        return math.exp(-vars.Theta * (vars.phi - vars.phi_s)**2)
+    
+    def v_phi_full():
+        """Calculates v(phi) using theta_B directly.
+        
+        Uses vars.phi, vars.phi_s, vars.theta_B
+        
+        Returns:
+            Beam approximation value
+        """
+        # Note: -4 * log(0.5) = 4 * log(2) (mathematically equivalent)
+        # Using 4 * log(2) for better performance
+        return math.exp((4 * math.log(2) * (vars.phi - vars.phi_s)**2) / (vars.theta_B**2))
+    
+    def estimate_phi_hat():
+        """Calculates the linear processor angle estimate.
+        
+        Uses vars.Delta, vars.Sigma, vars.theta_B, vars.phi_s
+        
+        Returns:
+            Angle estimate in degrees
+        """
+        return (vars.Delta / vars.Sigma) * (vars.theta_B**2 / (8 * math.log(2) * vars.phi_s))
+    
+    def sigma_phi_amplitude():
+        """Calculates the angle standard deviation for amplitude comparison.
+        
+        Uses vars.theta_B, vars.S_N, vars.phi_s
+        
+        Returns:
+            Angle standard deviation in degrees
+        """
+        return (vars.theta_B**2 * math.sqrt(1 / vars.S_N)) / (8 * math.sqrt(2) * vars.phi_s * math.log(2))
+    
+    def sigma_phi_phase():
+        """Calculates the angle standard deviation for phase comparison.
+        
+        Uses vars.wavelength, vars.d, vars.S_N
+        
+        Returns:
+            Angle standard deviation in radians
+        """
+        return (vars.wavelength / (2 * math.pi * vars.d)) * math.sqrt(1 / vars.S_N)
+    
+    def sigma_phi_time():
+        """Calculates the angle standard deviation for time comparison.
+        
+        Uses vars.c, vars.d, vars.B
+        
+        Returns:
+            Angle standard deviation in radians
+        """
+        return vars.c / (vars.d * vars.B)
+    
+    def db_to_linear():
+        """Converts SNR from dB to linear.
+        
+        Uses vars.x (as the dB value)
+        
+        Returns:
+            Linear value
+        """
+        return 10**(vars.x / 10)
 
 class convert: # add alias con for convenience
     pass
