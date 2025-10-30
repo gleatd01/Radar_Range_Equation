@@ -26,7 +26,7 @@ def test_package():
         print("✓ Public symbols present")
 
         # Test a simple conversion helper
-        meters = RRE.convert_ft_to_m(1)
+        meters = RRE.convert.ft_to_m(1)
         assert isclose(meters, 0.3048, rel_tol=1e-12), f"convert_ft_to_m(1) -> {meters}"
         print(f"✓ convert_ft_to_m(1) = {meters}")
 
