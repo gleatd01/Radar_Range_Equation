@@ -1,3 +1,22 @@
+"""Radar Range Equation Package - Core Module.
+
+This module provides a comprehensive toolkit for radar range equation calculations,
+including symbolic and numeric solutions for various radar types (CW, CWFM, pulsed),
+direction finding, and pulse compression techniques.
+
+The module is organized into four main classes:
+    - vars: Container for physical constants and radar parameters
+    - equations: Symbolic SymPy equations for radar calculations
+    - solve: Numeric solver functions for radar problems
+    - convert: Unit conversion utilities
+
+Example:
+    >>> import radar_range_equation as RRE
+    >>> RRE.vars.f = 10e9  # 10 GHz
+    >>> RRE.vars.wavelength = RRE.solve.wavelength()
+    >>> print(RRE.vars.wavelength)
+"""
+
 import sympy
 import scipy
 import numpy as np
@@ -8,6 +27,72 @@ from sympy.physics.units import convert_to
 from sympy.physics.units import speed_of_light
 
 class vars:
+    """Container for radar system variables and physical constants.
+    
+    This class provides a centralized namespace for all radar-related variables,
+    including physical constants, antenna parameters, radar equation parameters,
+    and topic-specific variables for different radar types.
+    
+    Attributes:
+        c (float): Speed of light in m/s (from scipy.constants.c)
+        k (float): Boltzmann constant in J/K (from scipy.constants.Boltzmann)
+        pi (float): Mathematical constant pi
+        pi4 (float): 4*pi constant
+        f (Symbol): Frequency (symbolic)
+        wavelength (Symbol): Wavelength (symbolic, use getattr/setattr for 'lambda')
+        
+        Antenna Parameters:
+            A_e (Symbol): Effective aperture
+            A (Symbol): Antenna area
+            D_h (Symbol): Horizontal antenna dimension
+            D_v (Symbol): Vertical antenna dimension
+            D (Symbol): Antenna diameter
+            eta (Symbol): Antenna efficiency
+            G_t (Symbol): Transmit antenna gain
+            G_r (Symbol): Receive antenna gain
+            theta_B (Symbol): Beamwidth
+            
+        Radar Equation Parameters:
+            R (Symbol): Range
+            R_max (Symbol): Maximum range
+            P_t (Symbol): Transmit power
+            S_min (Symbol): Minimum detectable signal
+            sigma (Symbol): Radar cross section
+            
+        Doppler CW Radar (Topic 07):
+            f_doppler (Symbol): Doppler frequency shift
+            f_if (Symbol): Intermediate frequency
+            f_obs (Symbol): Observed frequency at receiver
+            T_cpi (Symbol): Coherent processing time
+            delta_v (Symbol): Velocity resolution
+            
+        CWFM Radar (Topic 08):
+            R_un (Symbol): Unnormalized range
+            f_m (Symbol): Modulation frequency
+            f_bu (Symbol): Upper band frequency
+            f_bd (Symbol): Lower band frequency
+            f_r (Symbol): Radar operating frequency
+            f_d (Symbol): Frequency deviation
+            
+        Pulsed Radar (Topic 09):
+            f_p (Symbol): Pulse Repetition Frequency (PRF)
+            T_p (Symbol): Pulse Repetition Interval (PRI)
+            tau (Symbol): Pulse width
+            n_p (Symbol): Number of pulses integrated
+            S_N_1 (Symbol): Single pulse SNR
+            
+        Direction Finding (Topic 10):
+            phi (Symbol): Angle
+            phi_s (Symbol): Squint angle
+            d (Symbol): Element separation
+            S_N (Symbol): Signal-to-Noise ratio
+            B (Symbol): Bandwidth
+            
+        Pulse Compression (Topic 11):
+            delta_r (Symbol): Range resolution
+            gamma (Symbol): Chirp rate
+            PCR (Symbol): Pulse Compression Ratio
+    """
     # =========================================================================
     # BASE/COMMON PHYSICAL CONSTANTS AND VARIABLES
     # =========================================================================
@@ -125,6 +210,57 @@ class vars:
 v = vars()  # Create a global instance of vars for easy access
 
 class equations:
+    """Symbolic SymPy equations for radar calculations.
+    
+    This class contains symbolic representations of radar equations using SymPy.
+    Each equation is stored as a SymPy Eq object that can be manipulated symbolically
+    or solved numerically using the solve class.
+    
+    The equations are organized by topic:
+        - Base/Common: Fundamental radar equations (wavelength, gain, range)
+        - Topic 07: Doppler CW radar equations
+        - Topic 08: CWFM radar equations
+        - Topic 09: Pulsed radar equations
+        - Topic 10: Direction finding equations
+        - Topic 11: Pulse compression equations
+    
+    Attributes:
+        A_e (Eq): Effective aperture equation
+        wavelength (Eq): Wavelength equation (lambda = c/f)
+        G_t (Eq): Transmit antenna gain equation
+        R_max (Eq): Maximum radar range equation
+        Linear_to_dB (Eq): Linear to dB conversion equation
+        
+        Doppler CW Radar:
+            eq_f_doppler (Eq): Doppler frequency shift equation
+            eq_v_from_doppler (Eq): Velocity from Doppler shift
+            eq_delta_v (Eq): Velocity resolution equation
+            
+        CWFM Radar:
+            R_cwfm (Eq): Range equation for CWFM radar
+            v_cwfm (Eq): Velocity equation for CWFM radar
+            
+        Pulsed Radar:
+            eq_R_un_from_fp (Eq): Unambiguous range from PRF
+            eq_T_p (Eq): Pulse repetition interval equation
+            eq_S_N_n_coherent (Eq): Coherent integration SNR
+            
+        Direction Finding:
+            phi_hat_amp (Eq): Angle estimate for amplitude comparison
+            sigma_phi_amp (Eq): Angle accuracy for amplitude comparison
+            sigma_phi_phase (Eq): Angle accuracy for phase comparison
+            sigma_phi_time (Eq): Angle accuracy for time comparison
+            
+        Pulse Compression:
+            eq_delta_r_uncompressed (Eq): Uncompressed range resolution
+            eq_delta_r_compressed (Eq): Compressed range resolution
+            eq_PCR_1 (Eq): Pulse compression ratio equation
+    
+    Example:
+        >>> from radar_range_equation import equations
+        >>> print(equations.wavelength)
+        Eq(lambda, c/f)
+    """
     # --- Base/Common Symbols ---
     c_sym = Symbol('c')
     f_sym = Symbol('f')
@@ -253,6 +389,27 @@ class equations:
     eq_f_range_tone = sympy.Eq(f_range_tone_sym, -gamma_sym * (2 * R_offset_sym / c_sym))
 
 class solve:
+    """Numeric solver functions for radar calculations.
+    
+    This class provides methods to solve radar equations numerically using values
+    from the vars class. Functions either compute values directly using Python/NumPy
+    or use the _solver helper to create callable functions from symbolic equations.
+    
+    The solver functions are organized by topic:
+        - Base/Common: Fundamental calculations (wavelength, gain, range)
+        - Topic 07: Doppler CW radar solvers
+        - Topic 08: CWFM radar solvers
+        - Topic 09: Pulsed radar solvers
+        - Topic 10: Direction finding solvers
+        - Topic 11: Pulse compression solvers
+    
+    Example:
+        >>> import radar_range_equation as RRE
+        >>> RRE.vars.c = 3e8
+        >>> RRE.vars.f = 10e9
+        >>> wavelength = RRE.solve.wavelength()
+        >>> print(f"Wavelength: {wavelength} m")
+    """
     def __init__():
         pass
     
@@ -307,27 +464,137 @@ class solve:
     # =========================================================================
     
     def A_sphere():
+        """Calculate the radius of a sphere from its radar cross section.
+        
+        Uses vars.sigma (radar cross section in m²).
+        
+        Returns:
+            float: Radius of the sphere in meters.
+        
+        Example:
+            >>> import radar_range_equation as RRE
+            >>> RRE.vars.sigma = 3.14159
+            >>> radius = RRE.solve.A_sphere()
+        """
         return (vars.sigma / np.pi) ** (1/2)
     
     def sigma_sphere():
+        """Calculate the radar cross section of a sphere from its area.
+        
+        Uses vars.A (antenna area in m²).
+        
+        Returns:
+            float: Radar cross section in m².
+        
+        Example:
+            >>> import radar_range_equation as RRE
+            >>> RRE.vars.A = 1.0
+            >>> rcs = RRE.solve.sigma_sphere()
+        """
         return np.pi * vars.A ** 2
 
     def theta_B():
+        """Calculate the 3-dB beamwidth using Gaussian approximation.
+        
+        Uses vars.wavelength (wavelength in m) and vars.D_h (horizontal antenna 
+        dimension in m). Uses the approximation: theta_B = 65° * pi/180 * lambda/D_h.
+        
+        Returns:
+            float: Beamwidth in radians.
+        
+        Example:
+            >>> import radar_range_equation as RRE
+            >>> RRE.vars.wavelength = 0.03
+            >>> RRE.vars.D_h = 1.0
+            >>> beamwidth = RRE.solve.theta_B()
+        """
         return 65 * vars.pi / 180 * (vars.wavelength / vars.D_h)
 
     def A_e_rect():
+        """Calculate effective aperture for a rectangular antenna.
+        
+        Uses vars.eta (antenna efficiency), vars.D_h (horizontal dimension in m),
+        and vars.D_v (vertical dimension in m).
+        
+        Returns:
+            float: Effective aperture in m².
+        
+        Example:
+            >>> import radar_range_equation as RRE
+            >>> RRE.vars.eta = 0.6
+            >>> RRE.vars.D_h = 2.0
+            >>> RRE.vars.D_v = 1.5
+            >>> aperture = RRE.solve.A_e_rect()
+        """
         return vars.eta * vars.D_h * vars.D_v
 
     def A_e_circ():
+        """Calculate effective aperture for a circular antenna.
+        
+        Uses vars.eta (antenna efficiency) and vars.D (antenna diameter in m).
+        
+        Returns:
+            float: Effective aperture in m².
+        
+        Example:
+            >>> import radar_range_equation as RRE
+            >>> RRE.vars.eta = 0.6
+            >>> RRE.vars.D = 2.0
+            >>> aperture = RRE.solve.A_e_circ()
+        """
         return vars.eta * vars.pi * (vars.D / 2) ** 2
 
     def wavelength():
+        """Calculate wavelength from frequency.
+        
+        Uses vars.c (speed of light in m/s) and vars.f (frequency in Hz).
+        
+        Returns:
+            float: Wavelength in meters.
+        
+        Example:
+            >>> import radar_range_equation as RRE
+            >>> RRE.vars.c = 3e8
+            >>> RRE.vars.f = 10e9
+            >>> wl = RRE.solve.wavelength()
+        """
         return vars.c / vars.f
 
     def G_t():
+        """Calculate transmit antenna gain.
+        
+        Uses vars.pi (pi constant), vars.A_e (effective aperture in m²),
+        and vars.wavelength (wavelength in m).
+        
+        Returns:
+            float: Antenna gain (dimensionless).
+        
+        Example:
+            >>> import radar_range_equation as RRE
+            >>> RRE.vars.A_e = 1.0
+            >>> RRE.vars.wavelength = 0.03
+            >>> gain = RRE.solve.G_t()
+        """
         return 4 * vars.pi * vars.A_e / (vars.wavelength ** 2)
     
     def R4():
+        """Calculate R^4 from the radar range equation.
+        
+        Uses vars.P_t (transmit power), vars.G_t (transmit gain), vars.G_r (receive gain),
+        vars.wavelength (wavelength in m), vars.sigma (radar cross section in m²),
+        vars.pi4 (4*pi), and vars.S_min (minimum detectable signal).
+        
+        Returns:
+            float: R^4 value. Take the fourth root to get range in meters.
+        
+        Example:
+            >>> import radar_range_equation as RRE
+            >>> RRE.vars.P_t = 1000
+            >>> RRE.vars.G_t = 1000
+            >>> RRE.vars.G_r = 1000
+            >>> r4 = RRE.solve.R4()
+            >>> r = r4 ** 0.25  # Get actual range
+        """
         value = (vars.P_t * vars.G_t ** 2 * vars.G_r * vars.wavelength ** 2 * vars.sigma) / ( (vars.pi4) ** 3 * vars.S_min )
         return value
     
@@ -483,36 +750,163 @@ class solve:
     R_offset_from_tone = _solver(equations.eq_f_range_tone, equations.R_offset_sym)
 
 class convert:  # add alias con for convenience
+    """Unit conversion utilities for radar calculations.
+    
+    This class provides a comprehensive set of unit conversion functions for
+    angles, power, frequency, distance, and signal levels commonly used in
+    radar engineering.
+    
+    Available conversions:
+        - Angles: rad_to_deg, deg_to_rad
+        - Power/Signal: lin_to_db, db_to_lin
+        - Distance: m_to_mi, mi_to_m, m_to_nmi, nmi_to_m, ft_to_m, m_to, m_from
+        - Power: w_to, w_from
+        - Frequency: hz_to, hz_from
+    
+    Example:
+        >>> from radar_range_equation import convert
+        >>> deg = convert.rad_to_deg(3.14159)
+        >>> print(f"{deg} degrees")
+    """
     pass
     
     def rad_to_deg(value_radians):
+        """Convert radians to degrees.
+        
+        Args:
+            value_radians (float): Angle in radians.
+        
+        Returns:
+            float: Angle in degrees.
+        
+        Example:
+            >>> from radar_range_equation import convert
+            >>> deg = convert.rad_to_deg(3.14159)
+        """
         return value_radians * (180 / np.pi)
     
     def deg_to_rad(value_degrees):
+        """Convert degrees to radians.
+        
+        Args:
+            value_degrees (float): Angle in degrees.
+        
+        Returns:
+            float: Angle in radians.
+        
+        Example:
+            >>> from radar_range_equation import convert
+            >>> rad = convert.deg_to_rad(180)
+        """
         return value_degrees * (np.pi / 180)
     
     def lin_to_db(value_linear):
+        """Convert linear value to decibels (dB).
+        
+        Args:
+            value_linear (float): Linear value (must be positive).
+        
+        Returns:
+            float: Value in dB. Returns -inf for non-positive inputs.
+        
+        Example:
+            >>> from radar_range_equation import convert
+            >>> db = convert.lin_to_db(10)  # Returns 10 dB
+        """
         # Handle non-positive inputs to avoid math errors
         if value_linear <= 0:
             return -np.inf
         return np.log(value_linear)/np.log(10)*10
     
     def db_to_lin(value_db):
+        """Convert decibels (dB) to linear value.
+        
+        Args:
+            value_db (float): Value in dB.
+        
+        Returns:
+            float: Linear value.
+        
+        Example:
+            >>> from radar_range_equation import convert
+            >>> lin = convert.db_to_lin(10)  # Returns 10.0
+        """
         return 10**(value_db / 10.0)
     
     def m_to_mi(value_meters):
+        """Convert meters to miles.
+        
+        Args:
+            value_meters (float): Distance in meters.
+        
+        Returns:
+            float: Distance in miles.
+        
+        Example:
+            >>> from radar_range_equation import convert
+            >>> miles = convert.m_to_mi(1609.34)  # Returns ~1 mile
+        """
         return value_meters / 1609.34
     
     def mi_to_m(value_miles):
+        """Convert miles to meters.
+        
+        Args:
+            value_miles (float): Distance in miles.
+        
+        Returns:
+            float: Distance in meters.
+        
+        Example:
+            >>> from radar_range_equation import convert
+            >>> meters = convert.mi_to_m(1)  # Returns 1609.34 meters
+        """
         return value_miles * 1609.34
         
     def nmi_to_m(value_nmi):
+        """Convert nautical miles to meters.
+        
+        Args:
+            value_nmi (float): Distance in nautical miles.
+        
+        Returns:
+            float: Distance in meters.
+        
+        Example:
+            >>> from radar_range_equation import convert
+            >>> meters = convert.nmi_to_m(1)  # Returns 1852 meters
+        """
         return value_nmi * 1852.0
 
     def m_to_nmi(value_m):
+        """Convert meters to nautical miles.
+        
+        Args:
+            value_m (float): Distance in meters.
+        
+        Returns:
+            float: Distance in nautical miles.
+        
+        Example:
+            >>> from radar_range_equation import convert
+            >>> nmi = convert.m_to_nmi(1852)  # Returns ~1 nautical mile
+        """
         return value_m / 1852.0
 
     def w_to(value_w, target_unit):
+        """Convert watts to other power units.
+        
+        Args:
+            value_w (float): Power in watts.
+            target_unit (str): Target unit ('kw' for kilowatts, 'mw' for milliwatts).
+        
+        Returns:
+            float: Power in the target unit.
+        
+        Example:
+            >>> from radar_range_equation import convert
+            >>> kw = convert.w_to(1000, 'kw')  # Returns 1.0 kW
+        """
         conversion_factors = {
             'kw': 1 / 1000.0,
             'mw': 1 * 10**6
@@ -520,6 +914,19 @@ class convert:  # add alias con for convenience
         return value_w * conversion_factors.get(target_unit.lower(), 1)
 
     def w_from(value, source_unit):
+        """Convert from other power units to watts.
+        
+        Args:
+            value (float): Power in the source unit.
+            source_unit (str): Source unit ('kw' for kilowatts, 'mw' for milliwatts).
+        
+        Returns:
+            float: Power in watts.
+        
+        Example:
+            >>> from radar_range_equation import convert
+            >>> watts = convert.w_from(1, 'kw')  # Returns 1000.0 W
+        """
         conversion_factors = {
             'kw': 1 / 1000.0,
             'mw': 1 * 10**6
@@ -527,9 +934,34 @@ class convert:  # add alias con for convenience
         return value / conversion_factors.get(source_unit.lower(), 1)
     
     def ft_to_m(value_feet):
+        """Convert feet to meters.
+        
+        Args:
+            value_feet (float): Distance in feet.
+        
+        Returns:
+            float: Distance in meters.
+        
+        Example:
+            >>> from radar_range_equation import convert
+            >>> meters = convert.ft_to_m(1)  # Returns 0.3048 meters
+        """
         return value_feet * 0.3048
 
     def hz_to(value_hz, target_unit):
+        """Convert hertz to other frequency units.
+        
+        Args:
+            value_hz (float): Frequency in hertz.
+            target_unit (str): Target unit ('khz', 'mhz', or 'ghz').
+        
+        Returns:
+            float: Frequency in the target unit.
+        
+        Example:
+            >>> from radar_range_equation import convert
+            >>> ghz = convert.hz_to(10e9, 'ghz')  # Returns 10.0 GHz
+        """
         conversion_factors = {
             'khz': 1 * 10**3,
             'mhz': 1 * 10**6,
@@ -538,6 +970,19 @@ class convert:  # add alias con for convenience
         return value_hz / conversion_factors.get(target_unit.lower(), 1)
     
     def hz_from(value, source_unit):
+        """Convert from other frequency units to hertz.
+        
+        Args:
+            value (float): Frequency in the source unit.
+            source_unit (str): Source unit ('khz', 'mhz', or 'ghz').
+        
+        Returns:
+            float: Frequency in hertz.
+        
+        Example:
+            >>> from radar_range_equation import convert
+            >>> hz = convert.hz_from(10, 'ghz')  # Returns 10e9 Hz
+        """
         conversion_factors = {
             'khz': 1 * 10**3,
             'mhz': 1 * 10**6,
@@ -546,12 +991,38 @@ class convert:  # add alias con for convenience
         return value * conversion_factors.get(source_unit.lower(), 1)
     
     def m_to(value_meters, target_unit):
+        """Convert meters to other distance units.
+        
+        Args:
+            value_meters (float): Distance in meters.
+            target_unit (str): Target unit ('km' for kilometers).
+        
+        Returns:
+            float: Distance in the target unit.
+        
+        Example:
+            >>> from radar_range_equation import convert
+            >>> km = convert.m_to(1000, 'km')  # Returns 1.0 km
+        """
         conversion_factors = {
             'km': 1 / 1000.0
         }
         return value_meters * conversion_factors.get(target_unit.lower(), 1)
 
     def m_from(value, source_unit):
+        """Convert from other distance units to meters.
+        
+        Args:
+            value (float): Distance in the source unit.
+            source_unit (str): Source unit ('km', 'nmi', or 'mi').
+        
+        Returns:
+            float: Distance in meters.
+        
+        Example:
+            >>> from radar_range_equation import convert
+            >>> meters = convert.m_from(1, 'km')  # Returns 1000.0 meters
+        """
         conversion_factors = {
             'km': 1000.0,
             'nmi': 1852.0,
