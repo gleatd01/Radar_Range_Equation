@@ -281,20 +281,19 @@ class solve:
         
         def calculate():
             """Dynamically created solver function."""
-            # Get the global v instance
-            import sys
-            v_instance = sys.modules[__name__].v
+            # Access the global v instance directly
+            global v
             
             subs_map = {}
             for s in free_symbols:
-                if hasattr(v_instance, s.name):
-                    subs_map[s] = _s(getattr(v_instance, s.name))
+                if hasattr(v, s.name):
+                    subs_map[s] = _s(getattr(v, s.name))
                 # Handle special cases like 'lambda'
-                elif s.name == 'lambda' and hasattr(v_instance, 'wavelength'):
-                    subs_map[s] = _s(getattr(v_instance, 'wavelength'))
+                elif s.name == 'lambda' and hasattr(v, 'wavelength'):
+                    subs_map[s] = _s(getattr(v, 'wavelength'))
                 # Handle 'Delta f'
-                elif str(s) == 'Delta f' and hasattr(v_instance, 'deltaf'):
-                    subs_map[s] = _s(getattr(v_instance, 'deltaf'))
+                elif str(s) == 'Delta f' and hasattr(v, 'deltaf'):
+                    subs_map[s] = _s(getattr(v, 'deltaf'))
                 else:
                     # This will catch sympy constants like pi, log(2), sqrt(2)
                     # which don't need substitution.
@@ -572,11 +571,10 @@ def redefine_variable(var_name, new_value):
         var_name (str): The name of the variable to redefine (e.g., "lambda").
         new_value: The new value to assign to the variable.
     """
+    global v
     setattr(vars, var_name, new_value)
     # Also set on the global v instance for consistency
-    import sys
-    v_instance = sys.modules[__name__].v
-    setattr(v_instance, var_name, new_value)
+    setattr(v, var_name, new_value)
 # Demonstration of usage from a separate script or module:
 
 if __name__ == '__main__':  # Only runs when the script is executed directly
