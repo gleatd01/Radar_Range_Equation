@@ -1,0 +1,10 @@
+name: radar_range_equation
+description: A Dart package for calculating radar range equations. Provides functions for computing maximum detection range, received power, and other radar-related calculations.
+version: 0.0.1
+homepage: https://github.com/gleatd01/Radar_Range_Equation
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dev_dependencies:
+  test: ^1.24.0
