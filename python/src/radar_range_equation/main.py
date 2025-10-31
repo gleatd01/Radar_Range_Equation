@@ -581,7 +581,7 @@ if __name__ == '__main__':  # Only runs when the script is executed directly
     
     # --- Original Demo Code ---
     print("--- Original Demo (CWFM) ---")
-    v = vars()  # Create a reference to the global vars instance
+    # Use the global v instance directly
     v.f_bu = Symbol('f_bu')
     pprint(v.f_bu)
     v.f_bu = convert.hz_from(1510, 'mhz')
