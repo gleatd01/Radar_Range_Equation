@@ -3,7 +3,7 @@ import scipy
 import numpy as np
 import math
 import sympy.physics.units as units
-from sympy import symbols, Symbol, pprint
+from sympy import symbols, Symbol, pprint, exp, sqrt, log
 from sympy.physics.units import convert_to
 from sympy.physics.units import speed_of_light
 
@@ -47,15 +47,20 @@ class vars:
     f_d = Symbol('f_d')                   # frequency deviation (symbolic)
     deltaf = Symbol('Delta f')            # frequency difference (symbolic, with space)
     v = Symbol('v')                     # velocity (symbolic)
-    # Angle estimation variables
-    phi = Symbol('phi')                 # angle (symbolic)
-    phi_s = Symbol('phi_s')             # center angle (symbolic)
-    Theta = Symbol('Theta')             # beam parameter (symbolic)
-    Delta = Symbol('Delta')             # delta signal (symbolic)
-    Sigma = Symbol('Sigma')             # sigma signal (symbolic)
-    S_N = Symbol('S_N')                 # signal-to-noise ratio (symbolic)
-    d = Symbol('d')                     # antenna separation (symbolic)
-    B = Symbol('B')                     # bandwidth (symbolic)
+
+    # --- Topic 10: Direction Finding Vars ---
+    phi = Symbol('phi')                 # Angle (symbolic)
+    phi_s = Symbol('phi_s')             # Squint angle (symbolic)
+    Theta = Symbol('Theta')             # Gaussian beam parameter (symbolic)
+    v_phi = Symbol('v_phi')             # Gaussian beam voltage (symbolic)
+    Delta = Symbol('Delta')             # Difference signal (symbolic)
+    Sigma = Symbol('Sigma')             # Sum signal (symbolic)
+    phi_hat = Symbol('phi_hat')         # Angle estimate (symbolic)
+    sigma_phi = Symbol('sigma_phi')     # Angle standard deviation (symbolic)
+    S_N = Symbol('S_N')                 # Signal-to-Noise ratio (linear) (symbolic)
+    S_N_dB = Symbol('S_N_dB')           # Signal-to-Noise ratio (dB) (symbolic)
+    d = Symbol('d')                     # Element separation (symbolic)
+    B = Symbol('B')                     # Bandwidth (symbolic)
     #R(hat)_max
     latex = False  # Set to True for LaTeX-style variable names
     if latex == True:
@@ -92,13 +97,18 @@ class equations:
     f_0_sym = Symbol('f_0')
     deltaf_sym = Symbol('Delta f')
     v_sym = Symbol('v')
-    # Angle estimation symbols
+
+    # --- Topic 10: Direction Finding Symbols ---
     phi_sym = Symbol('phi')
     phi_s_sym = Symbol('phi_s')
     Theta_sym = Symbol('Theta')
+    v_phi_sym = Symbol('v_phi')
     Delta_sym = Symbol('Delta')
     Sigma_sym = Symbol('Sigma')
+    phi_hat_sym = Symbol('phi_hat')
+    sigma_phi_sym = Symbol('sigma_phi')
     S_N_sym = Symbol('S_N')
+    S_N_dB_sym = Symbol('S_N_dB')
     d_sym = Symbol('d')
     B_sym = Symbol('B')
 
@@ -117,15 +127,25 @@ class equations:
     f_0 = sympy.Eq(f_0_sym, 2*f_m_sym*deltaf_sym)
     f_r = sympy.Eq(f_r_sym, .5*(f_bu_sym+f_bd_sym))
     f_d = sympy.Eq(f_d_sym, .5*(f_bu_sym-f_bd_sym))
-    # Angle estimation equations
-    Theta = sympy.Eq(Theta_sym, (4 * sympy.log(2)) / (theta_B_sym**2))
-    v_phi = sympy.Eq(v_sym, sympy.exp(-Theta_sym * (phi_sym - phi_s_sym)**2))
-    v_phi_full = sympy.Eq(v_sym, sympy.exp((4 * sympy.log(2) * (phi_sym - phi_s_sym)**2) / (theta_B_sym**2)))
-    phi_hat = sympy.Eq(phi_sym, (Delta_sym / Sigma_sym) * (theta_B_sym**2 / (8 * sympy.log(2) * phi_s_sym)))
-    sigma_phi_amp = sympy.Eq(sigma_sym, (theta_B_sym**2 * sympy.sqrt(1 / S_N_sym)) / (8 * sympy.sqrt(2) * phi_s_sym * sympy.log(2)))
-    sigma_phi_phase = sympy.Eq(sigma_sym, (wavelength_sym / (2 * sympy.pi * d_sym)) * sympy.sqrt(1 / S_N_sym))
-    sigma_phi_time = sympy.Eq(sigma_sym, c_sym / (d_sym * B_sym))
-    dB_to_linear = sympy.Eq(x_sym, 10**(x_sym / 10))
+
+    # --- Topic 10: Direction Finding Equations ---
+    # Note: sympy.log is the natural logarithm (ln), which matches the derivation in the solutions
+    S_N_from_dB = sympy.Eq(S_N_sym, 10**(S_N_dB_sym / 10))
+    
+    v_phi = sympy.Eq(v_phi_sym, exp(-Theta_sym * (phi_sym - phi_s_sym)**2))
+    
+    Theta = sympy.Eq(Theta_sym, (4 * log(2)) / theta_B_sym**2)
+    
+    phi_hat_amp = sympy.Eq(phi_hat_sym, (Delta_sym / Sigma_sym) * (theta_B_sym**2 / (8 * log(2) * phi_s_sym)))
+    
+    # From solution sheet, interpreting garbled symbols via the numerical calculation (Prob 2)
+    sigma_phi_amp = sympy.Eq(sigma_phi_sym, (theta_B_sym**2 * sqrt(1 / S_N_sym)) / (8 * sqrt(2) * phi_s_sym * log(2)))
+    
+    # From solution sheet (Prob 3a)
+    sigma_phi_phase = sympy.Eq(sigma_phi_sym, (wavelength_sym / (2 * pi_sym * d_sym)) * sqrt(1 / S_N_sym))
+    
+    # From solution sheet (Prob 3b), which notably omits S/N ratio from the time comparison formula
+    sigma_phi_time = sympy.Eq(sigma_phi_sym, c_sym / (d_sym * B_sym))
 
 class solve:
     def __init__():
