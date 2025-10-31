@@ -26,7 +26,7 @@ Radar_Range_Equation/
 
 Each language implementation has its own README with detailed installation and usage instructions:
 
-- [Python Package](python/README.md)
+- [Python Package](python/README.md) - [PyPI](https://pypi.org/project/Radar-Range-Equation/)
 - [Flutter/Dart Package](flutter/README.md)
 - [Rust Crate](rust/README.md)
 

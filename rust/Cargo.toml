@@ -1,0 +1,15 @@
+[package]
+name = "radar_range_equation"
+version = "0.0.1"
+edition = "2021"
+authors = ["Taylor <taylor@buzzedtop.com>"]
+description = "A Rust library for calculating radar range equations"
+homepage = "https://github.com/gleatd01/Radar_Range_Equation"
+repository = "https://github.com/gleatd01/Radar_Range_Equation"
+license = "MIT"
+keywords = ["radar", "signal-processing", "range-equation", "doppler"]
+categories = ["science"]
+
+[dependencies]
+
+[dev-dependencies]
