@@ -8,7 +8,10 @@ from sympy.physics.units import convert_to
 from sympy.physics.units import speed_of_light
 
 class vars:
-    # Default physical constants and other useful defaults
+    # =========================================================================
+    # BASE/COMMON PHYSICAL CONSTANTS AND VARIABLES
+    # =========================================================================
+    
     c = Symbol('c')                     # speed of light (symbolic)
     c = scipy.constants.c               # speed of light (m/s)
     k = Symbol('k')                     # Boltzmann constant (symbolic)
@@ -21,6 +24,10 @@ class vars:
     f = Symbol('f')                     # frequency (symbolic)
     T_0 = Symbol('T_0')                 # reference temperature (symbolic)
     T_0 = 290                           # reference temperature (K) — example
+    wavelength = Symbol('lambda')       # wavelength (symbolic)
+    v = Symbol('v')                     # velocity (symbolic)
+    
+    # Antenna parameters
     A_e = Symbol('A_e')                 # effective aperture (symbolic)
     A = Symbol('A')                     # antenna area (symbolic)
     D_h = Symbol('D_h')                 # horizontal antenna dimension (symbolic)
@@ -31,24 +38,57 @@ class vars:
     G_t_dB = Symbol('G_t_dB')           # transmit antenna gain in dB (symbolic)
     G_r = Symbol('G_r')                 # receive antenna gain (symbolic)
     G_r_dB = Symbol('G_r_dB')           # receive antenna gain in dB (symbolic)
-    # figure out a way to make all wavelength variable names point to the same value
-    wavelength = Symbol('lambda')       # wavelength (symbolic)
-    R = Symbol('R')                     # range to the fourth power (symbolic)
+    theta_B = Symbol('theta_B')         # beamwidth (symbolic)
+    
+    # Radar equation parameters
+    R = Symbol('R')                     # range (symbolic)
+    R_max = Symbol('R_max')             # maximum range (symbolic)
     P_t = Symbol('P_t')                 # transmit power (symbolic)
     S_min = Symbol('S_min')             # minimum detectable signal (symbolic)
     sigma = Symbol('sigma')             # radar cross section (symbolic)
-    theta_B = Symbol('theta_B')         # beamwidth (symbolic)
-    R_max = Symbol('R_max')             # maximum range (symbolic)
-    R_un = Symbol('R_un')                   # unnormalized range (symbolic)
-    f_m = Symbol('f_m')                   # modulation frequency (symbolic)
-    f_bu = Symbol('f_bu')                 # upper band frequency (symbolic)
-    f_bd = Symbol('f_bd')                 # lower band frequency (symbolic)
-    f_r = Symbol('f_r')                   # radar operating frequency (symbolic)
-    f_d = Symbol('f_d')                   # frequency deviation (symbolic)
-    deltaf = Symbol('Delta f')            # frequency difference (symbolic, with space)
-    v = Symbol('v')                     # velocity (symbolic)
 
-    # --- Topic 10: Direction Finding Vars ---
+    # =========================================================================
+    # TOPIC 07: DOPPLER CW RADAR VARS
+    # =========================================================================
+    
+    f_doppler = Symbol('f_doppler')     # Doppler frequency shift (symbolic)
+    f_if = Symbol('f_if')               # Intermediate frequency (symbolic)
+    f_obs = Symbol('f_obs')             # Observed frequency at receiver (symbolic)
+    T_cpi = Symbol('T_cpi')             # Coherent processing time (symbolic)
+    delta_v = Symbol('delta_v')         # Velocity resolution (symbolic)
+
+    # =========================================================================
+    # TOPIC 08: CWFM RADAR VARS
+    # =========================================================================
+    
+    R_un = Symbol('R_un')               # unnormalized range (symbolic)
+    f_m = Symbol('f_m')                 # modulation frequency (symbolic)
+    f_bu = Symbol('f_bu')               # upper band frequency (symbolic)
+    f_bd = Symbol('f_bd')               # lower band frequency (symbolic)
+    f_r = Symbol('f_r')                 # radar operating frequency (symbolic)
+    f_d = Symbol('f_d')                 # frequency deviation (symbolic)
+    deltaf = Symbol('Delta f')          # frequency difference (symbolic, with space)
+
+    # =========================================================================
+    # TOPIC 09: PULSED RADAR VARS
+    # =========================================================================
+    
+    f_p = Symbol('f_p')                 # Pulse Repetition Frequency (PRF) (symbolic)
+    T_p = Symbol('T_p')                 # Pulse Repetition Interval (PRI) (symbolic)
+    t_delay = Symbol('t_delay')         # Round-trip time delay (symbolic)
+    duty_cycle = Symbol('duty_cycle')   # Duty cycle (symbolic)
+    tau = Symbol('tau')                 # Pulse width (symbolic)
+    n_p = Symbol('n_p')                 # Number of pulses integrated (symbolic)
+    t_scan = Symbol('t_scan')           # Antenna scan time (symbolic)
+    S_N_1 = Symbol('S_N_1')             # Single pulse SNR (linear) (symbolic)
+    S_N_1_dB = Symbol('S_N_1_dB')       # Single pulse SNR (dB) (symbolic)
+    S_N_n = Symbol('S_N_n')             # Integrated SNR (linear) (symbolic)
+    E_i = Symbol('E_i')                 # Integration efficiency (symbolic)
+
+    # =========================================================================
+    # TOPIC 10: DIRECTION FINDING VARS
+    # =========================================================================
+    
     phi = Symbol('phi')                 # Angle (symbolic)
     phi_s = Symbol('phi_s')             # Squint angle (symbolic)
     Theta = Symbol('Theta')             # Gaussian beam parameter (symbolic)
@@ -62,43 +102,30 @@ class vars:
     d = Symbol('d')                     # Element separation (symbolic)
     B = Symbol('B')                     # Bandwidth (symbolic)
 
-    # --- Topic 07: Doppler CW Radar Vars ---
-    f_doppler = Symbol('f_doppler')     # Doppler frequency shift (symbolic)
-    f_if = Symbol('f_if')               # Intermediate frequency (symbolic)
-    f_obs = Symbol('f_obs')             # Observed frequency at receiver (symbolic)
-    T_cpi = Symbol('T_cpi')             # Coherent processing time (symbolic)
-    delta_v = Symbol('delta_v')         # Velocity resolution (symbolic)
-
-    # --- Topic 09: Pulsed Radar Vars ---
-    f_p = Symbol('f_p')                 # Pulse Repetition Frequency (PRF) (symbolic)
-    T_p = Symbol('T_p')                 # Pulse Repetition Interval (PRI) (symbolic)
-    t_delay = Symbol('t_delay')         # Round-trip time delay (symbolic)
-    duty_cycle = Symbol('duty_cycle')   # Duty cycle (symbolic)
-    tau = Symbol('tau')                 # Pulse width (symbolic)
-    n_p = Symbol('n_p')                 # Number of pulses integrated (symbolic)
-    t_scan = Symbol('t_scan')           # Antenna scan time (symbolic)
-    S_N_1 = Symbol('S_N_1')             # Single pulse SNR (linear) (symbolic)
-    S_N_n = Symbol('S_N_n')             # Integrated SNR (linear) (symbolic)
-    E_i = Symbol('E_i')                 # Integration efficiency (symbolic)
-
-    # --- Topic 11: Pulse Compression Vars ---
+    # =========================================================================
+    # TOPIC 11: PULSE COMPRESSION VARS
+    # =========================================================================
+    
     delta_r = Symbol('delta_r')         # Range resolution (symbolic)
     gamma = Symbol('gamma')             # Chirp rate (symbolic)
     PCR = Symbol('PCR')                 # Pulse Compression Ratio (symbolic)
     R_offset = Symbol('R_offset')       # Range offset from reference (symbolic)
     f_range_tone = Symbol('f_range_tone') # IF frequency from dechirp (symbolic)
 
-    #R(hat)_max
+    # =========================================================================
+    # SPECIAL VARIABLES
+    # =========================================================================
+    
     latex = False  # Set to True for LaTeX-style variable names
     if latex == True:
         R_hat_max = Symbol(r"\hat{R}_{max}")  # normalized maximum range (symbolic/latex)
     else:
-        R_hat_max = Symbol("R\u0302_max")     # normalized maximum range (symbolic)
+        R_hat_max = Symbol("R\u0302_max")    # normalized maximum range (symbolic)
 
 v = vars()  # Create a global instance of vars for easy access
 
 class equations:
-    # Create purely symbolic names (no vars.*) to keep equations symbolic for later substitution
+    # --- Base/Common Symbols ---
     c_sym = Symbol('c')
     f_sym = Symbol('f')
     eta_sym = Symbol('eta')
@@ -115,6 +142,16 @@ class equations:
     R_max_sym = Symbol('R_max')
     pi_sym = Symbol('pi')
     theta_B_sym = Symbol('theta_B')
+    v_sym = Symbol('v')
+
+    # --- Topic 07: Doppler CW Radar Symbols ---
+    f_doppler_sym = Symbol('f_doppler')
+    f_if_sym = Symbol('f_if')
+    f_obs_sym = Symbol('f_obs')
+    T_cpi_sym = Symbol('T_cpi')
+    delta_v_sym = Symbol('delta_v')
+
+    # --- Topic 08: CWFM Radar Symbols ---
     R_un_sym = Symbol('R_un')
     f_m_sym = Symbol('f_m')
     f_bu_sym = Symbol('f_bu')
@@ -123,7 +160,18 @@ class equations:
     f_d_sym = Symbol('f_d')
     f_0_sym = Symbol('f_0')
     deltaf_sym = Symbol('Delta f')
-    v_sym = Symbol('v')
+    
+    # --- Topic 09: Pulsed Radar Symbols ---
+    f_p_sym = Symbol('f_p')
+    T_p_sym = Symbol('T_p')
+    t_delay_sym = Symbol('t_delay')
+    duty_cycle_sym = Symbol('duty_cycle')
+    tau_sym = Symbol('tau')
+    n_p_sym = Symbol('n_p')
+    t_scan_sym = Symbol('t_scan')
+    S_N_1_sym = Symbol('S_N_1')
+    S_N_n_sym = Symbol('S_N_n')
+    E_i_sym = Symbol('E_i')
 
     # --- Topic 10: Direction Finding Symbols ---
     phi_sym = Symbol('phi')
@@ -139,25 +187,6 @@ class equations:
     d_sym = Symbol('d')
     B_sym = Symbol('B')
 
-    # --- Topic 07: Doppler CW Radar Symbols ---
-    f_doppler_sym = Symbol('f_doppler')
-    f_if_sym = Symbol('f_if')
-    f_obs_sym = Symbol('f_obs')
-    T_cpi_sym = Symbol('T_cpi')
-    delta_v_sym = Symbol('delta_v')
-    
-    # --- Topic 09: Pulsed Radar Symbols ---
-    f_p_sym = Symbol('f_p')
-    T_p_sym = Symbol('T_p')
-    t_delay_sym = Symbol('t_delay')
-    duty_cycle_sym = Symbol('duty_cycle')
-    tau_sym = Symbol('tau')
-    n_p_sym = Symbol('n_p')
-    t_scan_sym = Symbol('t_scan')
-    S_N_1_sym = Symbol('S_N_1')
-    S_N_n_sym = Symbol('S_N_n')
-    E_i_sym = Symbol('E_i')
-
     # --- Topic 11: Pulse Compression Symbols ---
     delta_r_sym = Symbol('delta_r')
     gamma_sym = Symbol('gamma')
@@ -165,7 +194,11 @@ class equations:
     R_offset_sym = Symbol('R_offset')
     f_range_tone_sym = Symbol('f_range_tone')
 
-    # Symbolic equations without vars prefix
+    # =========================================================================
+    # EQUATIONS
+    # =========================================================================
+
+    # --- Base/Common Equations ---
     A_e = sympy.Eq(A_e_sym, eta_sym * D_h_sym * D_v_sym)
     wavelength = sympy.Eq(wavelength_sym, c_sym / f_sym)
     G_t = sympy.Eq(G_t_sym, 4 * sympy.pi * A_e_sym / (wavelength_sym ** 2))
@@ -174,52 +207,42 @@ class equations:
     P_t = sympy.Eq(P_t_sym, ((4 * pi_sym)**3 * S_min_sym * R_sym**4) / (G_t_sym**2 * wavelength_sym**2 * sigma_sym))
     R_max = sympy.Eq(R_max_sym, sympy.Pow((P_t_sym * (G_t_sym**2) * (wavelength_sym**2) * sigma_sym) / ((4 * pi_sym)**3 * S_min_sym), sympy.Rational(1, 4), evaluate=False), evaluate=False)
     theta_B = sympy.Eq(theta_B_sym, 65 * sympy.pi / 180 * (wavelength_sym / D_h_sym)) # Gaussian approx
-    
-    # --- Topic 08: CWFM Radar Equations (Already present) ---
-    R_cwfm = sympy.Eq(R_sym, (c_sym*f_r_sym)/(4*f_m_sym*deltaf_sym))
-    v_cwfm = sympy.Eq(v_sym, -(c_sym/f_sym)*(f_d_sym/2)) # Note: f_d here is from f_bu/f_bd
-    f_m_cwfm = sympy.Eq(f_m_sym, c_sym/(2*R_un_sym))
-    f_0_cwfm = sympy.Eq(f_0_sym, 2*f_m_sym*deltaf_sym) # f_dot
-    f_r_cwfm = sympy.Eq(f_r_sym, .5*(f_bu_sym+f_bd_sym))
-    f_d_cwfm = sympy.Eq(f_d_sym, .5*(f_bu_sym-f_bd_sym))
-
-    # --- Topic 10: Direction Finding Equations ---
-    # Note: sympy.log is the natural logarithm (ln), which matches the derivation in the solutions
-    S_N_from_dB = sympy.Eq(S_N_sym, 10**(S_N_dB_sym / 10))
-    
-    v_phi = sympy.Eq(v_phi_sym, exp(-Theta_sym * (phi_sym - phi_s_sym)**2))
-    
-    Theta = sympy.Eq(Theta_sym, (4 * log(2)) / theta_B_sym**2)
-    
-    phi_hat_amp = sympy.Eq(phi_hat_sym, (Delta_sym / Sigma_sym) * (theta_B_sym**2 / (8 * log(2) * phi_s_sym)))
-    
-    # From solution sheet, interpreting garbled symbols via the numerical calculation (Prob 2)
-    sigma_phi_amp = sympy.Eq(sigma_phi_sym, (theta_B_sym**2 * sqrt(1 / S_N_sym)) / (8 * sqrt(2) * phi_s_sym * log(2)))
-    
-    # From solution sheet (Prob 3a)
-    sigma_phi_phase = sympy.Eq(sigma_phi_sym, (wavelength_sym / (2 * pi_sym * d_sym)) * sqrt(1 / S_N_sym))
-    
-    # From solution sheet (Prob 3b), which notably omits S/N ratio from the time comparison formula
-    sigma_phi_time = sympy.Eq(sigma_phi_sym, c_sym / (d_sym * B_sym))
 
     # --- Topic 07: Doppler CW Radar Equations ---
     eq_f_doppler = sympy.Eq(f_doppler_sym, -2 * v_sym / wavelength_sym)
     eq_v_from_doppler = sympy.Eq(v_sym, -wavelength_sym * f_doppler_sym / 2)
     eq_f_obs_if = sympy.Eq(f_obs_sym, f_if_sym + f_doppler_sym)
     eq_delta_v = sympy.Eq(delta_v_sym, wavelength_sym / (2 * T_cpi_sym))
+    
+    # --- Topic 08: CWFM Radar Equations ---
+    R_cwfm = sympy.Eq(R_sym, (c_sym*f_r_sym)/(4*f_m_sym*deltaf_sym))
+    v_cwfm = sympy.Eq(v_sym, -(c_sym/f_sym)*(f_d_sym/2))
+    f_m_cwfm = sympy.Eq(f_m_sym, c_sym/(2*R_un_sym))
+    f_0_cwfm = sympy.Eq(f_0_sym, 2*f_m_sym*deltaf_sym)
+    f_r_cwfm = sympy.Eq(f_r_sym, .5*(f_bu_sym+f_bd_sym))
+    f_d_cwfm = sympy.Eq(f_d_sym, .5*(f_bu_sym-f_bd_sym))
 
-    # --- Topic 09/10: Pulsed Radar & Range Ambiguity Equations ---
+    # --- Topic 09: Pulsed Radar & Range Ambiguity Equations ---
     eq_R_un_from_fp = sympy.Eq(R_un_sym, c_sym / (2 * f_p_sym))
     eq_fp_from_R_un = sympy.Eq(f_p_sym, c_sym / (2 * R_un_sym))
     eq_T_p = sympy.Eq(T_p_sym, 1 / f_p_sym)
     eq_R_from_time = sympy.Eq(R_sym, c_sym * t_delay_sym / 2)
     eq_tau_from_duty = sympy.Eq(tau_sym, T_p_sym * duty_cycle_sym)
-    eq_n_p = sympy.Eq(n_p_sym, f_p_sym * t_scan_sym * (theta_B_sym / (2 * pi_sym))) # For rotating scan
+    eq_n_p = sympy.Eq(n_p_sym, f_p_sym * t_scan_sym * (theta_B_sym / (2 * pi_sym)))
     eq_S_N_n_coherent = sympy.Eq(S_N_n_sym, n_p_sym * S_N_1_sym)
     eq_S_N_n_noncoherent_Ei = sympy.Eq(S_N_n_sym, E_i_sym * n_p_sym * S_N_1_sym)
-    eq_E_i_sqrt_n = sympy.Eq(E_i_sym, 1 / sqrt(n_p_sym)) # Approx for noncoherent
+    eq_E_i_sqrt_n = sympy.Eq(E_i_sym, 1 / sqrt(n_p_sym))
     eq_S_N_n_noncoherent = eq_S_N_n_noncoherent_Ei.subs(E_i_sym, eq_E_i_sqrt_n.rhs)
-    eq_theta_B_skolnik = sympy.Eq(theta_B_sym, 1.2 * wavelength_sym / D_h_sym) # Skolnik approx
+    eq_theta_B_skolnik = sympy.Eq(theta_B_sym, 1.2 * wavelength_sym / D_h_sym)
+
+    # --- Topic 10: Direction Finding Equations ---
+    S_N_from_dB = sympy.Eq(S_N_sym, 10**(S_N_dB_sym / 10))
+    v_phi = sympy.Eq(v_phi_sym, exp(-Theta_sym * (phi_sym - phi_s_sym)**2))
+    Theta = sympy.Eq(Theta_sym, (4 * log(2)) / theta_B_sym**2)
+    phi_hat_amp = sympy.Eq(phi_hat_sym, (Delta_sym / Sigma_sym) * (theta_B_sym**2 / (8 * log(2) * phi_s_sym)))
+    sigma_phi_amp = sympy.Eq(sigma_phi_sym, (theta_B_sym**2 * sqrt(1 / S_N_sym)) / (8 * sqrt(2) * phi_s_sym * log(2)))
+    sigma_phi_phase = sympy.Eq(sigma_phi_sym, (wavelength_sym / (2 * pi_sym * d_sym)) * sqrt(1 / S_N_sym))
+    sigma_phi_time = sympy.Eq(sigma_phi_sym, c_sym / (d_sym * B_sym))
 
     # --- Topic 11: Pulse Compression Equations ---
     eq_delta_r_uncompressed = sympy.Eq(delta_r_sym, c_sym * tau_sym / 2)
@@ -228,13 +251,15 @@ class equations:
     eq_PCR_1 = sympy.Eq(PCR_sym, tau_sym * B_sym)
     eq_PCR_2 = sympy.Eq(PCR_sym, (tau_sym**2) * gamma_sym)
     eq_f_range_tone = sympy.Eq(f_range_tone_sym, -gamma_sym * (2 * R_offset_sym / c_sym))
-    # Note: Observed freq in dechirp is f_obs = f_range_tone + f_doppler
 
 class solve:
     def __init__():
         pass
     
-    # --- Helper function for SymPy solvers ---
+    # =========================================================================
+    # HELPER FUNCTION
+    # =========================================================================
+    
     def _solver(equation, solve_for_sym):
         """Internal helper to solve a SymPy equation and return a callable function."""
         try:
@@ -274,7 +299,10 @@ class solve:
         
         return calculate
 
-    # --- Original Solvers ---
+    # =========================================================================
+    # BASE/COMMON SOLVERS
+    # =========================================================================
+    
     def A_sphere():
         return (vars.sigma / np.pi) ** (1/2)
     
@@ -300,12 +328,23 @@ class solve:
         value = (vars.P_t * vars.G_t ** 2 * vars.G_r * vars.wavelength ** 2 * vars.sigma) / ( (vars.pi4) ** 3 * vars.S_min )
         return value
     
-    # --- SymPy-based Solvers (Original) ---
-    # Note: These are now generated dynamically by the functions below
-    
-    # --- Topic 08: CWFM Radar Solvers (Already present) ---
+    # SymPy-based solvers
     P_t = _solver(equations.P_t, equations.P_t.lhs)
     R_max = _solver(equations.R_max, equations.R_max.lhs)
+
+    # =========================================================================
+    # TOPIC 07: DOPPLER CW RADAR SOLVERS
+    # =========================================================================
+    
+    f_doppler = _solver(equations.eq_f_doppler, equations.eq_f_doppler.lhs)
+    v_from_doppler = _solver(equations.eq_v_from_doppler, equations.eq_v_from_doppler.lhs)
+    f_obs_if = _solver(equations.eq_f_obs_if, equations.eq_f_obs_if.lhs)
+    delta_v = _solver(equations.eq_delta_v, equations.eq_delta_v.lhs)
+
+    # =========================================================================
+    # TOPIC 08: CWFM RADAR SOLVERS
+    # =========================================================================
+    
     R_cwfm = _solver(equations.R_cwfm, equations.R_cwfm.lhs)
     v_cwfm = _solver(equations.v_cwfm, equations.v_cwfm.lhs)
     f_m_cwfm = _solver(equations.f_m_cwfm, equations.f_m_cwfm.lhs)
@@ -313,22 +352,10 @@ class solve:
     f_d_cwfm = _solver(equations.f_d_cwfm, equations.f_d_cwfm.lhs)
     f_0_cwfm = _solver(equations.f_0_cwfm, equations.f_0_cwfm.lhs)
 
-    # --- Topic 10: Direction Finding Solvers ---
-    S_N_from_dB = _solver(equations.S_N_from_dB, equations.S_N_from_dB.lhs)
-    sigma_phi_amplitude = _solver(equations.sigma_phi_amp, equations.sigma_phi_amp.lhs)
-    phi_s_from_sigma_amp = _solver(equations.sigma_phi_amp, equations.phi_s_sym)
-    sigma_phi_phase = _solver(equations.sigma_phi_phase, equations.sigma_phi_phase.lhs)
-    d_from_sigma_phase = _solver(equations.sigma_phi_phase, equations.d_sym)
-    sigma_phi_time = _solver(equations.sigma_phi_time, equations.sigma_phi_time.lhs)
-    B_from_sigma_time = _solver(equations.sigma_phi_time, equations.B_sym)
-
-    # --- Topic 07: Doppler CW Radar Solvers ---
-    f_doppler = _solver(equations.eq_f_doppler, equations.eq_f_doppler.lhs)
-    v_from_doppler = _solver(equations.eq_v_from_doppler, equations.eq_v_from_doppler.lhs)
-    f_obs_if = _solver(equations.eq_f_obs_if, equations.eq_f_obs_if.lhs)
-    delta_v = _solver(equations.eq_delta_v, equations.eq_delta_v.lhs)
-
-    # --- Topic 09/10: Pulsed Radar & Range Ambiguity Solvers ---
+    # =========================================================================
+    # TOPIC 09: PULSED RADAR & RANGE AMBIGUITY SOLVERS
+    # =========================================================================
+    
     R_un_from_fp = _solver(equations.eq_R_un_from_fp, equations.eq_R_un_from_fp.lhs)
     fp_from_R_un = _solver(equations.eq_fp_from_R_un, equations.eq_fp_from_R_un.lhs)
     R_from_time = _solver(equations.eq_R_from_time, equations.eq_R_from_time.lhs)
@@ -346,16 +373,20 @@ class solve:
         S_N_n_lin = np.sqrt(vars.n_p) * S_N_1_lin
         return convert.lin_to_db(S_N_n_lin)
 
-    # --- Topic 11: Pulse Compression Solvers ---
-    delta_r_uncompressed = _solver(equations.eq_delta_r_uncompressed, equations.eq_delta_r_uncompressed.lhs)
-    B_chirp = _solver(equations.eq_B_chirp, equations.eq_B_chirp.lhs)
-    delta_r_compressed = _solver(equations.eq_delta_r_compressed, equations.eq_delta_r_compressed.lhs)
-    PCR_from_B = _solver(equations.eq_PCR_1, equations.eq_PCR_1.lhs)
-    PCR_from_gamma = _solver(equations.eq_PCR_2, equations.eq_PCR_2.lhs)
-    f_range_tone = _solver(equations.eq_f_range_tone, equations.eq_f_range_tone.lhs)
-    R_offset_from_tone = _solver(equations.eq_f_range_tone, equations.R_offset_sym)
+    # =========================================================================
+    # TOPIC 10: DIRECTION FINDING SOLVERS
+    # =========================================================================
+    
+    # SymPy-based solvers
+    S_N_from_dB = _solver(equations.S_N_from_dB, equations.S_N_from_dB.lhs)
+    sigma_phi_amplitude = _solver(equations.sigma_phi_amp, equations.sigma_phi_amp.lhs)
+    phi_s_from_sigma_amp = _solver(equations.sigma_phi_amp, equations.phi_s_sym)
+    sigma_phi_phase = _solver(equations.sigma_phi_phase, equations.sigma_phi_phase.lhs)
+    d_from_sigma_phase = _solver(equations.sigma_phi_phase, equations.d_sym)
+    sigma_phi_time = _solver(equations.sigma_phi_time, equations.sigma_phi_time.lhs)
+    B_from_sigma_time = _solver(equations.sigma_phi_time, equations.B_sym)
 
-    # --- Angle estimation solve methods (keep for backward compatibility) ---
+    # Legacy math-based methods (kept for backward compatibility)
     def calculate_Theta():
         """Calculates the Theta parameter from the 3-dB beamwidth.
         
@@ -384,8 +415,6 @@ class solve:
         Returns:
             Beam approximation value
         """
-        # Note: -4 * log(0.5) = 4 * log(2) (mathematically equivalent)
-        # Using 4 * log(2) for better performance
         return math.exp((4 * math.log(2) * (vars.phi - vars.phi_s)**2) / (vars.theta_B**2))
     
     def estimate_phi_hat():
@@ -437,6 +466,18 @@ class solve:
             Linear value
         """
         return 10**(vars.x / 10)
+
+    # =========================================================================
+    # TOPIC 11: PULSE COMPRESSION SOLVERS
+    # =========================================================================
+    
+    delta_r_uncompressed = _solver(equations.eq_delta_r_uncompressed, equations.eq_delta_r_uncompressed.lhs)
+    B_chirp = _solver(equations.eq_B_chirp, equations.eq_B_chirp.lhs)
+    delta_r_compressed = _solver(equations.eq_delta_r_compressed, equations.eq_delta_r_compressed.lhs)
+    PCR_from_B = _solver(equations.eq_PCR_1, equations.eq_PCR_1.lhs)
+    PCR_from_gamma = _solver(equations.eq_PCR_2, equations.eq_PCR_2.lhs)
+    f_range_tone = _solver(equations.eq_f_range_tone, equations.eq_f_range_tone.lhs)
+    R_offset_from_tone = _solver(equations.eq_f_range_tone, equations.R_offset_sym)
 
 class convert:  # add alias con for convenience
     pass
