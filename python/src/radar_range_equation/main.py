@@ -281,7 +281,8 @@ class solve:
         
         def calculate():
             """Dynamically created solver function."""
-            # Access the global v instance directly
+            # Access the global v instance directly to look up variable values.
+            # The solver needs to substitute symbols with their numeric values stored in v.
             global v
             
             subs_map = {}
