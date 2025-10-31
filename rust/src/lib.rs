@@ -39,6 +39,9 @@ pub mod constants {
     
     /// Pi
     pub const PI: f64 = std::f64::consts::PI;
+    
+    /// Beamwidth coefficient for Gaussian approximation
+    pub const BEAMWIDTH_COEFFICIENT: f64 = 65.0;
 }
 
 /// Errors that can occur during radar calculations
@@ -182,7 +185,7 @@ pub fn calculate_effective_aperture_circ(efficiency: f64, diameter: f64) -> Resu
             "Diameter must be positive".to_string(),
         ));
     }
-    Ok(efficiency * constants::PI * (diameter / 2.0).powi(2))
+    Ok(efficiency * constants::PI * diameter * diameter * 0.25)
 }
 
 /// Calculate maximum detection range using the radar range equation
@@ -325,7 +328,7 @@ pub fn calculate_beamwidth(wavelength: f64, horizontal_dimension: f64) -> Result
             "Horizontal dimension must be positive".to_string(),
         ));
     }
-    Ok((65.0 * constants::PI / 180.0) * (wavelength / horizontal_dimension))
+    Ok((constants::BEAMWIDTH_COEFFICIENT * constants::PI / 180.0) * (wavelength / horizontal_dimension))
 }
 
 /// Calculate Doppler frequency shift

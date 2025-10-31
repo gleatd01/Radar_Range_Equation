@@ -20,6 +20,9 @@ class RadarConstants {
   
   /// Pi
   static const double pi = math.pi;
+  
+  /// Beamwidth coefficient for Gaussian approximation
+  static const double beamwidthCoefficient = 65.0;
 }
 
 /// Calculate wavelength from frequency
@@ -74,7 +77,7 @@ double calculateEffectiveApertureRect(
 ///
 /// Returns effective aperture in m²
 double calculateEffectiveApertureCirc(double efficiency, double diameter) {
-  return efficiency * RadarConstants.pi * math.pow(diameter / 2, 2);
+  return efficiency * RadarConstants.pi * diameter * diameter * 0.25;
 }
 
 /// Calculate maximum detection range using the radar range equation
@@ -139,7 +142,8 @@ double calculateReceivedPower(
 ///
 /// Returns beamwidth in radians
 double calculateBeamwidth(double wavelength, double horizontalDimension) {
-  return (65 * RadarConstants.pi / 180) * (wavelength / horizontalDimension);
+  return (RadarConstants.beamwidthCoefficient * RadarConstants.pi / 180) *
+      (wavelength / horizontalDimension);
 }
 
 /// Calculate Doppler frequency shift
