@@ -273,24 +273,28 @@ class solve:
             return error_function
             
         # Helper to convert Python numbers to sympy Floats but leave sympy types alone
-        def _s(v):
-            return v if isinstance(v, sympy.Basic) else sympy.Float(v)
+        def _s(val):
+            return val if isinstance(val, sympy.Basic) else sympy.Float(val)
 
         # Get all symbols used in the expression
         free_symbols = sym_expr.free_symbols
         
         def calculate():
             """Dynamically created solver function."""
+            # Get the global v instance
+            import sys
+            v_instance = sys.modules[__name__].v
+            
             subs_map = {}
             for s in free_symbols:
-                if hasattr(vars, s.name):
-                    subs_map[s] = _s(getattr(vars, s.name))
+                if hasattr(v_instance, s.name):
+                    subs_map[s] = _s(getattr(v_instance, s.name))
                 # Handle special cases like 'lambda'
-                elif s.name == 'lambda' and hasattr(vars, 'wavelength'):
-                    subs_map[s] = _s(getattr(vars, 'wavelength'))
+                elif s.name == 'lambda' and hasattr(v_instance, 'wavelength'):
+                    subs_map[s] = _s(getattr(v_instance, 'wavelength'))
                 # Handle 'Delta f'
-                elif str(s) == 'Delta f' and hasattr(vars, 'deltaf'):
-                    subs_map[s] = _s(getattr(vars, 'deltaf'))
+                elif str(s) == 'Delta f' and hasattr(v_instance, 'deltaf'):
+                    subs_map[s] = _s(getattr(v_instance, 'deltaf'))
                 else:
                     # This will catch sympy constants like pi, log(2), sqrt(2)
                     # which don't need substitution.
@@ -569,6 +573,10 @@ def redefine_variable(var_name, new_value):
         new_value: The new value to assign to the variable.
     """
     setattr(vars, var_name, new_value)
+    # Also set on the global v instance for consistency
+    import sys
+    v_instance = sys.modules[__name__].v
+    setattr(v_instance, var_name, new_value)
 # Demonstration of usage from a separate script or module:
 
 if __name__ == '__main__':  # Only runs when the script is executed directly
