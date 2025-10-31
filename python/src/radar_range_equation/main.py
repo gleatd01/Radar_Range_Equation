@@ -265,9 +265,12 @@ class solve:
         try:
             # Solve the equation for the desired symbol
             sym_expr = sympy.solve(equation, solve_for_sym)[0]
-        except IndexError:
-            print(f"Error: Could not solve equation for {solve_for_sym}.")
-            return lambda: None # Return a function that does nothing
+        except (IndexError, Exception) as e:
+            error_msg = f"Error: Could not solve equation for {solve_for_sym}: {e}"
+            print(error_msg)
+            def error_function():
+                raise ValueError(error_msg)
+            return error_function
             
         # Helper to convert Python numbers to sympy Floats but leave sympy types alone
         def _s(v):
@@ -284,10 +287,10 @@ class solve:
                     subs_map[s] = _s(getattr(vars, s.name))
                 # Handle special cases like 'lambda'
                 elif s.name == 'lambda' and hasattr(vars, 'wavelength'):
-                     subs_map[s] = _s(getattr(vars, 'wavelength'))
+                    subs_map[s] = _s(getattr(vars, 'wavelength'))
                 # Handle 'Delta f'
                 elif str(s) == 'Delta f' and hasattr(vars, 'deltaf'):
-                     subs_map[s] = _s(getattr(vars, 'deltaf'))
+                    subs_map[s] = _s(getattr(vars, 'deltaf'))
                 else:
                     # This will catch sympy constants like pi, log(2), sqrt(2)
                     # which don't need substitution.
@@ -491,7 +494,7 @@ class convert:  # add alias con for convenience
     def lin_to_db(value_linear):
         # Handle non-positive inputs to avoid math errors
         if value_linear <= 0:
-            return -float('inf')
+            return -np.inf
         return np.log(value_linear)/np.log(10)*10
     
     def db_to_lin(value_db):
@@ -572,7 +575,7 @@ if __name__ == '__main__':  # Only runs when the script is executed directly
     
     # --- Original Demo Code ---
     print("--- Original Demo (CWFM) ---")
-    v = vars() # This is already here, but ensure 'v' is the global instance
+    v = vars()  # Create a reference to the global vars instance
     v.f_bu = Symbol('f_bu')
     pprint(v.f_bu)
     v.f_bu = convert.hz_from(1510, 'mhz')
