@@ -16,6 +16,7 @@ All implementations provide the same core functionality with language-specific A
 ```
 Radar_Range_Equation/
 ├── python/          # Python package
+├── node/            # Node.js/TypeScript package
 ├── flutter/         # Flutter/Dart package
 ├── rust/            # Rust crate
 ├── README.md        # This file
@@ -27,6 +28,7 @@ Radar_Range_Equation/
 Each language implementation has its own README with detailed installation and usage instructions:
 
 - [Python Package](python/README.md) - [PyPI](https://pypi.org/project/Radar-Range-Equation/)
+- [Node.js/TypeScript Package](node/README.md) - [npm](https://www.npmjs.com/package/radar-range-equation)
 - [Flutter/Dart Package](flutter/README.md)
 - [Rust Crate](rust/README.md)
 
@@ -50,6 +52,20 @@ max_range = calculate_max_range(
     min_detectable_signal=1e-13
 )
 print(f"Maximum range: {max_range:.2f} meters")
+```
+
+### Node.js/TypeScript
+
+```bash
+cd node
+npm install
+```
+
+```typescript
+import { calculateMaxRange } from 'radar-range-equation';
+
+const maxRange = calculateMaxRange(1000, 1000, 0.03, 1.0, 1e-13);
+console.log(`Maximum range: ${maxRange.toFixed(2)} meters`);
 ```
 
 ### Flutter/Dart
@@ -88,7 +104,7 @@ println!("Maximum range: {:.2} meters", max_range);
 
 ## Features
 
-- **Multi-language Support**: Python, Flutter/Dart, and Rust implementations
+- **Multi-language Support**: Python, Node.js/TypeScript, Flutter/Dart, and Rust implementations
 - **Consistent API**: Similar function signatures across all languages
 - **Well-tested**: Comprehensive test suites for each implementation
 - **Documentation**: Full API documentation and examples
