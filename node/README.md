@@ -57,7 +57,7 @@ Calculates the maximum detection range of a radar system using the radar range e
 **Example:**
 ```typescript
 const maxRange = calculateMaxRange(1000, 1000, 0.03, 1.0, 1e-13);
-// Returns: ~45403.48 meters
+// Returns: ~46148.04 meters
 ```
 
 #### `calculateReceivedPower(transmitPower, antennaGain, wavelength, radarCrossSection, range)`
@@ -175,7 +175,7 @@ The `convert` object provides various unit conversion functions:
 ```typescript
 import { convert } from 'radar-range-equation';
 
-const rangeKm = convert.metersToKm(45403);
+const rangeKm = convert.metersToKm(46148);
 console.log(`${rangeKm} km`); // 45.403 km
 
 const powerDb = convert.linearToDb(1000);

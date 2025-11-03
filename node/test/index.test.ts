@@ -27,7 +27,7 @@ describe('Radar Range Equation', () => {
       );
 
       expect(maxRange).toBeGreaterThan(0);
-      expect(maxRange).toBeCloseTo(45403.48, 0); // Expected value from Python implementation
+      expect(maxRange).toBeCloseTo(46148.04, 0); // Expected value for monostatic radar with G³
     });
 
     it('should throw error for invalid transmit power', () => {

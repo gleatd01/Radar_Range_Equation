@@ -112,11 +112,11 @@ println!("Maximum range: {:.2} meters", max_range);
 
 ## Radar Range Equation
 
-The radar range equation relates the range of a radar to the characteristics of the transmitter, receiver, antenna, target, and environment. This library implements the basic radar equation:
+The radar range equation relates the range of a radar to the characteristics of the transmitter, receiver, antenna, target, and environment. This library implements the monostatic radar equation (same antenna for transmit and receive):
 
 ```
          ┌─────────────────────────────────────────────┐
-         │    P_t × G² × λ² × σ                       │
+         │    P_t × G³ × λ² × σ                       │
 R_max = ⁴│  ──────────────────────────────             │
          │    (4π)³ × P_min                           │
          └─────────────────────────────────────────────┘
@@ -125,10 +125,12 @@ R_max = ⁴│  ─────────────────────�
 Where:
 - `R_max` = Maximum range
 - `P_t` = Transmit power
-- `G` = Antenna gain
+- `G` = Antenna gain (applies to both transmit and receive)
 - `λ` = Wavelength
 - `σ` = Radar cross-section
 - `P_min` = Minimum detectable signal
+
+Note: For monostatic radar, the antenna gain appears cubed (G³) because the same antenna is used for both transmitting (G²) and receiving (G).
 
 ## Contributing
 

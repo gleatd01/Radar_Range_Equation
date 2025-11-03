@@ -10,11 +10,13 @@
  * 
  * The radar range equation relates the range of a radar to the characteristics
  * of the transmitter, receiver, antenna, target, and environment.
+ * For monostatic radar (same antenna for transmit and receive), the gain
+ * appears cubed (G³ = G_transmit² × G_receive).
  * 
- * Formula: R_max = ((P_t × G² × λ² × σ) / ((4π)³ × P_min))^(1/4)
+ * Formula: R_max = ((P_t × G³ × λ² × σ) / ((4π)³ × P_min))^(1/4)
  * 
  * @param transmitPower - Transmit power in watts (P_t)
- * @param antennaGain - Antenna gain (dimensionless) (G)
+ * @param antennaGain - Antenna gain (dimensionless) (G) - applies to both TX and RX
  * @param wavelength - Wavelength in meters (λ)
  * @param radarCrossSection - Radar cross-section in square meters (σ)
  * @param minDetectableSignal - Minimum detectable signal in watts (P_min)
@@ -50,7 +52,9 @@ export function calculateMaxRange(
   }
 
   const fourPi = 4 * Math.PI;
-  const numerator = transmitPower * Math.pow(antennaGain, 2) * Math.pow(wavelength, 2) * radarCrossSection;
+  // For monostatic radar (same antenna for TX and RX), the gain appears as G^3
+  // Formula: R_max = ((P_t × G² × G × λ² × σ) / ((4π)³ × P_min))^(1/4)
+  const numerator = transmitPower * Math.pow(antennaGain, 3) * Math.pow(wavelength, 2) * radarCrossSection;
   const denominator = Math.pow(fourPi, 3) * minDetectableSignal;
   
   return Math.pow(numerator / denominator, 0.25);
@@ -60,12 +64,13 @@ export function calculateMaxRange(
  * Calculate the received power at a given range.
  * 
  * This function calculates the power received by a radar from a target
- * at a specified range.
+ * at a specified range. For monostatic radar (same antenna for transmit 
+ * and receive), the gain appears cubed (G³ = G_transmit² × G_receive).
  * 
- * Formula: P_r = (P_t × G² × λ² × σ) / ((4π)³ × R⁴)
+ * Formula: P_r = (P_t × G³ × λ² × σ) / ((4π)³ × R⁴)
  * 
  * @param transmitPower - Transmit power in watts (P_t)
- * @param antennaGain - Antenna gain (dimensionless) (G)
+ * @param antennaGain - Antenna gain (dimensionless) (G) - applies to both TX and RX
  * @param wavelength - Wavelength in meters (λ)
  * @param radarCrossSection - Radar cross-section in square meters (σ)
  * @param range - Range to target in meters (R)
@@ -101,7 +106,9 @@ export function calculateReceivedPower(
   }
 
   const fourPi = 4 * Math.PI;
-  const numerator = transmitPower * Math.pow(antennaGain, 2) * Math.pow(wavelength, 2) * radarCrossSection;
+  // For monostatic radar (same antenna for TX and RX), the gain appears as G^3
+  // Formula: P_r = (P_t × G² × G × λ² × σ) / ((4π)³ × R⁴)
+  const numerator = transmitPower * Math.pow(antennaGain, 3) * Math.pow(wavelength, 2) * radarCrossSection;
   const denominator = Math.pow(fourPi, 3) * Math.pow(range, 4);
   
   return numerator / denominator;
