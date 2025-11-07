@@ -3,10 +3,13 @@
 
 This script performs tests to ensure the plotting functions work correctly
 and can generate the expected visualizations.
+
+Note: This test uses sys.path.insert() to allow running directly from the
+repository without installation. In production tests, install the package first.
 """
 
 import sys
-sys.path.insert(0, 'python/src')
+sys.path.insert(0, 'python/src')  # For running from repo without installation
 import radar_range_equation as RRE
 import numpy as np
 import matplotlib

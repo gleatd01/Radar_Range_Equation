@@ -346,9 +346,10 @@ def pulse_compression_signal(
     # Create compressed pulse (sinc function approximation)
     # Time constant for compressed pulse
     t_c = 1 / bandwidth
+    # Scale factor: divide by 2 * num_points for normalization from integration approximation
     compressed = amplitude * bandwidth * pulse_width * np.sinc(t_sec / t_c) / (2 * num_points)
     
-    # Normalize compressed pulse
+    # Normalize compressed pulse to match input amplitude
     compressed = compressed / np.max(np.abs(compressed)) * amplitude
     
     # Create the plot with three subplots

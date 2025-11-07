@@ -9,10 +9,14 @@ This example shows how to visualize various radar signals including:
 - Pulse compression signals
 - Range profiles
 - Doppler spectra
+
+Note: This example uses sys.path.insert() to allow running directly from the
+repository without installation. In production code, install the package and
+import normally: `import radar_range_equation as RRE`
 """
 
 import sys
-sys.path.insert(0, 'python/src')
+sys.path.insert(0, 'python/src')  # For running from repo without installation
 import radar_range_equation as RRE
 import numpy as np
 

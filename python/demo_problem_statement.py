@@ -4,10 +4,13 @@ Demonstration that matches the exact problem statement example.
 
 This script creates a pulsed radar transmit signal that matches the 
 parameters provided in the problem statement.
+
+Note: This demo uses sys.path.insert() to allow running directly from the
+repository without installation. In production code, install the package first.
 """
 
 import sys
-sys.path.insert(0, 'python/src')
+sys.path.insert(0, 'python/src')  # For running from repo without installation
 import radar_range_equation as RRE
 
 print("="*70)
