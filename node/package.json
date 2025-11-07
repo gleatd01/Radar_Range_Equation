@@ -1,0 +1,45 @@
+{
+  "name": "radar-range-equation",
+  "version": "0.0.1",
+  "description": "A multi-language library providing radar range equation calculations",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "radar",
+    "range",
+    "equation",
+    "signal-processing",
+    "aerospace",
+    "electronics"
+  ],
+  "author": "Taylor <taylor@buzzedtop.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gleatd01/Radar_Range_Equation.git",
+    "directory": "node"
+  },
+  "bugs": {
+    "url": "https://github.com/gleatd01/Radar_Range_Equation/issues"
+  },
+  "homepage": "https://github.com/gleatd01/Radar_Range_Equation#readme",
+  "devDependencies": {
+    "@types/jest": "^29.5.0",
+    "@types/node": "^20.0.0",
+    "jest": "^29.5.0",
+    "ts-jest": "^29.1.0",
+    "typescript": "^5.0.0"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}
