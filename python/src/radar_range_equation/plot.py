@@ -6,6 +6,7 @@ This module provides functions to visualize various radar signal types including
     - CWFM (Continuous Wave Frequency Modulated) signals
     - Range profiles
     - Doppler spectra
+    - Tactical scenarios (radar, target, and jammer positions)
 
 Example:
     >>> import radar_range_equation as RRE
@@ -492,6 +493,94 @@ def doppler_spectrum(
              bbox=dict(boxstyle='round', facecolor='yellow', alpha=0.3),
              fontsize=9)
     
+    if show:
+        plt.show()
+    
+    return fig
+
+
+def tactical_scenario(
+    radar_pos: Tuple[float, float] = (10, 20),
+    target_pos: Tuple[float, float] = (50, -20),
+    jammer_pos: Tuple[float, float] = (70, -10),
+    xlim: Tuple[float, float] = (0, 75),
+    ylim: Tuple[float, float] = (-25, 25),
+    figsize: Tuple[float, float] = (8, 6),
+    show: bool = True
+) -> plt.Figure:
+    """Plot a tactical scenario showing radar, target, and support jammer positions.
+    
+    Creates a 2D plot showing the positions of radar, target, and support jammer
+    on an X-Y coordinate system with customizable markers and colors.
+    
+    Args:
+        radar_pos: (x, y) position of the radar in km (default: (10, 20))
+        target_pos: (x, y) position of the target in km (default: (50, -20))
+        jammer_pos: (x, y) position of the support jammer in km (default: (70, -10))
+        xlim: X-axis limits as (min, max) in km (default: (0, 75))
+        ylim: Y-axis limits as (min, max) in km (default: (-25, 25))
+        figsize: Figure size as (width, height) in inches (default: (8, 6))
+        show: Whether to display the plot immediately (default: True)
+    
+    Returns:
+        fig (plt.Figure): The matplotlib Figure object
+    
+    Example:
+        >>> import radar_range_equation as RRE
+        >>> # Use default positions
+        >>> fig = RRE.plot.tactical_scenario()
+        >>> 
+        >>> # Custom positions
+        >>> fig = RRE.plot.tactical_scenario(
+        ...     radar_pos=(20, 15),
+        ...     target_pos=(60, -15),
+        ...     jammer_pos=(80, -5)
+        ... )
+    
+    Notes:
+        - Radar is displayed as a blue 'x' marker
+        - Target is displayed as a green solid square marker
+        - Support jammer is displayed as a red hollow circle marker
+        - Grid is displayed with dashed lines for easy position reading
+    """
+    # Create the figure and axes
+    fig = plt.figure(figsize=figsize)
+    
+    # Plot the individual data points
+    # Radar (Blue 'x')
+    plt.scatter(radar_pos[0], radar_pos[1], marker='x', color='blue', s=80, label='Radar')
+    
+    # Target (Green Square)
+    plt.scatter(target_pos[0], target_pos[1], marker='s', color='green', s=60, label='Target')
+    
+    # Support jammer (Red hollow circle)
+    plt.scatter(jammer_pos[0], jammer_pos[1], marker='o', facecolors='none', 
+                edgecolors='red', s=80, label='Support jammer')
+    
+    # Customize the plot
+    plt.xlabel('X (km)', fontsize=12)
+    plt.ylabel('Y (km)', fontsize=12)
+    
+    # Set axis limits
+    plt.xlim(xlim[0], xlim[1])
+    plt.ylim(ylim[0], ylim[1])
+    
+    # Set axis ticks
+    x_ticks = np.arange(xlim[0], xlim[1] + 1, 10)
+    y_ticks = np.arange(ylim[0], ylim[1] + 1, 5)
+    plt.xticks(x_ticks)
+    plt.yticks(y_ticks)
+    
+    # Add the grid
+    plt.grid(True, linestyle='--', alpha=0.7)
+    
+    # Add the legend
+    plt.legend()
+    
+    # Ensure the layout is clean
+    plt.tight_layout()
+    
+    # Display the plot
     if show:
         plt.show()
     

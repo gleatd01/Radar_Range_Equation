@@ -194,6 +194,32 @@ def example_doppler_spectrum():
     return fig
 
 
+def example_tactical_scenario():
+    """Demonstrate tactical scenario plotting."""
+    print("\n" + "="*70)
+    print("Example 7: Tactical Scenario")
+    print("="*70)
+    print("Creating tactical scenario plot with:")
+    print("  - Radar at (10, 20) km")
+    print("  - Target at (50, -20) km")
+    print("  - Support jammer at (70, -10) km")
+    
+    fig = RRE.plot.tactical_scenario(
+        radar_pos=(10, 20),
+        target_pos=(50, -20),
+        jammer_pos=(70, -10),
+        show=False
+    )
+    
+    print(f"✓ Generated tactical scenario plot")
+    
+    # Save the figure
+    fig.savefig('/tmp/tactical_scenario.png', dpi=150, bbox_inches='tight')
+    print("✓ Saved plot to /tmp/tactical_scenario.png")
+    
+    return fig
+
+
 def main():
     """Run all plotting examples."""
     print("\n" + "="*70)
@@ -210,6 +236,7 @@ def main():
         example_pulse_compression()
         example_range_profile()
         example_doppler_spectrum()
+        example_tactical_scenario()
         
         print("\n" + "="*70)
         print("✓ All examples completed successfully!")
@@ -221,6 +248,7 @@ def main():
         print("  - pulse_compression_signal.png")
         print("  - range_profile.png")
         print("  - doppler_spectrum.png")
+        print("  - tactical_scenario.png")
         print("\nYou can view these plots or integrate them into your application.")
         
         return 0

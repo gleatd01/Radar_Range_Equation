@@ -9,6 +9,7 @@ Main Components:
     equations: Symbolic SymPy equations for radar calculations
     solve: Numeric solver functions for computing radar parameters
     convert: Unit conversion utilities (angles, power, frequency, distance)
+    analysis: Analysis helpers for pulse parsing, integration gains, jammers
     plot: Plotting utilities for visualizing radar signals and equations
     redefine_variable: Helper function to set variables in the vars namespace
 
@@ -21,6 +22,10 @@ Example:
     >>> 
     >>> # Visualize a pulsed radar signal
     >>> RRE.plot.pulsed_radar_signal()
+    >>> 
+    >>> # Analyze pulse timing
+    >>> pulse_intervals = [(0, 15), (50, 65), (100, 115)]
+    >>> timing = RRE.analysis.pulse_timing(pulse_intervals)
 
 For detailed documentation, see the individual module docstrings in main.py and plot.py.
 """
@@ -29,6 +34,7 @@ from .main import vars, \
                     equations, \
                     solve, \
                     convert, \
+                    analysis, \
                     redefine_variable
 from . import plot
 
@@ -36,6 +42,7 @@ __all__ = ["vars",
            "equations",
            "solve",
            "convert",
+           "analysis",
            "plot",
            "redefine_variable"
            ]
