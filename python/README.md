@@ -2,9 +2,11 @@
 
 Main updates include support for theta_B and calculations for spheres, RCS and radius from RCS.
 
+**New:** Plotting capabilities for visualizing radar signals including pulsed radar, CW Doppler, CWFM, pulse compression, range profiles, and Doppler spectra.
+
 ## Radar Range Equation
 
-A compact toolbox for deriving and evaluating radar range equations. It exposes a small programmatic API for setting physical variables, performing common radar-related calculations, and converting units.
+A compact toolbox for deriving and evaluating radar range equations. It exposes a small programmatic API for setting physical variables, performing common radar-related calculations, converting units, and visualizing radar signals.
 
 ## Install
 
@@ -29,6 +31,15 @@ print('wavelength (m):', getattr(RRE.vars, 'lambda'))
 RRE.vars.D = RRE.convert_ft_to_m(60)  # antenna diameter in meters
 RRE.vars.A_e = RRE.solve.A_e_circ()
 print('A_e (m^2):', RRE.vars.A_e)
+
+# Visualize a pulsed radar signal
+RRE.plot.pulsed_radar_signal(
+    amplitude=20,
+    frequency=0.5e6,  # 0.5 MHz
+    pulse_width=15e-6,  # 15 microseconds
+    pri=50e-6,  # 50 microseconds
+    num_pulses=3
+)
 ```
 
 ## Public API (short)
@@ -36,8 +47,37 @@ print('A_e (m^2):', RRE.vars.A_e)
 - `vars` — namespace-like container of variables (speed of light `c`, frequency `f`, wavelength `lambda`, gains, power, sigma, etc.). Use `getattr`/`setattr` for `lambda`.
 - `solve` — helper functions for computing aperture, gain, R_max, P_t and other routine expressions (e.g., `solve.wavelength()`, `solve.G_t()`).
 - `equations` — symbolic SymPy expressions representing the radar equations used by `solve`.
+- `plot` — plotting utilities for visualizing radar signals (pulsed radar, CW Doppler, CWFM, pulse compression, range profiles, Doppler spectra).
 - `redefine_variable(name, value)` — convenience to set attributes on the `vars` namespace.
-- `convert_to_db`, `convert_to_degrees`, `convert_m_to_mi`, `convert_w_to_kw`, `convert_ft_to_m` — small conversion helpers.
+- `convert` — unit conversion helpers (e.g., `convert.ft_to_m()`, `convert.lin_to_db()`, `convert.hz_to()`, etc.).
+
+## Plotting Capabilities
+
+The package now includes comprehensive plotting functions for visualizing radar signals:
+
+### Pulsed Radar Signal
+```python
+import radar_range_equation as RRE
+
+# Visualize a pulsed radar transmit signal
+t, signal, fig = RRE.plot.pulsed_radar_signal(
+    amplitude=20,           # Peak amplitude
+    frequency=0.5e6,        # 0.5 MHz carrier
+    pulse_width=15e-6,      # 15 µs pulse width
+    pri=50e-6,              # 50 µs pulse repetition interval
+    num_pulses=3,           # 3 pulses
+    time_span=150e-6        # 150 µs total time
+)
+```
+
+### Other Plotting Functions
+- `plot.cw_doppler_signal()` — CW radar with Doppler shift
+- `plot.cwfm_signal()` — Continuous Wave Frequency Modulated radar
+- `plot.pulse_compression_signal()` — Chirp pulse and compressed output
+- `plot.range_profile()` — Target detections at various ranges
+- `plot.doppler_spectrum()` — Velocity distribution of targets
+
+See `python/example_plotting.py` for complete examples of all plotting capabilities.
 
 ## Testing
 
@@ -48,6 +88,18 @@ python python/test_package.py
 ```
 
 The test script checks basic import and example calculations.
+
+To test the plotting functionality:
+
+```powershell
+python python/test_plotting.py
+```
+
+To see examples of all plotting capabilities:
+
+```powershell
+python python/example_plotting.py
+```
 
 ## Notes and gotchas
 
