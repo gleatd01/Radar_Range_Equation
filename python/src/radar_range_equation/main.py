@@ -4,11 +4,12 @@ This module provides a comprehensive toolkit for radar range equation calculatio
 including symbolic and numeric solutions for various radar types (CW, CWFM, pulsed),
 direction finding, and pulse compression techniques.
 
-The module is organized into four main classes:
+The module is organized into five main classes:
     - vars: Container for physical constants and radar parameters
     - equations: Symbolic SymPy equations for radar calculations
     - solve: Numeric solver functions for radar problems
     - convert: Unit conversion utilities
+    - analysis: Analysis helpers for pulse parsing, integration, jammers
 
 Example:
     >>> import radar_range_equation as RRE
@@ -1031,6 +1032,147 @@ class convert:  # add alias con for convenience
         return value * conversion_factors.get(source_unit.lower(), 1)
     
 con = convert()  # alias for convenience
+
+
+class analysis:
+    """Analysis helpers: pulse parsing, integration gains, fluctuation loss,
+    jammer and burnthrough calculations.
+
+    These convenience functions wrap common calculation patterns used in the
+    quiz solutions and examples. They use `vars`, `convert` and numpy utilities
+    already defined in this module.
+    """
+
+    @staticmethod
+    def pulse_timing(pulse_intervals_us):
+        """Compute pulse width, PRI, PRF and duty cycle.
+
+        Args:
+            pulse_intervals_us (list of (start_us, end_us)): list of ON intervals in microseconds
+
+        Returns:
+            dict: {pulse_width_s, PRI_s, PRF_hz, duty_cycle, n_p}
+        """
+        if len(pulse_intervals_us) == 0:
+            return {'pulse_width_s': 0.0, 'PRI_s': 0.0, 'PRF_hz': 0.0, 'duty_cycle': 0.0, 'n_p': 0}
+        widths_us = [end - start for (start, end) in pulse_intervals_us]
+        pulse_width_us = widths_us[0]
+        starts = [s for (s, e) in pulse_intervals_us]
+        if len(starts) > 1:
+            PRI_us = starts[1] - starts[0]
+        else:
+            PRI_us = 0.0
+        pulse_width_s = pulse_width_us * 1e-6
+        PRI_s = PRI_us * 1e-6 if PRI_us > 0 else 0.0
+        PRF_hz = 1.0 / PRI_s if PRI_s > 0 else 0.0
+        duty_cycle = pulse_width_s / PRI_s if PRI_s > 0 else 0.0
+        n_p = len(pulse_intervals_us)
+        return {'pulse_width_s': pulse_width_s, 'PRI_s': PRI_s, 'PRF_hz': PRF_hz, 'duty_cycle': duty_cycle, 'n_p': n_p}
+
+    @staticmethod
+    def power_and_integration(amplitude, pulse_intervals_us, use='coherent'):
+        """Compute peak power, average power and integration SNR gain.
+
+        Args:
+            amplitude (float): amplitude A of the transmit pulse (arbitrary units)
+            pulse_intervals_us (list): list of (start,end) intervals in us
+            use (str): 'coherent' or 'noncoherent' for integration gain model
+
+        Returns:
+            dict: {P_peak, P_avg, n_p, gain_linear, gain_db}
+        """
+        P_peak = (amplitude ** 2) / 2.0
+        t = analysis.pulse_timing(pulse_intervals_us)
+        P_avg = P_peak * t['duty_cycle']
+        n = t['n_p']
+        if n <= 0:
+            gain_linear = 1.0
+        else:
+            if use == 'coherent':
+                gain_linear = float(n)
+            else:
+                # simple non-coherent approximation (amplitude averaging)
+                gain_linear = float(np.sqrt(n))
+        gain_db = convert.lin_to_db(gain_linear)
+        return {'P_peak': P_peak, 'P_avg': P_avg, 'n_p': n, 'gain_linear': gain_linear, 'gain_db': gain_db}
+
+    @staticmethod
+    def effective_independent_looks(pulse_start_times_us, correlation_time_us):
+        """Estimate number of effective independent looks given correlation time.
+
+        Groups pulses whose start times are within `correlation_time_us` of a group's
+        first pulse. Returns the clusters and n_e (number of independent looks).
+        """
+        clusters = []
+        for t in pulse_start_times_us:
+            placed = False
+            for cl in clusters:
+                if abs(t - cl[0]) < correlation_time_us:
+                    cl.append(t)
+                    placed = True
+                    break
+            if not placed:
+                clusters.append([t])
+        return {'clusters': clusters, 'n_e': len(clusters)}
+
+    @staticmethod
+    def fluctuation_loss_total(L_single_db, n_e):
+        """Combine single-look fluctuation loss across n_e independent looks.
+
+        Simple method (default): L_total_db = L_single_db - 10*log10(n_e)
+        (This is an approximate power-averaging rule; actual behavior depends on Swerling model.)
+        """
+        if n_e <= 0:
+            return L_single_db
+        return L_single_db - 10.0 * np.log10(n_e)
+
+    @staticmethod
+    def monostatic_received_power(Pt, Gt_linear, Gr_linear, wavelength_m, sigma_m2, R_m):
+        """Monostatic single-pulse received power (Friis-based radar equation).
+
+        Pr = Pt * Gt * Gr * lambda^2 * sigma / ((4*pi)^3 * R^4)
+        """
+        return (Pt * Gt_linear * Gr_linear * (wavelength_m ** 2) * sigma_m2) / ((4.0 * np.pi) ** 3 * (R_m ** 4))
+
+    @staticmethod
+    def processed_signal_power(Pr_single, n_p, PCR_db):
+        """Apply coherent integration (n_p) and pulse compression (PCR_db) to single-pulse power."""
+        PCR_lin = convert.db_to_lin(PCR_db)
+        return Pr_single * float(n_p) * PCR_lin
+
+    @staticmethod
+    def jammer_received_power(Pj, G_j_tx_db, G_radar_on_jam_db, wavelength_m, R_jr_m, band_ratio=1.0):
+        """Compute jammer power received in the radar band.
+
+        Assumes free-space propagation and that only 1/band_ratio of jammer power
+        falls into the radar bandwidth.
+        """
+        Gjt = convert.db_to_lin(G_j_tx_db)
+        Grj = convert.db_to_lin(G_radar_on_jam_db)
+        return Pj * Gjt * Grj * (wavelength_m ** 2) / ((4.0 * np.pi * R_jr_m) ** 2) * (1.0 / band_ratio)
+
+    @staticmethod
+    def signal_to_jammer(S_processed, P_jr):
+        """Return S/J linear and dB given processed signal power and jammer received power."""
+        if P_jr <= 0:
+            return {'SJR_linear': np.inf, 'SJR_db': np.inf}
+        s = S_processed / P_jr
+        return {'SJR_linear': s, 'SJR_db': convert.lin_to_db(s)}
+
+    @staticmethod
+    def burnthrough_range(Pj, G_j_tx_db, G_radar_on_jam_db, wavelength_m, band_ratio, S_processed):
+        """Solve for jammer range R_jr where processed signal equals jammer power in band.
+
+        Returns range in meters.
+        """
+        Gjt = convert.db_to_lin(G_j_tx_db)
+        Grj = convert.db_to_lin(G_radar_on_jam_db)
+        numer = Pj * Gjt * Grj * (wavelength_m ** 2)
+        den = (4.0 * np.pi) ** 2 * (1.0 / band_ratio) * S_processed
+        if den <= 0:
+            return np.inf
+        return float(np.sqrt(numer / den))
+
 
 def redefine_variable(var_name, new_value):
     """
