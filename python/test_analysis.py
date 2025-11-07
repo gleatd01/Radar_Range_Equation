@@ -126,7 +126,13 @@ def test_effective_independent_looks():
     print("\nTesting effective_independent_looks()...")
     
     # Pulses at 0, 50, 100, 110, 120 µs
-    # With correlation time of 15 µs, first 3 are independent, last 3 are correlated
+    # With correlation time of 15 µs:
+    # - 0: independent (first pulse)
+    # - 50: independent (50-0=50 > 15)
+    # - 100: independent (100-50=50 > 15)
+    # - 110: correlated with 100 (110-100=10 < 15)
+    # - 120: correlated with 110 (120-110=10 < 15), so also correlated with 100
+    # Expected: 3 independent looks: [0], [50], [100, 110, 120]
     pulse_starts = [0, 50, 100, 110, 120]
     correlation_time = 15
     
@@ -135,8 +141,8 @@ def test_effective_independent_looks():
     assert 'clusters' in result, "Should have clusters"
     assert 'n_e' in result, "Should have n_e"
     
-    # With correlation time of 15, pulses 100, 110, 120 should be in one cluster
-    assert result['n_e'] == 4, f"Expected 4 independent looks with correlation time {correlation_time}"
+    # With improved clustering (checks all cluster elements), pulses 100, 110, 120 are all correlated
+    assert result['n_e'] == 3, f"Expected 3 independent looks with correlation time {correlation_time}"
     
     print(f"✓ Effective independent looks calculated correctly:")
     print(f"  - Pulse starts: {pulse_starts} µs")
@@ -152,7 +158,7 @@ def test_fluctuation_loss():
     print("\nTesting fluctuation_loss_total()...")
     
     L_single_db = 5.0  # 5 dB single-look loss
-    n_e = 4  # 4 independent looks
+    n_e = 3  # 3 independent looks (updated to match improved clustering)
     
     result = RRE.analysis.fluctuation_loss_total(L_single_db, n_e)
     

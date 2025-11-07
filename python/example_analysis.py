@@ -89,9 +89,10 @@ def example_independent_looks():
         print(f"    - Cluster {i}: {cluster} µs")
     
     print("\n💡 Interpretation:")
-    print("   Pulses within 15 µs are correlated (same look)")
-    print("   Pulses 100, 110 are in one cluster (within 15 µs)")
-    print("   Other pulses are independent")
+    print("   Pulses within correlation time of ANY pulse in a cluster are grouped")
+    print("   Pulse 110 is correlated with 100 (10 µs apart)")
+    print("   Pulse 120 is correlated with 110 (10 µs apart)")
+    print("   Therefore, 100, 110, and 120 form one cluster")
     
     # Demonstrate fluctuation loss calculation
     L_single_db = 5.0

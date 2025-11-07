@@ -8,9 +8,9 @@ the same output as the original problem statement code.
 
 import sys
 sys.path.insert(0, 'python/src')
-import matplotlib.pyplot as plt
 import matplotlib
 matplotlib.use('Agg')  # Use non-interactive backend
+import matplotlib.pyplot as plt
 import numpy as np
 import radar_range_equation as RRE
 

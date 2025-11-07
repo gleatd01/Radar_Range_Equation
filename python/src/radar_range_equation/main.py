@@ -1054,7 +1054,7 @@ class analysis:
             dict: {pulse_width_s, PRI_s, PRF_hz, duty_cycle, n_p}
         """
         if len(pulse_intervals_us) == 0:
-            return {'pulse_width_s': 0.0, 'PRI_s': 0.0, 'PRF_hz': 0.0, 'duty_cycle': 0.0, 'n_p': 0}
+            return {'pulse_width_s': 0.0, 'PRI_s': 0.0, 'PRF_hz': float('inf'), 'duty_cycle': 0.0, 'n_p': 0}
         widths_us = [end - start for (start, end) in pulse_intervals_us]
         pulse_width_us = widths_us[0]
         starts = [s for (s, e) in pulse_intervals_us]
@@ -1064,7 +1064,7 @@ class analysis:
             PRI_us = 0.0
         pulse_width_s = pulse_width_us * 1e-6
         PRI_s = PRI_us * 1e-6 if PRI_us > 0 else 0.0
-        PRF_hz = 1.0 / PRI_s if PRI_s > 0 else 0.0
+        PRF_hz = 1.0 / PRI_s if PRI_s > 0 else float('inf')
         duty_cycle = pulse_width_s / PRI_s if PRI_s > 0 else 0.0
         n_p = len(pulse_intervals_us)
         return {'pulse_width_s': pulse_width_s, 'PRI_s': PRI_s, 'PRF_hz': PRF_hz, 'duty_cycle': duty_cycle, 'n_p': n_p}
@@ -1100,14 +1100,23 @@ class analysis:
     def effective_independent_looks(pulse_start_times_us, correlation_time_us):
         """Estimate number of effective independent looks given correlation time.
 
-        Groups pulses whose start times are within `correlation_time_us` of a group's
-        first pulse. Returns the clusters and n_e (number of independent looks).
+        Groups pulses whose start times are within `correlation_time_us` of any
+        pulse already in a group. Returns the clusters and n_e (number of 
+        independent looks).
+        
+        Args:
+            pulse_start_times_us (list): List of pulse start times in microseconds
+            correlation_time_us (float): Correlation time in microseconds
+            
+        Returns:
+            dict: {'clusters': list of clusters, 'n_e': number of independent looks}
         """
         clusters = []
         for t in pulse_start_times_us:
             placed = False
             for cl in clusters:
-                if abs(t - cl[0]) < correlation_time_us:
+                # Check if this pulse is within correlation time of ANY pulse in cluster
+                if any(abs(t - existing_t) < correlation_time_us for existing_t in cl):
                     cl.append(t)
                     placed = True
                     break
