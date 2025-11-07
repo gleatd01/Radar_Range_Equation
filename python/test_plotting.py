@@ -30,7 +30,8 @@ def test_plotting_module():
         'cwfm_signal',
         'pulse_compression_signal',
         'range_profile',
-        'doppler_spectrum'
+        'doppler_spectrum',
+        'tactical_scenario'
     ]
     
     for func_name in expected_functions:
@@ -166,6 +167,31 @@ def test_doppler_spectrum():
     return True
 
 
+def test_tactical_scenario():
+    """Test the tactical scenario plotting function."""
+    print("\nTesting tactical_scenario()...")
+    
+    # Test with default parameters
+    fig = RRE.plot.tactical_scenario(show=False)
+    
+    assert fig is not None, "Figure should be created"
+    
+    print("✓ Generated tactical scenario with default positions")
+    
+    # Test with custom positions
+    fig = RRE.plot.tactical_scenario(
+        radar_pos=(20, 15),
+        target_pos=(60, -15),
+        jammer_pos=(80, -5),
+        show=False
+    )
+    
+    assert fig is not None, "Figure should be created"
+    
+    print("✓ Generated tactical scenario with custom positions")
+    return True
+
+
 def main():
     """Run all tests."""
     print("="*70)
@@ -180,6 +206,7 @@ def main():
         test_pulse_compression_signal()
         test_range_profile()
         test_doppler_spectrum()
+        test_tactical_scenario()
         
         print("\n" + "="*70)
         print("✓ All plotting tests passed!")
