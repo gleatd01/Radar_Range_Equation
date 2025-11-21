@@ -106,6 +106,7 @@ class vars:
     pi = scipy.constants.pi             # pi (numeric)
     pi4 = Symbol('pi4')                 # 4*pi (symbolic)
     pi4 = 4 * scipy.constants.pi        # 4*pi (numeric)
+    g = 9.80665                         # Gravitational acceleration (m/s^2)
     x = Symbol('x')                     # generic variable for conversions (symbolic)
     f = Symbol('f')                     # frequency (symbolic)
     T_0 = Symbol('T_0')                 # reference temperature (symbolic)
@@ -197,6 +198,32 @@ class vars:
     PCR = Symbol('PCR')                 # Pulse Compression Ratio (symbolic)
     R_offset = Symbol('R_offset')       # Range offset from reference (symbolic)
     f_range_tone = Symbol('f_range_tone') # IF frequency from dechirp (symbolic)
+
+    # =========================================================================
+    # TOPIC 17: GATE STEALING VARS
+    # =========================================================================
+
+    alpha = Symbol('alpha')             # Target acceleration (effective for range) (symbolic)
+    T_time = Symbol('T')                # Time duration (symbolic)
+    Delta_r_max = Symbol('Delta_r_max') # Maximum required range offset (symbolic)
+    Delta_r_t = Symbol('Delta_r(t)')    # Range offset profile (symbolic)
+    rho_v = Symbol('rho_v')             # Velocity resolution (Doppler bin size) (symbolic)
+    n_gate_r = Symbol('n_gate_r')       # Range gate size (resolution cells) (symbolic)
+    n_gate_v = Symbol('n_gate_v')       # Velocity gate size (resolution cells) (symbolic)
+    Delta_v_max = Symbol('Delta_v_max') # Maximum required velocity offset (symbolic)
+    a_accel = Symbol('a')               # Target acceleration for velocity (symbolic)
+    Delta_v_t = Symbol('Delta_v(t)')    # Velocity offset profile (symbolic)
+
+    # =========================================================================
+    # TOPIC 18: CROSS-EYE VARS
+    # =========================================================================
+
+    L_cross = Symbol('L')               # Cross-eye aperture separation (symbolic)
+    a_gain_ratio = Symbol('a_ratio')    # Jammer gain ratio (J1/J2) (symbolic)
+    J_1 = Symbol('J_1')                 # Jammer channel 1 gain (symbolic)
+    J_2 = Symbol('J_2')                 # Jammer channel 2 gain (symbolic)
+    phi_hat_ce = Symbol('phi_hat_ce')   # Cross-eye angle error (symbolic)
+    S_phi_bar = Symbol('S_phi_bar')     # Normalized Monopulse Slope (symbolic)
 
     # =========================================================================
     # SPECIAL VARIABLES
@@ -331,6 +358,28 @@ class equations:
     R_offset_sym = Symbol('R_offset')
     f_range_tone_sym = Symbol('f_range_tone')
 
+    # --- Topic 17: Gate Stealing Symbols ---
+    alpha_sym = Symbol('alpha')
+    g_sym = Symbol('g')
+    T_time_sym = Symbol('T')
+    Delta_r_max_sym = Symbol('Delta_r_max')
+    Delta_r_t_sym = Symbol('Delta_r(t)')
+    rho_v_sym = Symbol('rho_v')
+    n_gate_r_sym = Symbol('n_gate_r')
+    n_gate_v_sym = Symbol('n_gate_v')
+    Delta_v_max_sym = Symbol('Delta_v_max')
+    a_accel_sym = Symbol('a')
+    Delta_v_t_sym = Symbol('Delta_v(t)')
+    t_delay_sym = Symbol('t')
+
+    # --- Topic 18: Cross-Eye Symbols ---
+    L_cross_sym = Symbol('L')
+    a_gain_ratio_sym = Symbol('a_ratio')
+    J_1_sym = Symbol('J_1')
+    J_2_sym = Symbol('J_2')
+    phi_hat_ce_sym = Symbol('phi_hat_ce')
+    S_phi_bar_sym = Symbol('S_phi_bar')
+
     # =========================================================================
     # EQUATIONS
     # =========================================================================
@@ -388,6 +437,28 @@ class equations:
     eq_PCR_1 = sympy.Eq(PCR_sym, tau_sym * B_sym)
     eq_PCR_2 = sympy.Eq(PCR_sym, (tau_sym**2) * gamma_sym)
     eq_f_range_tone = sympy.Eq(f_range_tone_sym, -gamma_sym * (2 * R_offset_sym / c_sym))
+
+    # --- Topic 17: Gate Stealing Equations ---
+    # Velocity Resolution (Doppler bin size)
+    eq_rho_v = sympy.Eq(rho_v_sym, wavelength_sym / (2 * T_cpi_sym))
+    # Required Max Range Offset (Gate Size * Resolution)
+    eq_Delta_r_max_gate = sympy.Eq(Delta_r_max_sym, n_gate_r_sym * delta_r_sym)
+    # Time (T) from Max Range Offset (Delta_r_max = 0.5 * alpha * T^2)
+    eq_T_from_Delta_r = sympy.Eq(Delta_r_max_sym, sympy.Rational(1, 2) * alpha_sym * T_time_sym**2)
+    # Range Offset Profile (Delta_r(t) = 0.5 * alpha * t^2)
+    eq_Delta_r_t = sympy.Eq(Delta_r_t_sym, sympy.Rational(1, 2) * alpha_sym * t_delay_sym**2)
+    # Required Max Velocity Offset (Gate Size * Resolution)
+    eq_Delta_v_max_gate = sympy.Eq(Delta_v_max_sym, n_gate_v_sym * rho_v_sym)
+    # Time (T) from Max Velocity Offset (Delta_v_max = a * T)
+    eq_T_from_Delta_v = sympy.Eq(Delta_v_max_sym, a_accel_sym * T_time_sym)
+    # Velocity Offset Profile (Delta_v(t) = a * t)
+    eq_Delta_v_t = sympy.Eq(Delta_v_t_sym, a_accel_sym * t_delay_sym)
+
+    # --- Topic 18: Cross-Eye Equations ---
+    # Jammer Gain Ratio (a)
+    eq_J_ratio = sympy.Eq(a_gain_ratio_sym, J_1_sym / J_2_sym)
+    # Apparent Cross-Eye Angle Error (Amplitude Monopulse Approximation)
+    eq_phi_hat_ce_amp = sympy.Eq(phi_hat_ce_sym, sympy.Rational(1, 2) * (L_cross_sym / R_sym) * (1 + a_gain_ratio_sym) / (1 - a_gain_ratio_sym))
 
 class solve:
     """Numeric solver functions for radar calculations.
@@ -749,6 +820,83 @@ class solve:
     PCR_from_gamma = _solver(equations.eq_PCR_2, equations.eq_PCR_2.lhs)
     f_range_tone = _solver(equations.eq_f_range_tone, equations.eq_f_range_tone.lhs)
     R_offset_from_tone = _solver(equations.eq_f_range_tone, equations.R_offset_sym)
+
+    # =========================================================================
+    # TOPIC 17: GATE STEALING SOLVERS
+    # =========================================================================
+
+    @staticmethod
+    def rho_v():
+        """Calculate Velocity Resolution (Doppler bin size).
+        Uses vars.wavelength (m) and vars.T_cpi (s).
+        Returns: float: Velocity resolution (m/s)."""
+        # rho_v = lambda / (2 * T_cpi)
+        if not hasattr(vars, 'T_cpi') or not vars.T_cpi:
+            raise ValueError("T_cpi (Coherent Processing Interval) is not set or zero.")
+        return (vars.wavelength / (2 * vars.T_cpi))
+
+    @staticmethod
+    def Delta_r_max_gate():
+        """Calculate the maximum required range offset to exit the gate.
+        Uses vars.n_gate_r (cells) and vars.delta_r (m).
+        Returns: float: Maximum range offset (m)."""
+        # Delta_r_max = n_gate_r * delta_r (Requires delta_r to be set)
+        return vars.n_gate_r * vars.delta_r
+
+    @staticmethod
+    def T_from_Delta_r():
+        """Calculate the time required (T) to achieve range offset (Delta_r_max) at constant acceleration (alpha).
+        Uses vars.Delta_r_max (m) and vars.alpha (m/s^2).
+        Returns: float: Time duration (s)."""
+        # T = sqrt((2 * Delta_r_max) / alpha)
+        if vars.alpha <= 0:
+            raise ValueError("Acceleration (alpha) must be positive.")
+        return math.sqrt((2 * vars.Delta_r_max) / vars.alpha)
+
+    @staticmethod
+    def Delta_v_max_gate():
+        """Calculate the maximum required velocity offset to exit the gate.
+        Uses vars.n_gate_v (cells) and vars.rho_v (m/s).
+        Returns: float: Maximum velocity offset (m/s)."""
+        # Delta_v_max = n_gate_v * rho_v (Requires rho_v to be set)
+        return vars.n_gate_v * vars.rho_v
+
+    @staticmethod
+    def T_from_Delta_v():
+        """Calculate the time required (T) to achieve velocity offset (Delta_v_max) at constant acceleration (a_accel).
+        Uses vars.Delta_v_max (m/s) and vars.a_accel (m/s^2).
+        Returns: float: Time duration (s)."""
+        # T = Delta_v_max / a_accel
+        if vars.a_accel == 0:
+            raise ValueError("Acceleration (a_accel) cannot be zero.")
+        return vars.Delta_v_max / vars.a_accel
+
+    # =========================================================================
+    # TOPIC 18: CROSS-EYE SOLVERS
+    # =========================================================================
+
+    @staticmethod
+    def phi_hat_cross_eye_amp():
+        """Calculate the apparent cross-eye angle error (amplitude monopulse approximation).
+        Uses vars.L_cross (m), vars.R (m), and vars.a_gain_ratio (J1/J2, dimensionless).
+        Returns: float: Angle error in radians."""
+        # phi_hat = (L/(2R)) * (1+a)/(1-a)
+        if vars.R == 0:
+             raise ValueError("Range (R) cannot be zero.")
+        if abs(vars.a_gain_ratio - 1.0) < 1e-9: # Check for a very close to 1
+            # The denominator (1-a) approaches zero, causing the angle error to approach infinity (saturating the tracker)
+            return np.inf 
+        return (vars.L_cross / (2 * vars.R)) * ((1 + vars.a_gain_ratio) / (1 - vars.a_gain_ratio))
+
+    @staticmethod
+    def L_cross_from_phi_hat():
+        """Calculate the required cross-eye aperture separation (L) to produce a specific angle error (phi_hat_ce).
+        Uses vars.phi_hat_ce (rad), vars.R (m), and vars.a_gain_ratio (J1/J2).
+        Returns: float: Aperture separation (m)."""
+        # Rearrange: L = 2 * R * phi_hat_ce * (1-a)/(1+a)
+        if abs(vars.a_gain_ratio + 1.0) < 1e-9: # Check for a very close to -1
+            return np.inf # Denominator approaches zero
+        return 2 * vars.R * vars.phi_hat_ce * ((1 - vars.a_gain_ratio) / (1 + vars.a_gain_ratio))
 
 class convert:  # add alias con for convenience
     """Unit conversion utilities for radar calculations.
@@ -1392,3 +1540,74 @@ if __name__ == '__main__':  # Only runs when the script is executed directly
     redefine_variable('f_range_tone', solve.f_range_tone())
     print(f"\nGiven: Range Offset = {v.R_offset} m")
     print(f"Calculated Dechirp Range Tone = {convert.hz_to(v.f_range_tone, 'mhz'):.2f} MHz") # -6.67 MHz
+
+    # =========================================================================
+    # Topic 17: Gate Stealing Demo
+    # =========================================================================
+    print("\n" + "="*30)
+    print("Topic 17: Gate Stealing Demo (Range and Velocity)")
+    print("="*30)
+    
+    # 1. Range Stealing Example (Range Gate Pull-Off)
+    print("\n--- Range Gate Pull-Off (RGPO) ---")
+    redefine_variable('f', 3e9)                         # 3 GHz
+    redefine_variable('wavelength', solve.wavelength())
+    redefine_variable('alpha', 2 * v.g)                  # Target Accel = 2g
+    redefine_variable('tau', 20e-6)                      # 20 us
+    redefine_variable('gamma', 0.5e12)                   # 0.5 MHz/us = 0.5e12 Hz/s
+    redefine_variable('B', solve.B_chirp())
+    redefine_variable('delta_r', solve.delta_r_compressed()) # Compressed Range Res
+
+    print(f"Accel (alpha): {v.alpha:.2f} m/s^2")
+    print(f"Compressed Range Res (delta_r): {v.delta_r:.2f} m")
+
+    # Required Max Range Offset of at least 200m (Delta_r_max = 200m)
+    redefine_variable('Delta_r_max', 200) # Directly set the requirement
+    
+    redefine_variable('T_time', solve.T_from_Delta_r())
+    print(f"Time to achieve 200m offset (T): {v.T_time:.2f} s")
+    print(f"Range Offset Profile: Delta_r(t) = 0.5 * {v.alpha:.2f} * t^2")
+    
+    # 2. Velocity Stealing Example (Velocity Gate Pull-Off)
+    print("\n--- Velocity Gate Pull-Off (VGPO) ---")
+    redefine_variable('f', 12e9)
+    redefine_variable('wavelength', solve.wavelength())
+    redefine_variable('T_cpi', 60e-3)                    # 60 ms
+    redefine_variable('a_accel', 1.5 * v.g)              # Target Accel = 1.5g
+
+    redefine_variable('rho_v', solve.rho_v())
+    print(f"Doppler Bin Size (rho_v): {v.rho_v:.3f} m/s")
+
+    # Max velocity offset is two gate widths (2 * 9 cells * rho_v)
+    redefine_variable('n_gate_v', 9) 
+    redefine_variable('Delta_v_max', 2 * v.n_gate_v * v.rho_v) # Max offset is two gate widths
+    print(f"Max Velocity Offset (Delta_v_max): {v.Delta_v_max:.2f} m/s")
+    
+    redefine_variable('T_time', solve.T_from_Delta_v())
+    print(f"Time to achieve max offset (T): {v.T_time:.2f} s")
+    print(f"Velocity Offset Profile: Delta_v(t) = {v.a_accel:.2f} * t")
+
+    # =========================================================================
+    # Topic 18: Cross-Eye Demo
+    # =========================================================================
+    print("\n" + "="*30)
+    print("Topic 18: Cross-Eye Demo")
+    print("="*30)
+    
+    # Cross-Eye Example (based on Topic 18, Prob 1b)
+    # Required parameters: R, phi_hat_ce, a_gain_ratio
+    redefine_variable('R', 30e3)                         # Target Range (30 km)
+    redefine_variable('a_gain_ratio', -0.9)              # J1/J2 = -0.9
+    
+    # Assume the required angle error is 0.0035 rad (5 times the example's sigma_phi)
+    redefine_variable('phi_hat_ce', 0.0035) 
+
+    redefine_variable('L_cross', solve.L_cross_from_phi_hat())
+    print(f"Target Range (R): {v.R / 1e3:.0f} km")
+    print(f"Gain Ratio (a_ratio): {v.a_gain_ratio}")
+    print(f"Required Aperture Separation (L_cross): {v.L_cross:.2f} m") 
+    
+    # Reverse check: Calculate the angle error for a large aperture (L=138m from solution)
+    redefine_variable('L_cross', 138.0) 
+    redefine_variable('phi_hat_ce', solve.phi_hat_cross_eye_amp())
+    print(f"\nGiven L_cross=138m, Angle Error (phi_hat_ce): {v.phi_hat_ce * 1e3:.2f} mrad ({convert.rad_to_deg(v.phi_hat_ce):.4f} deg)")
