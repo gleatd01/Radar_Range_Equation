@@ -755,8 +755,8 @@ def generate_lfm_spectrogram(
     idx_max = min(len(f_plot_RF), idx_max)
     
     if idx_max <= idx_min:
-         # Fallback if search fails or range is invalid
-         idx_min, idx_max = 0, len(f_plot_RF)
+        # Fallback if search fails or range is invalid
+        idx_min, idx_max = 0, len(f_plot_RF)
 
     f_plot = f_plot_RF[idx_min:idx_max]
     Sxx_plot = Sxx_db[idx_min:idx_max, :]
