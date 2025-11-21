@@ -4,12 +4,11 @@ This module provides a comprehensive toolkit for radar range equation calculatio
 including symbolic and numeric solutions for various radar types (CW, CWFM, pulsed),
 direction finding, and pulse compression techniques.
 
-The module is organized into five main classes:
+The module is organized into four main classes:
     - vars: Container for physical constants and radar parameters
     - equations: Symbolic SymPy equations for radar calculations
     - solve: Numeric solver functions for radar problems
     - convert: Unit conversion utilities
-    - analysis: Analysis helpers for pulse parsing, integration, jammers
 
 Example:
     >>> import radar_range_equation as RRE
@@ -106,6 +105,7 @@ class vars:
     pi = scipy.constants.pi             # pi (numeric)
     pi4 = Symbol('pi4')                 # 4*pi (symbolic)
     pi4 = 4 * scipy.constants.pi        # 4*pi (numeric)
+    g = 9.80665                         # Gravitational acceleration (m/s^2)
     x = Symbol('x')                     # generic variable for conversions (symbolic)
     f = Symbol('f')                     # frequency (symbolic)
     T_0 = Symbol('T_0')                 # reference temperature (symbolic)
@@ -197,6 +197,93 @@ class vars:
     PCR = Symbol('PCR')                 # Pulse Compression Ratio (symbolic)
     R_offset = Symbol('R_offset')       # Range offset from reference (symbolic)
     f_range_tone = Symbol('f_range_tone') # IF frequency from dechirp (symbolic)
+
+    # =========================================================================
+    # TOPIC 12: CHAFF VARS
+    # =========================================================================
+    L_fiber = Symbol('L_fiber')         # Chaff Fiber Length (m)
+    D_fiber = Symbol('D_fiber')         # Chaff Fiber Diameter (m)
+    V_ch = Symbol('V_ch')               # Volume of a single chaff fiber (m^3)
+    V_box = Symbol('V_box')             # Volume of chaff cartridge (m^3)
+    Fill_ratio = Symbol('Fill_ratio')   # Chaff cartridge fill ratio (dimensionless)
+    N_fiber = Symbol('N_fiber')         # Number of chaff fibers (dimensionless)
+    sigma_ch = Symbol('sigma_ch')       # Average RCS of chaff (m^2)
+    zeta_ch = Symbol('zeta_ch')         # Chaff dispersion constant (s)
+
+    # =========================================================================
+    # TOPIC 13: NOISE JAMMING VARS
+    # =========================================================================
+    Pj = Symbol('Pj')                   # Jammer Transmit Power (W)
+    Gj = Symbol('Gj')                   # Jammer Antenna Gain (linear)
+    Bj = Symbol('Bj')                   # Jammer Bandwidth (Hz)
+    Lossj = Symbol('Lossj')             # Jammer Loss (linear)
+    S_J_ratio = Symbol('S/J')           # Signal-to-Jammer Ratio (linear)
+    R_bt = Symbol('R_bt')               # Burnthrough Range (m)
+
+    # =========================================================================
+    # TOPIC 14: GATED NOISE VARS
+    # =========================================================================
+    R_tgt = Symbol('R_tgt')             # Target Range (m)
+    R_gn_start_offset = Symbol('R_gn_start_offset') # Range before target to start noise (m)
+    t_tgt_2way = Symbol('t_tgt_2way')   # Two-way time to target (s)
+    t_gn_start_release = Symbol('t_gn_start_release') # Gated Noise start time (s)
+    Delta_R_mask = Symbol('Delta_R_mask') # Total masking range (m)
+
+    # =========================================================================
+    # TOPIC 15: FALSE TARGET GENERATION VARS
+    # =========================================================================
+    v_tgt = Symbol('v_tgt')             # Target range rate (m/s)
+    R_ft = Symbol('R_ft')               # False Target Range (m)
+    v_ft = Symbol('v_ft')               # False Target range rate (m/s)
+    f_D_tgt = Symbol('f_D_tgt')         # Doppler Frequency Target (Hz)
+    f_D_ft = Symbol('f_D_ft')           # Doppler Frequency False Target (Hz)
+    Delta_t_ft = Symbol('Delta_t_ft')   # Time Delay for False Target (s)
+    Delta_f_ft = Symbol('Delta_f_ft')   # Frequency Shift for False Target (Hz)
+
+    # =========================================================================
+    # TOPIC 16: RADAR TRACKING / FALSE TRACKS VARS
+    # =========================================================================
+    P_density = Symbol('P_density')     # Power Density (W/m^2)
+    Pj_emulated = Symbol('Pj_emulated') # Jammer Power to emulate target RCS (W)
+
+    # =========================================================================
+    # TOPIC 17: GATE STEALING VARS
+    # =========================================================================
+    alpha = Symbol('alpha')             # Target acceleration (effective for range) (symbolic)
+    T_time = Symbol('T')                # Time duration (symbolic)
+    Delta_r_max = Symbol('Delta_r_max') # Maximum required range offset (symbolic)
+    Delta_r_t = Symbol('Delta_r(t)')    # Range offset profile (symbolic)
+    rho_v = Symbol('rho_v')             # Velocity resolution (Doppler bin size) (symbolic)
+    n_gate_r = Symbol('n_gate_r')       # Range gate size (resolution cells) (symbolic)
+    n_gate_v = Symbol('n_gate_v')       # Velocity gate size (resolution cells) (symbolic)
+    Delta_v_max = Symbol('Delta_v_max') # Maximum required velocity offset (symbolic)
+    a_accel = Symbol('a')               # Target acceleration for velocity (symbolic)
+    Delta_v_t = Symbol('Delta_v(t)')    # Velocity offset profile (symbolic)
+
+    # =========================================================================
+    # TOPIC 18: CROSS-EYE VARS
+    # =========================================================================
+    L_cross = Symbol('L')               # Cross-eye aperture separation (symbolic)
+    a_gain_ratio = Symbol('a_ratio')    # Jammer gain ratio (J1/J2) (symbolic)
+    J_1 = Symbol('J_1')                 # Jammer channel 1 gain (symbolic)
+    J_2 = Symbol('J_2')                 # Jammer channel 2 gain (symbolic)
+    phi_hat_ce = Symbol('phi_hat_ce')   # Cross-eye angle error (symbolic)
+    S_phi_bar = Symbol('S_phi_bar')     # Normalized Monopulse Slope (symbolic)
+
+    # =========================================================================
+    # LEGACY: RANGE GATE PULL-OFF (RGPO) VARS (kept for compatibility)
+    # =========================================================================
+    R_gate = Symbol('R_gate')           # Range gate center position (symbolic)
+    delta_R_gate = Symbol('delta_R_gate') # Range gate width (symbolic)
+    R_true = Symbol('R_true')           # True target range (symbolic)
+    R_false = Symbol('R_false')         # False target range (symbolic)
+    delta_t_pull = Symbol('delta_t_pull') # Time delay increment per pulse (symbolic)
+    delta_R_pull = Symbol('delta_R_pull') # Range increment per pulse (symbolic)
+    pull_rate = Symbol('pull_rate')     # Pull-off rate (m/s or m/pulse) (symbolic)
+    n_pulses_capture = Symbol('n_pulses_capture') # Number of pulses to capture gate (symbolic)
+    gate_bias = Symbol('gate_bias')     # Range gate bias/error (symbolic)
+    alpha_track = Symbol('alpha_track') # Tracking loop gain (symbolic)
+    BW_track = Symbol('BW_track')       # Tracking bandwidth (Hz) (symbolic)
 
     # =========================================================================
     # SPECIAL VARIABLES
@@ -331,6 +418,78 @@ class equations:
     R_offset_sym = Symbol('R_offset')
     f_range_tone_sym = Symbol('f_range_tone')
 
+    # --- Topic 12: Chaff Symbols ---
+    L_fiber_sym = Symbol('L_fiber')
+    D_fiber_sym = Symbol('D_fiber')
+    V_ch_sym = Symbol('V_ch')
+    V_box_sym = Symbol('V_box')
+    Fill_ratio_sym = Symbol('Fill_ratio')
+    N_fiber_sym = Symbol('N_fiber')
+    sigma_ch_sym = Symbol('sigma_ch')
+    zeta_ch_sym = Symbol('zeta_ch')
+    
+    # --- Topic 13: Noise Jamming Symbols ---
+    Pj_sym = Symbol('Pj')
+    Gj_sym = Symbol('Gj')
+    Bj_sym = Symbol('Bj')
+    Lossj_sym = Symbol('Lossj')
+    S_J_ratio_sym = Symbol('S/J')
+    R_bt_sym = Symbol('R_bt')
+    
+    # --- Topic 14: Gated Noise Symbols ---
+    R_tgt_sym = Symbol('R_tgt')
+    R_gn_start_offset_sym = Symbol('R_gn_start_offset')
+    t_tgt_2way_sym = Symbol('t_tgt_2way')
+    t_gn_start_release_sym = Symbol('t_gn_start_release')
+    Delta_R_mask_sym = Symbol('Delta_R_mask')
+    
+    # --- Topic 15: False Target Generation Symbols ---
+    v_tgt_sym = Symbol('v_tgt')
+    R_ft_sym = Symbol('R_ft')
+    v_ft_sym = Symbol('v_ft')
+    f_D_tgt_sym = Symbol('f_D_tgt')
+    f_D_ft_sym = Symbol('f_D_ft')
+    Delta_t_ft_sym = Symbol('Delta_t_ft')
+    Delta_f_ft_sym = Symbol('Delta_f_ft')
+    
+    # --- Topic 16: Radar Tracking / False Tracks Symbols ---
+    P_density_sym = Symbol('P_density')
+    Pj_emulated_sym = Symbol('Pj_emulated')
+
+    # --- Topic 17: Gate Stealing Symbols ---
+    alpha_sym = Symbol('alpha')
+    g_sym = Symbol('g')
+    T_time_sym = Symbol('T')
+    Delta_r_max_sym = Symbol('Delta_r_max')
+    Delta_r_t_sym = Symbol('Delta_r(t)')
+    rho_v_sym = Symbol('rho_v')
+    n_gate_r_sym = Symbol('n_gate_r')
+    n_gate_v_sym = Symbol('n_gate_v')
+    Delta_v_max_sym = Symbol('Delta_v_max')
+    a_accel_sym = Symbol('a')
+    Delta_v_t_sym = Symbol('Delta_v(t)')
+
+    # --- Topic 18: Cross-Eye Symbols ---
+    L_cross_sym = Symbol('L')
+    a_gain_ratio_sym = Symbol('a_ratio')
+    J_1_sym = Symbol('J_1')
+    J_2_sym = Symbol('J_2')
+    phi_hat_ce_sym = Symbol('phi_hat_ce')
+    S_phi_bar_sym = Symbol('S_phi_bar')
+
+    # --- Legacy: Range Gate Pull-Off (RGPO) Symbols ---
+    R_gate_sym = Symbol('R_gate')
+    delta_R_gate_sym = Symbol('delta_R_gate')
+    R_true_sym = Symbol('R_true')
+    R_false_sym = Symbol('R_false')
+    delta_t_pull_sym = Symbol('delta_t_pull')
+    delta_R_pull_sym = Symbol('delta_R_pull')
+    pull_rate_sym = Symbol('pull_rate')
+    n_pulses_capture_sym = Symbol('n_pulses_capture')
+    gate_bias_sym = Symbol('gate_bias')
+    alpha_track_sym = Symbol('alpha_track')
+    BW_track_sym = Symbol('BW_track')
+
     # =========================================================================
     # EQUATIONS
     # =========================================================================
@@ -383,6 +542,92 @@ class equations:
 
     # --- Topic 11: Pulse Compression Equations ---
     eq_delta_r_uncompressed = sympy.Eq(delta_r_sym, c_sym * tau_sym / 2)
+    eq_B_chirp = sympy.Eq(B_sym, gamma_sym * tau_sym)
+    eq_delta_r_compressed = sympy.Eq(delta_r_sym, c_sym / (2 * B_sym))
+    eq_PCR_1 = sympy.Eq(PCR_sym, tau_sym * B_sym)
+    eq_PCR_2 = sympy.Eq(PCR_sym, (tau_sym**2) * gamma_sym)
+    eq_f_range_tone = sympy.Eq(f_range_tone_sym, -gamma_sym * (2 * R_offset_sym / c_sym))
+
+    # --- Topic 12: Chaff Equations ---
+    # Chaff Fiber Length
+    eq_L_fiber = sympy.Eq(L_fiber_sym, wavelength_sym / 2)
+    # Volume of a Single Chaff Fiber (approximated as cylinder)
+    eq_V_ch = sympy.Eq(V_ch_sym, (sympy.pi * L_fiber_sym * D_fiber_sym**2) / 4)
+    # Number of Fibers in Box
+    eq_N_fiber = sympy.Eq(N_fiber_sym, (V_box_sym * Fill_ratio_sym) / V_ch_sym)
+    # RCS of Chaff Cloud (Time-dependent)
+    eq_sigma_ch_t = sympy.Eq(sigma_ch_sym, 0.15 * N_fiber_sym * wavelength_sym**2 * (1 - exp(-t_delay_sym / zeta_ch_sym)))
+    # Max RCS of Chaff Cloud (t -> inf)
+    eq_sigma_ch_max = sympy.Eq(sigma_ch_sym, 0.15 * N_fiber_sym * wavelength_sym**2)
+    
+    # --- Topic 13: Noise Jamming Equations ---
+    # Signal-to-Jammer (S/J) Ratio for Barrage Noise
+    eq_S_J_ratio = sympy.Eq(S_J_ratio_sym, (P_t_sym * G_t_sym * sigma_sym * n_p_sym * Bj_sym) / (4 * sympy.pi * R_sym**2 * Pj_sym * Gj_sym * Lossj_sym * B_sym))
+    # Burnthrough Range
+    eq_R_bt = sympy.Eq(R_bt_sym**2, (P_t_sym * G_t_sym * sigma_sym * n_p_sym * Bj_sym) / (4 * sympy.pi * Pj_sym * Gj_sym * Lossj_sym * B_sym * S_min_sym))
+    
+    # --- Topic 14: Gated Noise Equations ---
+    # Two-way time to target
+    eq_t_tgt_2way = sympy.Eq(t_tgt_2way_sym, 2 * R_tgt_sym / c_sym)
+    # Gated Noise Start Release Time
+    eq_t_gn_start_release = sympy.Eq(t_gn_start_release_sym, (2 * (R_tgt_sym - R_gn_start_offset_sym) / c_sym) - (tau_sym / 2))
+    
+    # --- Topic 15: False Target Generation Equations ---
+    # Target Doppler Frequency
+    eq_f_D_tgt = sympy.Eq(f_D_tgt_sym, -2 * v_tgt_sym / wavelength_sym)
+    # False Target Doppler Frequency
+    eq_f_D_ft = sympy.Eq(f_D_ft_sym, -2 * v_ft_sym / wavelength_sym)
+    # Time Delay to apply
+    eq_Delta_t_ft = sympy.Eq(Delta_t_ft_sym, (2 * R_ft_sym / c_sym) - (2 * R_sym / c_sym))
+    # Frequency Shift to apply
+    eq_Delta_f_ft = sympy.Eq(Delta_f_ft_sym, f_D_ft_sym - f_D_tgt_sym)
+
+    # --- Topic 16: Radar Tracking / False Tracks Equations ---
+    # Power Density at Jammer/Target
+    eq_P_density = sympy.Eq(P_density_sym, (P_t_sym * G_t_sym) / (4 * sympy.pi * R_sym**2))
+    # Required Jammer Power to Emulate RCS
+    eq_Pj_emulated = sympy.Eq(Pj_emulated_sym, (P_density_sym * sigma_sym) / Gj_sym)
+
+    # --- Topic 17: Gate Stealing Equations ---
+    # Velocity Resolution (Doppler bin size)
+    eq_rho_v = sympy.Eq(rho_v_sym, wavelength_sym / (2 * T_cpi_sym))
+    # Required Max Range Offset (Gate Size * Resolution)
+    eq_Delta_r_max_gate = sympy.Eq(Delta_r_max_sym, n_gate_r_sym * delta_r_sym)
+    # Time (T) from Max Range Offset (Delta_r_max = 0.5 * alpha * T^2)
+    eq_T_from_Delta_r = sympy.Eq(Delta_r_max_sym, sympy.Rational(1, 2) * alpha_sym * T_time_sym**2)
+    # Range Offset Profile (Delta_r(t) = 0.5 * alpha * t^2)
+    eq_Delta_r_t = sympy.Eq(Delta_r_t_sym, sympy.Rational(1, 2) * alpha_sym * t_delay_sym**2)
+    # Required Max Velocity Offset (Gate Size * Resolution)
+    eq_Delta_v_max_gate = sympy.Eq(Delta_v_max_sym, n_gate_v_sym * rho_v_sym)
+    # Time (T) from Max Velocity Offset (Delta_v_max = a * T)
+    eq_T_from_Delta_v = sympy.Eq(Delta_v_max_sym, a_accel_sym * T_time_sym)
+    # Velocity Offset Profile (Delta_v(t) = a * t)
+    eq_Delta_v_t = sympy.Eq(Delta_v_t_sym, a_accel_sym * t_delay_sym)
+
+    # --- Topic 18: Cross-Eye Equations ---
+    # Jammer Gain Ratio (a)
+    eq_J_ratio = sympy.Eq(a_gain_ratio_sym, J_1_sym / J_2_sym)
+    # Apparent Cross-Eye Angle Error (Amplitude Monopulse Approximation)
+    eq_phi_hat_ce_amp = sympy.Eq(phi_hat_ce_sym, sympy.Rational(1, 2) * (L_cross_sym / R_sym) * (1 + a_gain_ratio_sym) / (1 - a_gain_ratio_sym))
+
+    # --- Legacy: Gate Stealing / Range Gate Pull-Off (RGPO) Equations ---
+    # Time delay per pull increment
+    eq_delta_t_pull = sympy.Eq(delta_t_pull_sym, 2 * delta_R_pull_sym / c_sym)
+    
+    # Range increment from time delay increment
+    eq_delta_R_from_time = sympy.Eq(delta_R_pull_sym, c_sym * delta_t_pull_sym / 2)
+    
+    # Pull-off rate (range per pulse)
+    eq_pull_rate = sympy.Eq(pull_rate_sym, delta_R_pull_sym)
+    
+    # Number of pulses to pull gate a certain distance
+    eq_n_pulses_rgpo = sympy.Eq(n_pulses_capture_sym, (R_false_sym - R_true_sym) / delta_R_pull_sym)
+    
+    # Gate bias/tracking error
+    eq_gate_bias = sympy.Eq(gate_bias_sym, R_gate_sym - R_true_sym)
+    
+    # Tracking loop bandwidth (first-order alpha-beta filter approximation)
+    eq_BW_track = sympy.Eq(BW_track_sym, alpha_track_sym * f_p_sym / (2 * pi_sym))
     eq_B_chirp = sympy.Eq(B_sym, gamma_sym * tau_sym)
     eq_delta_r_compressed = sympy.Eq(delta_r_sym, c_sym / (2 * B_sym))
     eq_PCR_1 = sympy.Eq(PCR_sym, tau_sym * B_sym)
@@ -750,6 +995,353 @@ class solve:
     f_range_tone = _solver(equations.eq_f_range_tone, equations.eq_f_range_tone.lhs)
     R_offset_from_tone = _solver(equations.eq_f_range_tone, equations.R_offset_sym)
 
+    # =========================================================================
+    # TOPIC 12: CHAFF SOLVERS
+    # =========================================================================
+    @staticmethod
+    def L_fiber():
+        """Calculate Chaff Fiber Length (lambda/2).
+        Uses vars.wavelength (m).
+        Returns: float: Fiber length (m)."""
+        return vars.wavelength / 2
+
+    @staticmethod
+    def V_ch():
+        """Calculate Volume of a single chaff fiber (cylinder).
+        Uses vars.L_fiber (m) and vars.D_fiber (m).
+        Returns: float: Fiber volume (m^3)."""
+        # V_ch = pi * L * D^2 / 4
+        return (vars.pi * vars.L_fiber * vars.D_fiber**2) / 4
+
+    @staticmethod
+    def N_fiber():
+        """Calculate Number of fibers in a cartridge.
+        Uses vars.V_box (m^3), vars.Fill_ratio (dim), and vars.V_ch (m^3).
+        Returns: float: Number of fibers (dimensionless)."""
+        # N_fiber = (V_box * Fill_ratio) / V_ch
+        if vars.V_ch == 0:
+            raise ValueError("Chaff fiber volume (V_ch) cannot be zero.")
+        return (vars.V_box * vars.Fill_ratio) / vars.V_ch
+
+    @staticmethod
+    def sigma_ch_t(t_s):
+        """Calculate RCS of Chaff Cloud at time t.
+        Uses vars.N_fiber (dim), vars.wavelength (m), vars.zeta_ch (s), and t_s (s).
+        Returns: float: RCS (m^2)."""
+        # sigma_ch(t) = 0.15 * N * lambda^2 * (1 - e^(-t/zeta))
+        return 0.15 * vars.N_fiber * vars.wavelength**2 * (1 - math.exp(-t_s / vars.zeta_ch))
+        
+    # =========================================================================
+    # TOPIC 13: NOISE JAMMING SOLVERS
+    # =========================================================================
+    @staticmethod
+    def S_J_ratio():
+        """Calculate Signal-to-Jammer (S/J) Ratio for Barrage Noise.
+        Uses Pt, Gt, sigma, n_p, Bj, R, Pj, Gj, Lossj, B.
+        Returns: float: S/J Ratio (linear)."""
+        # S/J = (Pt * Gt * sigma * n_p * Bj) / (4 * pi * R^2 * Pj * Gj * Lossj * B)
+        numerator = vars.P_t * vars.G_t * vars.sigma * vars.n_p * vars.Bj
+        denominator = 4 * vars.pi * vars.R**2 * vars.Pj * vars.Gj * vars.Lossj * vars.B
+        if denominator == 0:
+            raise ValueError("Denominator is zero. Check Pj, R, Gj, Lossj, or B.")
+        return numerator / denominator
+
+    @staticmethod
+    def R_burnthrough():
+        """Calculate Burnthrough Range (R_bt).
+        Uses Pt, Gt, sigma, n_p, Bj, Pj, Gj, Lossj, B, S_min.
+        Returns: float: Burnthrough Range (m)."""
+        # R_bt = sqrt( (Pt * Gt * sigma * n_p * Bj) / (4 * pi * Pj * Gj * Lossj * B * S_min) )
+        numerator = vars.P_t * vars.G_t * vars.sigma * vars.n_p * vars.Bj
+        denominator = 4 * vars.pi * vars.Pj * vars.Gj * vars.Lossj * vars.B * vars.S_min
+        if denominator <= 0:
+            return np.inf
+        return math.sqrt(numerator / denominator)
+
+    # =========================================================================
+    # TOPIC 14: GATED NOISE SOLVERS
+    # =========================================================================
+    @staticmethod
+    def t_tgt_2way():
+        """Calculate Two-way Time of Flight to Target.
+        Uses vars.R_tgt (m) and vars.c (m/s).
+        Returns: float: Time (s)."""
+        return 2 * vars.R_tgt / vars.c
+
+    @staticmethod
+    def t_gn_start_release():
+        """Calculate Gated Noise Start Release Time (relative to T=0 radar pulse).
+        Uses vars.R_tgt, vars.R_gn_start_offset, vars.c, vars.tau.
+        Returns: float: Time (s)."""
+        # t_gn_start_release = 2 * (R_tgt - R_gn_start_offset) / c - tau / 2
+        R_start = vars.R_tgt - vars.R_gn_start_offset
+        return (2 * R_start / vars.c) - (vars.tau / 2)
+
+    # =========================================================================
+    # TOPIC 15: FALSE TARGET GENERATION SOLVERS
+    # =========================================================================
+    @staticmethod
+    def f_D_tgt():
+        """Calculate Target Doppler Frequency.
+        Uses vars.v_tgt (m/s) and vars.wavelength (m).
+        Returns: float: Doppler frequency (Hz)."""
+        return -2 * vars.v_tgt / vars.wavelength
+
+    @staticmethod
+    def f_D_ft():
+        """Calculate False Target Doppler Frequency.
+        Uses vars.v_ft (m/s) and vars.wavelength (m).
+        Returns: float: Doppler frequency (Hz)."""
+        return -2 * vars.v_ft / vars.wavelength
+
+    @staticmethod
+    def Delta_t_ft():
+        """Calculate Time Delay to apply for False Target Generation.
+        Uses vars.R_ft (m), vars.R (m), and vars.c (m/s).
+        Returns: float: Time delay (s)."""
+        # Delta_t_ft = 2 * (R_ft - R) / c
+        return 2 * (vars.R_ft - vars.R) / vars.c
+
+    @staticmethod
+    def Delta_f_ft():
+        """Calculate Frequency Shift to apply for False Target Generation.
+        Uses vars.f_D_ft (Hz) and vars.f_D_tgt (Hz).
+        Returns: float: Frequency shift (Hz)."""
+        # Delta_f_ft = f_D_ft - f_D_tgt
+        return vars.f_D_ft - vars.f_D_tgt
+
+    # =========================================================================
+    # TOPIC 16: RADAR TRACKING / FALSE TRACKS SOLVERS
+    # =========================================================================
+    @staticmethod
+    def P_density():
+        """Calculate Power Density at Target.
+        Uses vars.P_t (W), vars.G_t (dim), and vars.R (m).
+        Returns: float: Power density (W/m^2)."""
+        # P_density = (Pt * Gt) / (4 * pi * R^2)
+        if vars.R == 0:
+            raise ValueError("Range (R) cannot be zero.")
+        return (vars.P_t * vars.G_t) / (4 * vars.pi * vars.R**2)
+
+    @staticmethod
+    def Pj_emulated():
+        """Calculate Jammer Power required to emulate a target RCS (sigma).
+        Uses vars.P_density (W/m^2), vars.sigma (m^2), and vars.Gj (dim).
+        Returns: float: Jammer transmit power (W)."""
+        # Pj_emulated = (P_density * sigma) / Gj
+        if vars.Gj == 0:
+            raise ValueError("Jammer gain (Gj) cannot be zero.")
+        return (vars.P_density * vars.sigma) / vars.Gj
+
+    # =========================================================================
+    # TOPIC 17: GATE STEALING SOLVERS
+    # =========================================================================
+
+    @staticmethod
+    def rho_v():
+        """Calculate Velocity Resolution (Doppler bin size).
+        Uses vars.wavelength (m) and vars.T_cpi (s).
+        Returns: float: Velocity resolution (m/s)."""
+        # rho_v = lambda / (2 * T_cpi)
+        if not hasattr(vars, 'T_cpi') or not vars.T_cpi:
+            raise ValueError("T_cpi (Coherent Processing Interval) is not set or zero.")
+        return (vars.wavelength / (2 * vars.T_cpi))
+
+    @staticmethod
+    def Delta_r_max_gate():
+        """Calculate the maximum required range offset to exit the gate.
+        Uses vars.n_gate_r (cells) and vars.delta_r (m).
+        Returns: float: Maximum range offset (m)."""
+        # Delta_r_max = n_gate_r * delta_r (Requires delta_r to be set)
+        return vars.n_gate_r * vars.delta_r
+
+    @staticmethod
+    def T_from_Delta_r():
+        """Calculate the time required (T) to achieve range offset (Delta_r_max) at constant acceleration (alpha).
+        Uses vars.Delta_r_max (m) and vars.alpha (m/s^2).
+        Returns: float: Time duration (s)."""
+        # T = sqrt((2 * Delta_r_max) / alpha)
+        if vars.alpha <= 0:
+            raise ValueError("Acceleration (alpha) must be positive.")
+        return math.sqrt((2 * vars.Delta_r_max) / vars.alpha)
+
+    @staticmethod
+    def Delta_v_max_gate():
+        """Calculate the maximum required velocity offset to exit the gate.
+        Uses vars.n_gate_v (cells) and vars.rho_v (m/s).
+        Returns: float: Maximum velocity offset (m/s)."""
+        # Delta_v_max = n_gate_v * rho_v (Requires rho_v to be set)
+        return vars.n_gate_v * vars.rho_v
+
+    @staticmethod
+    def T_from_Delta_v():
+        """Calculate the time required (T) to achieve velocity offset (Delta_v_max) at constant acceleration (a_accel).
+        Uses vars.Delta_v_max (m/s) and vars.a_accel (m/s^2).
+        Returns: float: Time duration (s)."""
+        # T = Delta_v_max / a_accel
+        if vars.a_accel == 0:
+            raise ValueError("Acceleration (a_accel) cannot be zero.")
+        return vars.Delta_v_max / vars.a_accel
+
+    # =========================================================================
+    # TOPIC 18: CROSS-EYE SOLVERS
+    # =========================================================================
+
+    @staticmethod
+    def phi_hat_cross_eye_amp():
+        """Calculate the apparent cross-eye angle error (amplitude monopulse approximation).
+        Uses vars.L_cross (m), vars.R (m), and vars.a_gain_ratio (J1/J2, dimensionless).
+        Returns: float: Angle error in radians."""
+        # phi_hat = (L/(2R)) * (1+a)/(1-a)
+        if vars.R == 0:
+             raise ValueError("Range (R) cannot be zero.")
+        if abs(vars.a_gain_ratio - 1.0) < 1e-9: # Check for a very close to 1
+            # The denominator (1-a) approaches zero, causing the angle error to approach infinity (saturating the tracker)
+            return np.inf 
+        return (vars.L_cross / (2 * vars.R)) * ((1 + vars.a_gain_ratio) / (1 - vars.a_gain_ratio))
+
+    @staticmethod
+    def L_cross_from_phi_hat():
+        """Calculate the required cross-eye aperture separation (L) to produce a specific angle error (phi_hat_ce).
+        Uses vars.phi_hat_ce (rad), vars.R (m), and vars.a_gain_ratio (J1/J2).
+        Returns: float: Aperture separation (m)."""
+        # Rearrange: L = 2 * R * phi_hat_ce * (1-a)/(1+a)
+        if abs(vars.a_gain_ratio + 1.0) < 1e-9: # Check for a very close to -1
+            return np.inf # Denominator approaches zero
+        return 2 * vars.R * vars.phi_hat_ce * ((1 - vars.a_gain_ratio) / (1 + vars.a_gain_ratio))
+
+    # =========================================================================
+    # LEGACY: GATE STEALING / RANGE GATE PULL-OFF (RGPO) SOLVERS
+    # =========================================================================
+    
+    delta_t_pull_from_range = _solver(equations.eq_delta_t_pull, equations.delta_t_pull_sym)
+    delta_R_pull_from_time = _solver(equations.eq_delta_R_from_time, equations.delta_R_pull_sym)
+    n_pulses_to_capture = _solver(equations.eq_n_pulses_rgpo, equations.n_pulses_capture_sym)
+    gate_bias_error = _solver(equations.eq_gate_bias, equations.gate_bias_sym)
+    tracking_bandwidth = _solver(equations.eq_BW_track, equations.BW_track_sym)
+    
+    @staticmethod
+    def rgpo_delay_profile(R_initial, R_final, delta_R_per_pulse, n_pulses=None):
+        """Generate a Range Gate Pull-Off delay profile.
+        
+        Args:
+            R_initial: Initial range (m) where jammer matches true target
+            R_final: Final range (m) to pull the gate to
+            delta_R_per_pulse: Range increment per pulse (m/pulse)
+            n_pulses: Number of pulses (optional, calculated if not provided)
+            
+        Returns:
+            dict with keys:
+                - 'pulse_number': List of pulse indices
+                - 'range_m': List of false target ranges (m)
+                - 'delay_us': List of time delays (μs)
+                - 'n_pulses': Total number of pulses
+                - 'total_time_s': Total time if PRF known
+        """
+        import numpy as np
+        
+        if n_pulses is None:
+            n_pulses = int(np.ceil((R_final - R_initial) / delta_R_per_pulse)) + 1
+        
+        pulse_nums = np.arange(n_pulses)
+        ranges = R_initial + pulse_nums * delta_R_per_pulse
+        ranges = np.minimum(ranges, R_final)  # Cap at final range
+        
+        # Time delay is 2R/c (round-trip)
+        delays_s = 2 * ranges / vars.c
+        delays_us = delays_s * 1e6
+        
+        result = {
+            'pulse_number': pulse_nums.tolist(),
+            'range_m': ranges.tolist(),
+            'range_km': (ranges / 1000).tolist(),
+            'delay_us': delays_us.tolist(),
+            'delay_s': delays_s.tolist(),
+            'n_pulses': n_pulses,
+            'delta_R_per_pulse': delta_R_per_pulse
+        }
+        
+        # If PRF is set, calculate total time
+        if hasattr(vars, 'f_p') and vars.f_p > 0:
+            total_time = n_pulses / vars.f_p
+            result['total_time_s'] = total_time
+            result['PRF_hz'] = vars.f_p
+        
+        return result
+    
+    @staticmethod
+    def rgpo_max_pull_rate(delta_R_gate, factor=0.1):
+        """Calculate maximum safe RGPO pull rate.
+        
+        The pull rate must be slow enough that the gate doesn't lose lock.
+        A common rule of thumb is to move no more than 10-20% of the gate
+        width per pulse.
+        
+        Args:
+            delta_R_gate: Range gate width (m)
+            factor: Fraction of gate width to move per pulse (default 0.1)
+            
+        Returns:
+            Maximum delta_R per pulse (m/pulse)
+        """
+        return delta_R_gate * factor
+    
+    @staticmethod
+    def rgpo_capture_analysis(R_true, R_jammer_start, delta_R_pull, gate_width, n_pulses_max=1000):
+        """Analyze when/if RGPO captures the tracking gate.
+        
+        Args:
+            R_true: True target range (m)
+            R_jammer_start: Initial jammer range (usually equals R_true) (m)
+            delta_R_pull: Range pull increment per pulse (m/pulse)
+            gate_width: Range gate width (m)
+            n_pulses_max: Maximum pulses to simulate
+            
+        Returns:
+            dict with analysis results
+        """
+        import numpy as np
+        
+        # Simulate gate tracking
+        gate_center = R_true  # Gate initially centered on true target
+        jammer_range = R_jammer_start
+        
+        captured = False
+        capture_pulse = None
+        
+        for pulse in range(n_pulses_max):
+            # Jammer pulls off
+            jammer_range += delta_R_pull
+            
+            # Check if jammer is dominant in gate
+            # (Simple model: whichever is closer to gate center)
+            dist_to_true = abs(gate_center - R_true)
+            dist_to_jammer = abs(gate_center - jammer_range)
+            
+            if dist_to_jammer < dist_to_true:
+                # Gate starts tracking jammer
+                if not captured:
+                    captured = True
+                    capture_pulse = pulse
+                gate_center = jammer_range  # Simplified: gate follows jammer
+            else:
+                gate_center = R_true  # Gate follows true target
+        
+        result = {
+            'captured': captured,
+            'capture_pulse': capture_pulse,
+            'final_gate_position': gate_center,
+            'final_jammer_range': jammer_range,
+            'gate_error': gate_center - R_true
+        }
+        
+        if captured:
+            result['capture_time_pulses'] = capture_pulse
+            if hasattr(vars, 'f_p') and vars.f_p > 0:
+                result['capture_time_s'] = capture_pulse / vars.f_p
+        
+        return result
+
 class convert:  # add alias con for convenience
     """Unit conversion utilities for radar calculations.
     
@@ -1054,7 +1646,7 @@ class analysis:
             dict: {pulse_width_s, PRI_s, PRF_hz, duty_cycle, n_p}
         """
         if len(pulse_intervals_us) == 0:
-            return {'pulse_width_s': 0.0, 'PRI_s': 0.0, 'PRF_hz': float('inf'), 'duty_cycle': 0.0, 'n_p': 0}
+            return {'pulse_width_s': 0.0, 'PRI_s': 0.0, 'PRF_hz': 0.0, 'duty_cycle': 0.0, 'n_p': 0}
         widths_us = [end - start for (start, end) in pulse_intervals_us]
         pulse_width_us = widths_us[0]
         starts = [s for (s, e) in pulse_intervals_us]
@@ -1064,7 +1656,7 @@ class analysis:
             PRI_us = 0.0
         pulse_width_s = pulse_width_us * 1e-6
         PRI_s = PRI_us * 1e-6 if PRI_us > 0 else 0.0
-        PRF_hz = 1.0 / PRI_s if PRI_s > 0 else float('inf')
+        PRF_hz = 1.0 / PRI_s if PRI_s > 0 else 0.0
         duty_cycle = pulse_width_s / PRI_s if PRI_s > 0 else 0.0
         n_p = len(pulse_intervals_us)
         return {'pulse_width_s': pulse_width_s, 'PRI_s': PRI_s, 'PRF_hz': PRF_hz, 'duty_cycle': duty_cycle, 'n_p': n_p}
@@ -1100,23 +1692,14 @@ class analysis:
     def effective_independent_looks(pulse_start_times_us, correlation_time_us):
         """Estimate number of effective independent looks given correlation time.
 
-        Groups pulses whose start times are within `correlation_time_us` of any
-        pulse already in a group. Returns the clusters and n_e (number of 
-        independent looks).
-        
-        Args:
-            pulse_start_times_us (list): List of pulse start times in microseconds
-            correlation_time_us (float): Correlation time in microseconds
-            
-        Returns:
-            dict: {'clusters': list of clusters, 'n_e': number of independent looks}
+        Groups pulses whose start times are within `correlation_time_us` of a group's
+        first pulse. Returns the clusters and n_e (number of independent looks).
         """
         clusters = []
         for t in pulse_start_times_us:
             placed = False
             for cl in clusters:
-                # Check if this pulse is within correlation time of ANY pulse in cluster
-                if any(abs(t - existing_t) < correlation_time_us for existing_t in cl):
+                if abs(t - cl[0]) < correlation_time_us:
                     cl.append(t)
                     placed = True
                     break
@@ -1181,6 +1764,183 @@ class analysis:
         if den <= 0:
             return np.inf
         return float(np.sqrt(numer / den))
+
+    # =========================================================================
+    # GATE STEALING / RANGE GATE PULL-OFF (RGPO) ANALYSIS
+    # =========================================================================
+    
+    @staticmethod
+    def rgpo_delay_increment(delta_R_m, c=None):
+        """Calculate time delay increment for RGPO.
+        
+        Args:
+            delta_R_m: Range increment per pulse (meters)
+            c: Speed of light (m/s), uses vars.c if not provided
+            
+        Returns:
+            Time delay increment (seconds)
+        """
+        if c is None:
+            c = vars.c
+        return 2.0 * delta_R_m / c
+    
+    @staticmethod
+    def rgpo_range_increment(delta_t_s, c=None):
+        """Calculate range increment from time delay.
+        
+        Args:
+            delta_t_s: Time delay increment (seconds)
+            c: Speed of light (m/s), uses vars.c if not provided
+            
+        Returns:
+            Range increment (meters)
+        """
+        if c is None:
+            c = vars.c
+        return c * delta_t_s / 2.0
+    
+    @staticmethod
+    def rgpo_pulses_to_capture(R_initial, R_final, delta_R_per_pulse):
+        """Calculate number of pulses needed to pull gate from initial to final range.
+        
+        Args:
+            R_initial: Initial range (meters)
+            R_final: Final range (meters)
+            delta_R_per_pulse: Range increment per pulse (meters)
+            
+        Returns:
+            Number of pulses required
+        """
+        return int(np.ceil(abs(R_final - R_initial) / delta_R_per_pulse))
+    
+    @staticmethod
+    def rgpo_max_safe_rate(gate_width_m, safety_factor=0.1):
+        """Calculate maximum safe RGPO pull rate.
+        
+        Rule of thumb: Don't exceed 10-20% of gate width per pulse to maintain lock.
+        
+        Args:
+            gate_width_m: Range gate width (meters)
+            safety_factor: Fraction of gate width (default 0.1 = 10%)
+            
+        Returns:
+            Maximum delta_R per pulse (meters)
+        """
+        return gate_width_m * safety_factor
+    
+    @staticmethod
+    def rgpo_profile(R_initial, R_final, delta_R_per_pulse, PRF=None, c=None):
+        """Generate complete RGPO delay profile.
+        
+        Args:
+            R_initial: Initial jammer range (m), typically equals true target range
+            R_final: Final range to pull gate to (m)
+            delta_R_per_pulse: Range increment per pulse (m/pulse)
+            PRF: Pulse repetition frequency (Hz), optional
+            c: Speed of light (m/s), uses vars.c if not provided
+            
+        Returns:
+            dict containing:
+                - pulse_number: array of pulse indices
+                - range_m: array of false target ranges (m)
+                - range_km: array of false target ranges (km)
+                - delay_us: array of time delays (microseconds)
+                - delay_increment_us: delay increment per pulse (microseconds)
+                - n_pulses: total number of pulses
+                - total_distance_m: total range pulled (m)
+                - pull_rate_m_per_pulse: rate (m/pulse)
+                - (if PRF provided) total_time_s, pull_rate_m_per_s
+        """
+        if c is None:
+            c = vars.c
+        
+        n_pulses = int(np.ceil(abs(R_final - R_initial) / delta_R_per_pulse)) + 1
+        pulse_nums = np.arange(n_pulses)
+        
+        # Calculate ranges for each pulse
+        ranges_m = R_initial + pulse_nums * delta_R_per_pulse
+        ranges_m = np.clip(ranges_m, min(R_initial, R_final), max(R_initial, R_final))
+        
+        # Calculate time delays (round-trip: 2R/c)
+        delays_s = 2.0 * ranges_m / c
+        delays_us = delays_s * 1e6
+        
+        # Delay increment per pulse
+        delta_t_increment_s = 2.0 * delta_R_per_pulse / c
+        delta_t_increment_us = delta_t_increment_s * 1e6
+        
+        result = {
+            'pulse_number': pulse_nums,
+            'range_m': ranges_m,
+            'range_km': ranges_m / 1000.0,
+            'delay_us': delays_us,
+            'delay_s': delays_s,
+            'delay_increment_us': delta_t_increment_us,
+            'delay_increment_s': delta_t_increment_s,
+            'n_pulses': n_pulses,
+            'total_distance_m': abs(R_final - R_initial),
+            'pull_rate_m_per_pulse': delta_R_per_pulse
+        }
+        
+        if PRF is not None and PRF > 0:
+            total_time_s = n_pulses / PRF
+            pull_rate_m_per_s = delta_R_per_pulse * PRF
+            result.update({
+                'total_time_s': total_time_s,
+                'PRF_hz': PRF,
+                'pull_rate_m_per_s': pull_rate_m_per_s,
+                'pull_rate_km_per_s': pull_rate_m_per_s / 1000.0
+            })
+        
+        return result
+    
+    @staticmethod
+    def rgpo_with_doppler(R_initial, R_final, delta_R_per_pulse, v_true, PRF, f_radar, c=None):
+        """Generate RGPO profile with Doppler shift considerations.
+        
+        Args:
+            R_initial: Initial jammer range (m)
+            R_final: Final range to pull gate to (m)
+            delta_R_per_pulse: Range increment per pulse (m/pulse)
+            v_true: True target velocity (m/s), positive = closing
+            PRF: Pulse repetition frequency (Hz)
+            f_radar: Radar frequency (Hz)
+            c: Speed of light (m/s), uses vars.c if not provided
+            
+        Returns:
+            dict containing range profile plus Doppler information
+        """
+        if c is None:
+            c = vars.c
+        
+        # Get base RGPO profile
+        profile = analysis.rgpo_profile(R_initial, R_final, delta_R_per_pulse, PRF, c)
+        
+        # Calculate wavelength
+        wavelength = c / f_radar
+        
+        # True target Doppler
+        f_doppler_true = 2.0 * v_true / wavelength
+        
+        # Synthetic velocity from pull-off rate
+        if PRF > 0:
+            v_synthetic = delta_R_per_pulse * PRF  # m/s
+            f_doppler_synthetic = 2.0 * v_synthetic / wavelength
+        else:
+            v_synthetic = 0
+            f_doppler_synthetic = 0
+        
+        # Add Doppler information
+        profile.update({
+            'v_true_m_s': v_true,
+            'f_doppler_true_hz': f_doppler_true,
+            'v_synthetic_m_s': v_synthetic,
+            'f_doppler_synthetic_hz': f_doppler_synthetic,
+            'f_doppler_difference_hz': f_doppler_synthetic - f_doppler_true,
+            'wavelength_m': wavelength
+        })
+        
+        return profile
 
 
 def redefine_variable(var_name, new_value):
