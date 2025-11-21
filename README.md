@@ -16,6 +16,7 @@ All implementations provide the same core functionality with language-specific A
 ```
 Radar_Range_Equation/
 ├── python/          # Python package
+├── node/            # Node.js/TypeScript package
 ├── flutter/         # Flutter/Dart package
 ├── rust/            # Rust crate
 ├── README.md        # This file
@@ -27,6 +28,7 @@ Radar_Range_Equation/
 Each language implementation has its own README with detailed installation and usage instructions:
 
 - [Python Package](python/README.md) - [PyPI](https://pypi.org/project/Radar-Range-Equation/)
+- [Node.js/TypeScript Package](node/README.md) - [npm](https://www.npmjs.com/package/radar-range-equation)
 - [Flutter/Dart Package](flutter/README.md)
 - [Rust Crate](rust/README.md)
 
@@ -50,6 +52,20 @@ max_range = calculate_max_range(
     min_detectable_signal=1e-13
 )
 print(f"Maximum range: {max_range:.2f} meters")
+```
+
+### Node.js/TypeScript
+
+```bash
+cd node
+npm install
+```
+
+```typescript
+import { calculateMaxRange } from 'radar-range-equation';
+
+const maxRange = calculateMaxRange(1000, 1000, 0.03, 1.0, 1e-13);
+console.log(`Maximum range: ${maxRange.toFixed(2)} meters`);
 ```
 
 ### Flutter/Dart
@@ -88,7 +104,7 @@ println!("Maximum range: {:.2} meters", max_range);
 
 ## Features
 
-- **Multi-language Support**: Python, Flutter/Dart, and Rust implementations
+- **Multi-language Support**: Python, Node.js/TypeScript, Flutter/Dart, and Rust implementations
 - **Consistent API**: Similar function signatures across all languages
 - **Well-tested**: Comprehensive test suites for each implementation
 - **Documentation**: Full API documentation and examples
@@ -96,11 +112,18 @@ println!("Maximum range: {:.2} meters", max_range);
 
 ## Radar Range Equation
 
-The radar range equation relates the range of a radar to the characteristics of the transmitter, receiver, antenna, target, and environment. This library implements the basic radar equation:
+The radar range equation relates the range of a radar to the characteristics of the transmitter, receiver, antenna, target, and environment. 
+
+For monostatic radar systems (where the same antenna is used for both transmitting and receiving), the antenna gain appears cubed because:
+- The transmit gain contributes G² (squared beam pattern on transmit)
+- The receive gain contributes G (single gain on receive)
+- Combined: G² × G = G³
+
+This library implements the monostatic radar equation:
 
 ```
          ┌─────────────────────────────────────────────┐
-         │    P_t × G² × λ² × σ                       │
+         │    P_t × G³ × λ² × σ                       │
 R_max = ⁴│  ──────────────────────────────             │
          │    (4π)³ × P_min                           │
          └─────────────────────────────────────────────┘
@@ -109,7 +132,7 @@ R_max = ⁴│  ─────────────────────�
 Where:
 - `R_max` = Maximum range
 - `P_t` = Transmit power
-- `G` = Antenna gain
+- `G` = Antenna gain (applies to both transmit and receive)
 - `λ` = Wavelength
 - `σ` = Radar cross-section
 - `P_min` = Minimum detectable signal
