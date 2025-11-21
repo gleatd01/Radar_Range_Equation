@@ -31,7 +31,8 @@ def test_plotting_module():
         'pulse_compression_signal',
         'range_profile',
         'doppler_spectrum',
-        'tactical_scenario'
+        'tactical_scenario',
+        'generate_lfm_spectrogram'
     ]
     
     for func_name in expected_functions:
@@ -192,6 +193,40 @@ def test_tactical_scenario():
     return True
 
 
+def test_generate_lfm_spectrogram():
+    """Test the LFM spectrogram generation function."""
+    print("\nTesting generate_lfm_spectrogram()...")
+    
+    # Test with default parameters
+    f, t, Sxx, fig = RRE.plot.generate_lfm_spectrogram(show=False)
+    
+    assert isinstance(f, np.ndarray), "Frequency vector should be numpy array"
+    assert isinstance(t, np.ndarray), "Time vector should be numpy array"
+    assert isinstance(Sxx, np.ndarray), "Spectrogram data should be numpy array"
+    assert fig is not None, "Figure should be created"
+    assert len(f) > 0, "Frequency vector should not be empty"
+    assert len(t) > 0, "Time vector should not be empty"
+    assert Sxx.ndim == 2, "Spectrogram should be 2D array"
+    
+    print(f"✓ Generated LFM spectrogram with default parameters")
+    print(f"  Frequency bins: {len(f)}, Time bins: {len(t)}")
+    
+    # Test with custom parameters matching problem statement
+    f, t, Sxx, fig = RRE.plot.generate_lfm_spectrogram(
+        f_start_MHz=7850,
+        f_end_MHz=8150,
+        pulse_duration_us=40,
+        pulse_start_times_us=[0, 120],
+        total_duration_us=180,
+        show=False
+    )
+    
+    assert fig is not None, "Figure should be created with custom parameters"
+    print("✓ Custom parameters work correctly")
+    
+    return True
+
+
 def main():
     """Run all tests."""
     print("="*70)
@@ -207,6 +242,7 @@ def main():
         test_range_profile()
         test_doppler_spectrum()
         test_tactical_scenario()
+        test_generate_lfm_spectrogram()
         
         print("\n" + "="*70)
         print("✓ All plotting tests passed!")

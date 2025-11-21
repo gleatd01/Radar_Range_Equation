@@ -7,6 +7,7 @@ This module provides functions to visualize various radar signal types including
     - Range profiles
     - Doppler spectra
     - Tactical scenarios (radar, target, and jammer positions)
+    - LFM (Linear Frequency Modulated) spectrograms
 
 Example:
     >>> import radar_range_equation as RRE
@@ -18,11 +19,19 @@ Example:
     ...     num_pulses=3,
     ...     time_span=150e-6
     ... )
+    >>> 
+    >>> # Generate LFM spectrogram
+    >>> RRE.plot.generate_lfm_spectrogram(
+    ...     f_start_MHz=7850,
+    ...     f_end_MHz=8150,
+    ...     pulse_duration_us=40
+    ... )
 """
 
 import numpy as np
 import matplotlib.pyplot as plt
 from typing import Optional, Tuple, List
+from scipy.signal import spectrogram
 
 
 def pulsed_radar_signal(
@@ -585,3 +594,204 @@ def tactical_scenario(
         plt.show()
     
     return fig
+
+
+def generate_lfm_spectrogram(
+    f_start_MHz: float = 7850, 
+    f_end_MHz: float = 8150, 
+    pulse_duration_us: float = 40, 
+    pulse_start_times_us: List[float] = None, 
+    total_duration_us: float = 180, 
+    Fs_MHz: float = 500, 
+    noise_factor: float = 0.05,
+    figsize: Tuple[float, float] = (10, 5),
+    show: bool = True
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray, plt.Figure]:
+    """
+    Generates and plots a spectrogram for Linear Frequency Modulated (LFM) radar pulses.
+    
+    Creates a time-frequency representation of LFM chirp pulses, showing how the
+    frequency changes linearly over the duration of each pulse. This is useful for
+    visualizing radar pulse compression waveforms.
+    
+    Parameters:
+        f_start_MHz: Start frequency of the chirp in MHz (default: 7850)
+        f_end_MHz: End frequency of the chirp in MHz (default: 8150)
+        pulse_duration_us: Duration of a single pulse in microseconds (default: 40)
+        pulse_start_times_us: List of start times for each pulse in microseconds.
+            If None, defaults to [0, 120] (default: None)
+        total_duration_us: Total duration of the simulation in microseconds (default: 180)
+        Fs_MHz: Sampling frequency in MHz. Must be > (f_end - f_start) (default: 500)
+        noise_factor: Magnitude of the complex Gaussian noise added to the signal (default: 0.05)
+        figsize: Figure size as (width, height) in inches (default: (10, 5))
+        show: Whether to display the plot immediately (default: True)
+    
+    Returns:
+        Tuple containing:
+            - f_plot_RF (np.ndarray): Frequency vector in MHz
+            - time_sec (np.ndarray): Time vector in seconds
+            - Sxx_db (np.ndarray): Spectrogram power spectral density in dB
+            - fig (plt.Figure): The matplotlib Figure object
+    
+    Example:
+        >>> import radar_range_equation as RRE
+        >>> # Generate spectrogram with default parameters
+        >>> f, t, Sxx, fig = RRE.plot.generate_lfm_spectrogram()
+        >>> 
+        >>> # Custom parameters
+        >>> f, t, Sxx, fig = RRE.plot.generate_lfm_spectrogram(
+        ...     f_start_MHz=7850,
+        ...     f_end_MHz=8150,
+        ...     pulse_duration_us=40,
+        ...     pulse_start_times_us=[0, 120],
+        ...     total_duration_us=180,
+        ...     show=False
+        ... )
+    
+    Notes:
+        - The signal is generated at baseband (centered at 0 Hz) to avoid aliasing artifacts
+        - Complex exponential representation is used to create clean chirp signals
+        - The spectrogram uses overlapping windows for better time-frequency resolution
+        - Dynamic range of the plot is set to 40 dB for better visualization
+    """
+    # Default pulse start times
+    if pulse_start_times_us is None:
+        pulse_start_times_us = [0, 120]
+    
+    # --- 1. Parameter Setup ---
+    # Convert units to SI (Hz, seconds)
+    Fs = Fs_MHz * 1e6
+    T_total = total_duration_us * 1e-6
+    T_pulse = pulse_duration_us * 1e-6
+    
+    f_start_RF = f_start_MHz * 1e6
+    f_end_RF = f_end_MHz * 1e6
+    
+    # Calculate Bandwidth and Center Frequency
+    bandwidth = f_end_RF - f_start_RF
+    f_center_RF = (f_start_RF + f_end_RF) / 2
+    
+    # Check Nyquist
+    if Fs <= bandwidth:
+        print(f"Warning: Fs ({Fs_MHz} MHz) is too low for bandwidth ({bandwidth/1e6} MHz). Aliasing will occur.")
+
+    # Time Vector for the total duration
+    N_total = int(Fs * T_total)
+    t = np.linspace(0, T_total, N_total, endpoint=False)
+    
+    # --- 2. Pulse Generation (Baseband) ---
+    # We generate the pulse at Baseband (centered at 0 Hz) using complex exponential
+    # to avoid "V-shape" artifacts at DC.
+    f_start_BB = -bandwidth / 2
+    f_end_BB = bandwidth / 2
+    
+    # Time vector for a single pulse
+    N_pulse = int(Fs * T_pulse)
+    t_pulse_vec = np.linspace(0, T_pulse, N_pulse, endpoint=False)
+    
+    # Generate Phase for Linear Chirp: phi(t) = 2*pi * (f0*t + k/2 * t^2)
+    k_chirp = (f_end_BB - f_start_BB) / T_pulse
+    phase = 2 * np.pi * (f_start_BB * t_pulse_vec + 0.5 * k_chirp * t_pulse_vec**2)
+    signal_pulse_BB = np.exp(1j * phase)
+    
+    # --- 3. Signal Assembly ---
+    signal_total = np.zeros(N_total, dtype=complex)
+    
+    for start_time_us in pulse_start_times_us:
+        # Convert start time to index
+        t_start = start_time_us * 1e-6
+        idx_start = int(t_start * Fs)
+        idx_end = idx_start + N_pulse
+        
+        # Bounds check to ensure we don't write past the array
+        if idx_end <= N_total:
+            signal_total[idx_start:idx_end] = signal_pulse_BB
+        else:
+            print(f"Warning: Pulse starting at {start_time_us}us exceeds total duration.")
+
+    # Add Noise
+    noise = noise_factor * (np.random.randn(N_total) + 1j * np.random.randn(N_total))
+    signal_with_noise = signal_total + noise
+    
+    # --- 4. Spectrogram Calculation ---
+    nperseg = int(0.5e-6 * Fs) # Window size (approx 0.5 us)
+    noverlap = int(nperseg * 0.9)
+    
+    # Compute spectrogram (complex mode, full spectrum)
+    f, time_sec, Sxx = spectrogram(
+        signal_with_noise,
+        Fs,
+        nperseg=nperseg,
+        noverlap=noverlap,
+        scaling='spectrum',
+        mode='complex',
+        return_onesided=False
+    )
+    
+    # Shift zero frequency to the center
+    f = np.fft.fftshift(f)
+    Sxx = np.fft.fftshift(Sxx, axes=0)
+    
+    # Convert to dB
+    Sxx_db = 10 * np.log10(np.abs(Sxx) + 1e-12)
+    
+    # --- 5. Plotting ---
+    fig = plt.figure(figsize=figsize)
+    
+    # Shift frequency axis back to RF for display
+    f_plot_RF = (f + f_center_RF) / 1e6
+    
+    # Define view limits slightly wider than the chirp
+    view_margin = 0 # MHz margin
+    f_view_min = f_start_MHz - view_margin
+    f_view_max = f_end_MHz + view_margin
+    
+    # Slice data for better contrast in plotting
+    idx_min = np.searchsorted(f_plot_RF, f_view_min)
+    idx_max = np.searchsorted(f_plot_RF, f_view_max)
+    
+    # Handle edge case where indices might be out of bounds
+    idx_min = max(0, idx_min)
+    idx_max = min(len(f_plot_RF), idx_max)
+    
+    if idx_max <= idx_min:
+        # Fallback if search fails or range is invalid
+        idx_min, idx_max = 0, len(f_plot_RF)
+
+    f_plot = f_plot_RF[idx_min:idx_max]
+    Sxx_plot = Sxx_db[idx_min:idx_max, :]
+    
+    # Calculate edges for pcolormesh
+    dt = time_sec[1] - time_sec[0] if len(time_sec) > 1 else 1e-6
+    time_plot_edges = np.append(time_sec, time_sec[-1] + dt) * 1e6
+    
+    if len(f_plot) > 1:
+        df = f_plot[1] - f_plot[0]
+        f_plot_edges = np.append(f_plot, f_plot[-1] + df)
+    else:
+        # Fallback for very small slices
+        f_plot_edges = np.array([f_plot[0], f_plot[0] + 1.0])
+
+    # Plot
+    plt.pcolormesh(
+        time_plot_edges, 
+        f_plot_edges, 
+        Sxx_plot,
+        cmap='jet',
+        vmin=np.max(Sxx_db) - 40, # Dynamic range of 40 dB
+        vmax=np.max(Sxx_db)
+    )
+    
+    plt.xlim(0, total_duration_us)
+    plt.ylim(f_view_min, f_view_max)
+    
+    plt.xlabel(r'Time ($\mu$s)')
+    plt.ylabel('Frequency (MHz)')
+    plt.title(f'Spectrogram of LFM Radar Pulses ({f_start_MHz}-{f_end_MHz} MHz)')
+    plt.colorbar(label='Power Spectral Density (dB)')
+    plt.grid(False)
+    
+    if show:
+        plt.show()
+    
+    return f_plot_RF, time_sec, Sxx_db, fig

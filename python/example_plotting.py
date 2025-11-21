@@ -220,6 +220,38 @@ def example_tactical_scenario():
     return fig
 
 
+def example_lfm_spectrogram():
+    """Demonstrate LFM spectrogram generation."""
+    print("\n" + "="*70)
+    print("Example 8: LFM Spectrogram")
+    print("="*70)
+    print("Creating LFM spectrogram with:")
+    print("  - Start frequency: 7850 MHz")
+    print("  - End frequency: 8150 MHz")
+    print("  - Pulse duration: 40 µs")
+    print("  - Pulse start times: [0, 120] µs")
+    print("  - Total duration: 180 µs")
+    
+    f, t, Sxx, fig = RRE.plot.generate_lfm_spectrogram(
+        f_start_MHz=7850,
+        f_end_MHz=8150,
+        pulse_duration_us=40,
+        pulse_start_times_us=[0, 120],
+        total_duration_us=180,
+        show=False
+    )
+    
+    print(f"✓ Generated LFM spectrogram")
+    print(f"  Frequency bins: {len(f)}")
+    print(f"  Time bins: {len(t)}")
+    
+    # Save the figure
+    fig.savefig('/tmp/lfm_spectrogram.png', dpi=150, bbox_inches='tight')
+    print("✓ Saved plot to /tmp/lfm_spectrogram.png")
+    
+    return fig
+
+
 def main():
     """Run all plotting examples."""
     print("\n" + "="*70)
@@ -237,6 +269,7 @@ def main():
         example_range_profile()
         example_doppler_spectrum()
         example_tactical_scenario()
+        example_lfm_spectrogram()
         
         print("\n" + "="*70)
         print("✓ All examples completed successfully!")
@@ -249,6 +282,7 @@ def main():
         print("  - range_profile.png")
         print("  - doppler_spectrum.png")
         print("  - tactical_scenario.png")
+        print("  - lfm_spectrogram.png")
         print("\nYou can view these plots or integrate them into your application.")
         
         return 0
