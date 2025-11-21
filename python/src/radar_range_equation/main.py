@@ -200,6 +200,54 @@ class vars:
     f_range_tone = Symbol('f_range_tone') # IF frequency from dechirp (symbolic)
 
     # =========================================================================
+    # TOPIC 12: CHAFF VARS
+    # =========================================================================
+    L_fiber = Symbol('L_fiber')         # Chaff Fiber Length (m)
+    D_fiber = Symbol('D_fiber')         # Chaff Fiber Diameter (m)
+    V_ch = Symbol('V_ch')               # Volume of a single chaff fiber (m^3)
+    V_box = Symbol('V_box')             # Volume of chaff cartridge (m^3)
+    Fill_ratio = Symbol('Fill_ratio')   # Chaff cartridge fill ratio (dimensionless)
+    N_fiber = Symbol('N_fiber')         # Number of chaff fibers (dimensionless)
+    sigma_ch = Symbol('sigma_ch')       # Average RCS of chaff (m^2)
+    zeta_ch = Symbol('zeta_ch')         # Chaff dispersion constant (s)
+
+    # =========================================================================
+    # TOPIC 13: NOISE JAMMING VARS
+    # =========================================================================
+    Pj = Symbol('Pj')                   # Jammer Transmit Power (W)
+    Gj = Symbol('Gj')                   # Jammer Antenna Gain (linear)
+    Bj = Symbol('Bj')                   # Jammer Bandwidth (Hz)
+    Lossj = Symbol('Lossj')             # Jammer Loss (linear)
+    S_J_ratio = Symbol('S/J')           # Signal-to-Jammer Ratio (linear)
+    R_bt = Symbol('R_bt')               # Burnthrough Range (m)
+
+    # =========================================================================
+    # TOPIC 14: GATED NOISE VARS
+    # =========================================================================
+    R_tgt = Symbol('R_tgt')             # Target Range (m)
+    R_gn_start_offset = Symbol('R_gn_start_offset') # Range before target to start noise (m)
+    t_tgt_2way = Symbol('t_tgt_2way')   # Two-way time to target (s)
+    t_gn_start_release = Symbol('t_gn_start_release') # Gated Noise start time (s)
+    Delta_R_mask = Symbol('Delta_R_mask') # Total masking range (m)
+
+    # =========================================================================
+    # TOPIC 15: FALSE TARGET GENERATION VARS
+    # =========================================================================
+    v_tgt = Symbol('v_tgt')             # Target range rate (m/s)
+    R_ft = Symbol('R_ft')               # False Target Range (m)
+    v_ft = Symbol('v_ft')               # False Target range rate (m/s)
+    f_D_tgt = Symbol('f_D_tgt')         # Doppler Frequency Target (Hz)
+    f_D_ft = Symbol('f_D_ft')           # Doppler Frequency False Target (Hz)
+    Delta_t_ft = Symbol('Delta_t_ft')   # Time Delay for False Target (s)
+    Delta_f_ft = Symbol('Delta_f_ft')   # Frequency Shift for False Target (Hz)
+
+    # =========================================================================
+    # TOPIC 16: RADAR TRACKING / FALSE TRACKS VARS
+    # =========================================================================
+    P_density = Symbol('P_density')     # Power Density (W/m^2)
+    Pj_emulated = Symbol('Pj_emulated') # Jammer Power to emulate target RCS (W)
+
+    # =========================================================================
     # TOPIC 17: GATE STEALING VARS
     # =========================================================================
 
@@ -358,6 +406,44 @@ class equations:
     R_offset_sym = Symbol('R_offset')
     f_range_tone_sym = Symbol('f_range_tone')
 
+    # --- Topic 12: Chaff Symbols ---
+    L_fiber_sym = Symbol('L_fiber')
+    D_fiber_sym = Symbol('D_fiber')
+    V_ch_sym = Symbol('V_ch')
+    V_box_sym = Symbol('V_box')
+    Fill_ratio_sym = Symbol('Fill_ratio')
+    N_fiber_sym = Symbol('N_fiber')
+    sigma_ch_sym = Symbol('sigma_ch')
+    zeta_ch_sym = Symbol('zeta_ch')
+    
+    # --- Topic 13: Noise Jamming Symbols ---
+    Pj_sym = Symbol('Pj')
+    Gj_sym = Symbol('Gj')
+    Bj_sym = Symbol('Bj')
+    Lossj_sym = Symbol('Lossj')
+    S_J_ratio_sym = Symbol('S/J')
+    R_bt_sym = Symbol('R_bt')
+    
+    # --- Topic 14: Gated Noise Symbols ---
+    R_tgt_sym = Symbol('R_tgt')
+    R_gn_start_offset_sym = Symbol('R_gn_start_offset')
+    t_tgt_2way_sym = Symbol('t_tgt_2way')
+    t_gn_start_release_sym = Symbol('t_gn_start_release')
+    Delta_R_mask_sym = Symbol('Delta_R_mask')
+    
+    # --- Topic 15: False Target Generation Symbols ---
+    v_tgt_sym = Symbol('v_tgt')
+    R_ft_sym = Symbol('R_ft')
+    v_ft_sym = Symbol('v_ft')
+    f_D_tgt_sym = Symbol('f_D_tgt')
+    f_D_ft_sym = Symbol('f_D_ft')
+    Delta_t_ft_sym = Symbol('Delta_t_ft')
+    Delta_f_ft_sym = Symbol('Delta_f_ft')
+    
+    # --- Topic 16: Radar Tracking / False Tracks Symbols ---
+    P_density_sym = Symbol('P_density')
+    Pj_emulated_sym = Symbol('Pj_emulated')
+
     # --- Topic 17: Gate Stealing Symbols ---
     alpha_sym = Symbol('alpha')
     g_sym = Symbol('g')
@@ -437,6 +523,46 @@ class equations:
     eq_PCR_1 = sympy.Eq(PCR_sym, tau_sym * B_sym)
     eq_PCR_2 = sympy.Eq(PCR_sym, (tau_sym**2) * gamma_sym)
     eq_f_range_tone = sympy.Eq(f_range_tone_sym, -gamma_sym * (2 * R_offset_sym / c_sym))
+
+    # --- Topic 12: Chaff Equations ---
+    # Chaff Fiber Length
+    eq_L_fiber = sympy.Eq(L_fiber_sym, wavelength_sym / 2)
+    # Volume of a Single Chaff Fiber (approximated as cylinder)
+    eq_V_ch = sympy.Eq(V_ch_sym, (sympy.pi * L_fiber_sym * D_fiber_sym**2) / 4)
+    # Number of Fibers in Box
+    eq_N_fiber = sympy.Eq(N_fiber_sym, (V_box_sym * Fill_ratio_sym) / V_ch_sym)
+    # RCS of Chaff Cloud (Time-dependent)
+    eq_sigma_ch_t = sympy.Eq(sigma_ch_sym, 0.15 * N_fiber_sym * wavelength_sym**2 * (1 - exp(-t_delay_sym / zeta_ch_sym)))
+    # Max RCS of Chaff Cloud (t -> inf)
+    eq_sigma_ch_max = sympy.Eq(sigma_ch_sym, 0.15 * N_fiber_sym * wavelength_sym**2)
+    
+    # --- Topic 13: Noise Jamming Equations ---
+    # Signal-to-Jammer (S/J) Ratio for Barrage Noise
+    eq_S_J_ratio = sympy.Eq(S_J_ratio_sym, (P_t_sym * G_t_sym * sigma_sym * n_p_sym * Bj_sym) / (4 * sympy.pi * R_sym**2 * Pj_sym * Gj_sym * Lossj_sym * B_sym))
+    # Burnthrough Range
+    eq_R_bt = sympy.Eq(R_bt_sym**2, (P_t_sym * G_t_sym * sigma_sym * n_p_sym * Bj_sym) / (4 * sympy.pi * Pj_sym * Gj_sym * Lossj_sym * B_sym * S_min_sym))
+    
+    # --- Topic 14: Gated Noise Equations ---
+    # Two-way time to target
+    eq_t_tgt_2way = sympy.Eq(t_tgt_2way_sym, 2 * R_tgt_sym / c_sym)
+    # Gated Noise Start Release Time
+    eq_t_gn_start_release = sympy.Eq(t_gn_start_release_sym, (2 * (R_tgt_sym - R_gn_start_offset_sym) / c_sym) - (tau_sym / 2))
+    
+    # --- Topic 15: False Target Generation Equations ---
+    # Target Doppler Frequency
+    eq_f_D_tgt = sympy.Eq(f_D_tgt_sym, -2 * v_tgt_sym / wavelength_sym)
+    # False Target Doppler Frequency
+    eq_f_D_ft = sympy.Eq(f_D_ft_sym, -2 * v_ft_sym / wavelength_sym)
+    # Time Delay to apply
+    eq_Delta_t_ft = sympy.Eq(Delta_t_ft_sym, (2 * R_ft_sym / c_sym) - (2 * R_sym / c_sym))
+    # Frequency Shift to apply
+    eq_Delta_f_ft = sympy.Eq(Delta_f_ft_sym, f_D_ft_sym - f_D_tgt_sym)
+
+    # --- Topic 16: Radar Tracking / False Tracks Equations ---
+    # Power Density at Jammer/Target
+    eq_P_density = sympy.Eq(P_density_sym, (P_t_sym * G_t_sym) / (4 * sympy.pi * R_sym**2))
+    # Required Jammer Power to Emulate RCS
+    eq_Pj_emulated = sympy.Eq(Pj_emulated_sym, (P_density_sym * sigma_sym) / Gj_sym)
 
     # --- Topic 17: Gate Stealing Equations ---
     # Velocity Resolution (Doppler bin size)
@@ -820,6 +946,144 @@ class solve:
     PCR_from_gamma = _solver(equations.eq_PCR_2, equations.eq_PCR_2.lhs)
     f_range_tone = _solver(equations.eq_f_range_tone, equations.eq_f_range_tone.lhs)
     R_offset_from_tone = _solver(equations.eq_f_range_tone, equations.R_offset_sym)
+
+    # =========================================================================
+    # TOPIC 12: CHAFF SOLVERS
+    # =========================================================================
+    @staticmethod
+    def L_fiber():
+        """Calculate Chaff Fiber Length (lambda/2).
+        Uses vars.wavelength (m).
+        Returns: float: Fiber length (m)."""
+        return vars.wavelength / 2
+
+    @staticmethod
+    def V_ch():
+        """Calculate Volume of a single chaff fiber (cylinder).
+        Uses vars.L_fiber (m) and vars.D_fiber (m).
+        Returns: float: Fiber volume (m^3)."""
+        # V_ch = pi * L * D^2 / 4
+        return (vars.pi * vars.L_fiber * vars.D_fiber**2) / 4
+
+    @staticmethod
+    def N_fiber():
+        """Calculate Number of fibers in a cartridge.
+        Uses vars.V_box (m^3), vars.Fill_ratio (dim), and vars.V_ch (m^3).
+        Returns: float: Number of fibers (dimensionless)."""
+        # N_fiber = (V_box * Fill_ratio) / V_ch
+        if vars.V_ch == 0:
+            raise ValueError("Chaff fiber volume (V_ch) cannot be zero.")
+        return (vars.V_box * vars.Fill_ratio) / vars.V_ch
+
+    @staticmethod
+    def sigma_ch_t(t_s):
+        """Calculate RCS of Chaff Cloud at time t.
+        Uses vars.N_fiber (dim), vars.wavelength (m), vars.zeta_ch (s), and t_s (s).
+        Returns: float: RCS (m^2)."""
+        # sigma_ch(t) = 0.15 * N * lambda^2 * (1 - e^(-t/zeta))
+        return 0.15 * vars.N_fiber * vars.wavelength**2 * (1 - math.exp(-t_s / vars.zeta_ch))
+        
+    # =========================================================================
+    # TOPIC 13: NOISE JAMMING SOLVERS
+    # =========================================================================
+    @staticmethod
+    def S_J_ratio():
+        """Calculate Signal-to-Jammer (S/J) Ratio for Barrage Noise.
+        Uses Pt, Gt, sigma, N_p, Bj, R, Pj, Gj, Lossj, B.
+        Returns: float: S/J Ratio (linear)."""
+        # S/J = (Pt * Gt * sigma * N_p * Bj) / (4 * pi * R^2 * Pj * Gj * Lossj * B)
+        numerator = vars.Pt * vars.Gt * vars.sigma * vars.N_p * vars.Bj
+        denominator = 4 * vars.pi * vars.R**2 * vars.Pj * vars.Gj * vars.Lossj * vars.B
+        if denominator == 0:
+            raise ValueError("Denominator is zero. Check Pj, R, Gj, Lossj, or B.")
+        return numerator / denominator
+
+    @staticmethod
+    def R_burnthrough():
+        """Calculate Burnthrough Range (R_bt).
+        Uses Pt, Gt, sigma, N_p, Bj, Pj, Gj, Lossj, B, S_min.
+        Returns: float: Burnthrough Range (m)."""
+        # R_bt = sqrt( (Pt * Gt * sigma * N_p * Bj) / (4 * pi * Pj * Gj * Lossj * B * S_min) )
+        numerator = vars.Pt * vars.Gt * vars.sigma * vars.N_p * vars.Bj
+        denominator = 4 * vars.pi * vars.Pj * vars.Gj * vars.Lossj * vars.B * vars.S_min
+        if denominator <= 0:
+            return np.inf
+        return math.sqrt(numerator / denominator)
+
+    # =========================================================================
+    # TOPIC 14: GATED NOISE SOLVERS
+    # =========================================================================
+    @staticmethod
+    def t_tgt_2way():
+        """Calculate Two-way Time of Flight to Target.
+        Uses vars.R_tgt (m) and vars.c (m/s).
+        Returns: float: Time (s)."""
+        return 2 * vars.R_tgt / vars.c
+
+    @staticmethod
+    def t_gn_start_release():
+        """Calculate Gated Noise Start Release Time (relative to T=0 radar pulse).
+        Uses vars.R_tgt, vars.R_gn_start_offset, vars.c, vars.tau.
+        Returns: float: Time (s)."""
+        # t_gn_start_release = 2 * (R_tgt - R_gn_start_offset) / c - tau / 2
+        R_start = vars.R_tgt - vars.R_gn_start_offset
+        return (2 * R_start / vars.c) - (vars.tau / 2)
+
+    # =========================================================================
+    # TOPIC 15: FALSE TARGET GENERATION SOLVERS
+    # =========================================================================
+    @staticmethod
+    def f_D_tgt():
+        """Calculate Target Doppler Frequency.
+        Uses vars.v_tgt (m/s) and vars.wavelength (m).
+        Returns: float: Doppler frequency (Hz)."""
+        return -2 * vars.v_tgt / vars.wavelength
+
+    @staticmethod
+    def f_D_ft():
+        """Calculate False Target Doppler Frequency.
+        Uses vars.v_ft (m/s) and vars.wavelength (m).
+        Returns: float: Doppler frequency (Hz)."""
+        return -2 * vars.v_ft / vars.wavelength
+
+    @staticmethod
+    def Delta_t_ft():
+        """Calculate Time Delay to apply for False Target Generation.
+        Uses vars.R_ft (m), vars.R (m), and vars.c (m/s).
+        Returns: float: Time delay (s)."""
+        # Delta_t_ft = 2 * (R_ft - R) / c
+        return 2 * (vars.R_ft - vars.R) / vars.c
+
+    @staticmethod
+    def Delta_f_ft():
+        """Calculate Frequency Shift to apply for False Target Generation.
+        Uses vars.f_D_ft (Hz) and vars.f_D_tgt (Hz).
+        Returns: float: Frequency shift (Hz)."""
+        # Delta_f_ft = f_D_ft - f_D_tgt
+        return vars.f_D_ft - vars.f_D_tgt
+
+    # =========================================================================
+    # TOPIC 16: RADAR TRACKING / FALSE TRACKS SOLVERS
+    # =========================================================================
+    @staticmethod
+    def P_density():
+        """Calculate Power Density at Target.
+        Uses vars.Pt (W), vars.Gt (dim), and vars.R (m).
+        Returns: float: Power density (W/m^2)."""
+        # P_density = (Pt * Gt) / (4 * pi * R^2)
+        if vars.R == 0:
+            raise ValueError("Range (R) cannot be zero.")
+        return (vars.Pt * vars.Gt) / (4 * vars.pi * vars.R**2)
+
+    @staticmethod
+    def Pj_emulated():
+        """Calculate Jammer Power required to emulate a target RCS (sigma).
+        Uses vars.P_density (W/m^2), vars.sigma (m^2), and vars.Gj (dim).
+        Returns: float: Jammer transmit power (W)."""
+        # Pj_emulated = (P_density * sigma) / Gj
+        if vars.Gj == 0:
+            raise ValueError("Jammer gain (Gj) cannot be zero.")
+        return (vars.P_density * vars.sigma) / vars.Gj
 
     # =========================================================================
     # TOPIC 17: GATE STEALING SOLVERS
@@ -1540,6 +1804,129 @@ if __name__ == '__main__':  # Only runs when the script is executed directly
     redefine_variable('f_range_tone', solve.f_range_tone())
     print(f"\nGiven: Range Offset = {v.R_offset} m")
     print(f"Calculated Dechirp Range Tone = {convert.hz_to(v.f_range_tone, 'mhz'):.2f} MHz") # -6.67 MHz
+
+    # =========================================================================
+    # Topic 12: Chaff Demo
+    # =========================================================================
+    print("\n" + "="*30)
+    print("Topic 12: Chaff Demo")
+    print("="*30)
+
+    # Example 1: 10 GHz radar
+    redefine_variable('f', 10e9)
+    redefine_variable('wavelength', solve.wavelength())
+    redefine_variable('L_fiber', solve.L_fiber())
+    # Fiber diameter is 1/1000th of length
+    redefine_variable('D_fiber', v.L_fiber / 1000) 
+    redefine_variable('V_ch', solve.V_ch())
+
+    # Box size: 5cm x 5cm x 2cm, 60% fill ratio
+    redefine_variable('V_box', 0.05 * 0.05 * 0.02)
+    redefine_variable('Fill_ratio', 0.60)
+    redefine_variable('N_fiber', solve.N_fiber())
+
+    print(f"Fiber Length (L_fiber): {v.L_fiber*1e3:.2f} mm")
+    print(f"Single Fiber Volume (V_ch): {v.V_ch:.2e} m^3")
+    print(f"Total Fibers (N_fiber): {v.N_fiber:.2e} fibers")
+
+    # RCS at T=infinity
+    redefine_variable('sigma_ch', 0.15 * v.N_fiber * v.wavelength**2)
+    print(f"Max Chaff RCS (sigma_ch_max): {v.sigma_ch:.0f} m^2")
+    print(f"Max Chaff RCS (dBsm): {convert.lin_to_db(v.sigma_ch):.2f} dBsm")
+
+    # =========================================================================
+    # Topic 13: Noise Jamming Demo
+    # =========================================================================
+    print("\n" + "="*30)
+    print("Topic 13: Noise Jamming Demo (Burnthrough)")
+    print("="*30)
+
+    # Based on Topic 13 Example 1
+    redefine_variable('f', 12e9)
+    redefine_variable('wavelength', solve.wavelength())
+    redefine_variable('R', 10e3)              # Range 10 km
+    redefine_variable('Pt', 1500.0)           # P_t = 1500 W
+    redefine_variable('Gt', convert.db_to_lin(33)) # G_t = 33 dB
+    redefine_variable('sigma', convert.db_to_lin(13)) # sigma = 13 dBsm
+    redefine_variable('N_p', 1.0)             # N_p = 1
+    redefine_variable('B', 67e6)              # B_r = 67 MHz (from 15 ns pulse width)
+    redefine_variable('S_min', convert.db_to_lin(10)) # Assume 10dB S/N required
+    redefine_variable('Pj', 500.0)            # P_j = 500 W
+    redefine_variable('Gj', convert.db_to_lin(3)) # G_j = 3 dB
+    redefine_variable('Bj', 6e9)              # B_j = 6 GHz
+    redefine_variable('Lossj', convert.db_to_lin(2)) # Loss_j = 2 dB
+
+    redefine_variable('S_J_ratio', solve.S_J_ratio())
+    print(f"S/J Ratio: {v.S_J_ratio:.3f} (Linear)")
+    print(f"S/J Ratio: {convert.lin_to_db(v.S_J_ratio):.2f} dB")
+
+    redefine_variable('R_bt', solve.R_burnthrough())
+    print(f"Burnthrough Range (R_bt): {v.R_bt / 1e3:.2f} km")
+
+    # =========================================================================
+    # Topic 14: Gated Noise Demo
+    # =========================================================================
+    print("\n" + "="*30)
+    print("Topic 14: Gated Noise Demo (Timing)")
+    print("="*30)
+
+    # Based on Topic 14 Example 1
+    redefine_variable('R_tgt', 50e3)          # Range 50 km
+    redefine_variable('tau', 30e-6)           # Pulse Width 30 us
+    redefine_variable('R_gn_start_offset', 600) # Start 600m before target
+    
+    redefine_variable('t_tgt_2way', solve.t_tgt_2way())
+    redefine_variable('t_gn_start_release', solve.t_gn_start_release())
+
+    print(f"Target 2-way time (t_tgt_2way): {v.t_tgt_2way*1e6:.2f} µs")
+    print(f"Noise Start Release Time (t_gn_start_release): {v.t_gn_start_release*1e6:.2f} µs")
+
+    # =========================================================================
+    # Topic 15: False Target Generation Demo
+    # =========================================================================
+    print("\n" + "="*30)
+    print("Topic 15: False Target Generation Demo")
+    print("="*30)
+    
+    # Based on Topic 15 Example 1
+    redefine_variable('f', 10e9)
+    redefine_variable('wavelength', solve.wavelength())
+    redefine_variable('R', 50e3)              # Target Range 50 km
+    redefine_variable('v_tgt', -120.0)        # Target range rate -120 m/s
+    redefine_variable('R_ft', 60e3)           # False Target Range 60 km
+    redefine_variable('v_ft', 60.0)           # False Target range rate 60 m/s
+
+    redefine_variable('f_D_tgt', solve.f_D_tgt())
+    redefine_variable('f_D_ft', solve.f_D_ft())
+
+    redefine_variable('Delta_t_ft', solve.Delta_t_ft())
+    redefine_variable('Delta_f_ft', solve.Delta_f_ft())
+
+    print(f"Target Doppler (f_D_tgt): {v.f_D_tgt:.0f} Hz")
+    print(f"False Target Doppler (f_D_ft): {v.f_D_ft:.0f} Hz")
+    print(f"Required Time Delay (Delta_t_ft): {v.Delta_t_ft*1e6:.2f} µs")
+    print(f"Required Freq Shift (Delta_f_ft): {v.Delta_f_ft/1e3:.1f} kHz")
+
+    # =========================================================================
+    # Topic 16: Radar Tracking / False Tracks Demo
+    # =========================================================================
+    print("\n" + "="*30)
+    print("Topic 16: False Tracks Demo (Jammer Power)")
+    print("="*30)
+
+    # Based on Topic 16 Example 1
+    redefine_variable('f', 10e9)
+    redefine_variable('R', 50e3)              # Range 50 km
+    redefine_variable('Pt', 3000.0)           # P_t = 3 kW
+    redefine_variable('Gt', convert.db_to_lin(25)) # G_t = 25 dB
+    redefine_variable('sigma', convert.db_to_lin(10)) # Target RCS 10 dBsm
+    redefine_variable('Gj', convert.db_to_lin(3)) # Jammer Gain 3 dB
+
+    redefine_variable('P_density', solve.P_density())
+    print(f"Power Density at Target: {v.P_density:.2e} W/m^2")
+
+    redefine_variable('Pj_emulated', solve.Pj_emulated())
+    print(f"Jammer Power to Emulate RCS: {v.Pj_emulated*1e3:.2f} mW")
 
     # =========================================================================
     # Topic 17: Gate Stealing Demo
