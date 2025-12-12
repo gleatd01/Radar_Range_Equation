@@ -5,7 +5,7 @@ introspective solver for individual radar parameters.
 """
 
 import sympy
-from .radar_vars import vars
+from .variables import vars
 
 
 class Solvable:

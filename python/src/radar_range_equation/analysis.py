@@ -5,7 +5,7 @@ pulse parsing, integration gains, fluctuation loss, and jammer calculations.
 """
 
 import numpy as np
-from .radar_vars import vars
+from .variables import vars
 from .converters import convert
 
 

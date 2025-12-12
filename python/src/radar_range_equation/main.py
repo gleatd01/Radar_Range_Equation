@@ -5,12 +5,12 @@ including symbolic and numeric solutions for various radar types (CW, CWFM, puls
 direction finding, and pulse compression techniques.
 
 The module is organized into separate sub-modules:
-    - radar_vars: Container for physical constants and radar parameters
-    - radar_equations: Symbolic SymPy equations for radar calculations
+    - variables: Container for physical constants and radar parameters
+    - equations: Symbolic SymPy equations for radar calculations
     - solvable: Solvable class for interactive parameter solving
     - solvers: Numeric solver functions for radar problems
     - converters: Unit conversion utilities
-    - radar_analysis: Analysis helpers for pulse parsing, integration, etc.
+    - analysis: Analysis helpers for pulse parsing, integration, etc.
 
 Example:
     >>> import radar_range_equation as RRE
@@ -20,12 +20,12 @@ Example:
 """
 
 # Import all classes from sub-modules
-from .radar_vars import vars, v
-from .radar_equations import equations
+from .variables import vars, v
+from .equations import equations
 from .solvable import Solvable
 from .solvers import solve
 from .converters import convert, con
-from .radar_analysis import analysis
+from .analysis import analysis
 
 
 def redefine_variable(var_name, new_value):

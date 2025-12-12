@@ -10,12 +10,12 @@ The `radar_range_equation` package has been refactored from a single 2372-line `
 
 | Module | Lines | Description |
 |--------|-------|-------------|
-| `radar_vars.py` | 283 | Variable definitions and physical constants |
-| `radar_equations.py` | 347 | Symbolic SymPy equations for all radar types |
+| `variables.py` | 283 | Variable definitions and physical constants |
+| `equations.py` | 347 | Symbolic SymPy equations for all radar types |
 | `solvable.py` | 201 | Interactive Solvable class for parameter solving |
 | `solvers.py` | 750 | Numeric solver functions and methods |
 | `converters.py` | 293 | Unit conversion utilities |
-| `radar_analysis.py` | 537 | Analysis helpers for pulse parsing, integration, etc. |
+| `analysis.py` | 537 | Analysis helpers for pulse parsing, integration, etc. |
 | `main.py` | 54 | Orchestration module that imports and re-exports all classes |
 
 ### Supporting Modules
@@ -29,23 +29,23 @@ The `radar_range_equation` package has been refactored from a single 2372-line `
 
 ```
 main.py
-├── radar_vars.py (no dependencies)
-├── radar_equations.py (depends on: sympy)
-├── solvable.py (depends on: radar_vars, sympy)
-├── solvers.py (depends on: solvable, radar_equations, radar_vars, converters)
+├── variables.py (no dependencies)
+├── equations.py (depends on: sympy)
+├── solvable.py (depends on: variables, sympy)
+├── solvers.py (depends on: solvable, equations, variables, converters)
 ├── converters.py (depends on: numpy)
-└── radar_analysis.py (depends on: radar_vars, converters, numpy)
+└── analysis.py (depends on: variables, converters, numpy)
 
 plot.py (separate, depends on: matplotlib, numpy)
 ```
 
 ## Key Classes
 
-### vars (from radar_vars.py)
+### vars (from variables.py)
 - Container for all radar system variables and physical constants
 - Organized by topic (Base, Doppler, CWFM, Pulsed, Direction Finding, etc.)
 
-### equations (from radar_equations.py)
+### equations (from equations.py)
 - Symbolic SymPy representations of radar equations
 - Supports all radar types and calculation scenarios
 
@@ -61,7 +61,7 @@ plot.py (separate, depends on: matplotlib, numpy)
 - Unit conversion utilities for angles, power, frequency, distance
 - Supports dB conversions, metric conversions, etc.
 
-### analysis (from radar_analysis.py)
+### analysis (from analysis.py)
 - Helper functions for pulse timing, integration gains, jammer analysis
 - RGPO (Range Gate Pull-Off) analysis tools
 
@@ -101,7 +101,7 @@ RRE.convert.lin_to_db(1000)
 
 ### Direct Module Import (Advanced)
 ```python
-from radar_range_equation.radar_vars import vars
+from radar_range_equation.variables import vars
 from radar_range_equation.solvable import Solvable
 from radar_range_equation.solvers import solve
 
@@ -111,10 +111,10 @@ vars.f = 10e9
 
 ## Development Guidelines
 
-1. **Adding New Variables**: Edit `radar_vars.py`
-2. **Adding New Equations**: Edit `radar_equations.py`
+1. **Adding New Variables**: Edit `variables.py`
+2. **Adding New Equations**: Edit `equations.py`
 3. **Adding New Solvers**: Edit `solvers.py` and create Solvable instances
 4. **Adding Conversions**: Edit `converters.py`
-5. **Adding Analysis Tools**: Edit `radar_analysis.py`
+5. **Adding Analysis Tools**: Edit `analysis.py`
 
 Always ensure `main.py` re-exports any new classes or functions for backward compatibility.

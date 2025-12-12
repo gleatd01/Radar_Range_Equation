@@ -8,8 +8,8 @@ import numpy as np
 import math
 import sympy
 from .solvable import Solvable
-from .radar_equations import equations
-from .radar_vars import vars
+from .equations import equations
+from .variables import vars
 from .converters import convert
 
 
