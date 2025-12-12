@@ -1,5 +1,9 @@
 # Radar Range Equation
 
+![Python Package Tests](https://img.shields.io/badge/tests-100%25%20passing-brightgreen)
+![Equations](https://img.shields.io/badge/equations-72-blue)
+![Solvers](https://img.shields.io/badge/solvers-76-blue)
+
 A multi-language library providing radar range equation calculations for Python, Flutter/Dart, and Rust.
 
 ## Overview
@@ -98,21 +102,46 @@ println!("Maximum range: {:.2} meters", max_range);
 
 The radar range equation relates the range of a radar to the characteristics of the transmitter, receiver, antenna, target, and environment. This library implements the basic radar equation:
 
-```
-         ┌─────────────────────────────────────────────┐
-         │    P_t × G² × λ² × σ                       │
-R_max = ⁴│  ──────────────────────────────             │
-         │    (4π)³ × P_min                           │
-         └─────────────────────────────────────────────┘
+### Maximum Range Equation
+
+```math
+R_{max} = \sqrt[4]{\frac{P_t \cdot G^2 \cdot \lambda^2 \cdot \sigma}{(4\pi)^3 \cdot S_{min}}}
 ```
 
 Where:
-- `R_max` = Maximum range
-- `P_t` = Transmit power
-- `G` = Antenna gain
-- `λ` = Wavelength
-- `σ` = Radar cross-section
-- `P_min` = Minimum detectable signal
+- $R_{max}$ = Maximum detection range (meters)
+- $P_t$ = Transmit power (watts)
+- $G$ = Antenna gain (dimensionless)
+- $\lambda$ = Wavelength (meters)
+- $\sigma$ = Radar cross-section (m²)
+- $S_{min}$ = Minimum detectable signal (watts)
+
+### Wavelength Equation
+
+```math
+\lambda = \frac{c}{f}
+```
+
+Where:
+- $\lambda$ = Wavelength (meters)
+- $c$ = Speed of light (3×10⁸ m/s)
+- $f$ = Frequency (Hz)
+
+### Available Equations and Solvers
+
+This package includes **72 equations** and **76 solver functions** covering:
+
+- **Base/Common**: Fundamental radar equations (wavelength, gain, range)
+- **Doppler CW Radar**: Doppler frequency shift and velocity calculations
+- **CWFM Radar**: Continuous Wave FM radar equations
+- **Pulsed Radar**: Range ambiguity, pulse repetition, and integration
+- **Direction Finding**: Angle estimation and accuracy
+- **Pulse Compression**: Range resolution and pulse compression ratio
+- **Electronic Warfare**: Chaff, jamming, false targets, and countermeasures
+
+For detailed documentation of all equations with LaTeX rendering, see:
+- [Complete Equations Reference](EQUATIONS.md) - Full list of all 72 equations
+- [Python Package README](python/README.md) - Python-specific usage and examples
 
 ## Contributing
 

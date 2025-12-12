@@ -35,6 +35,9 @@ htmlcov/
 dmypy.json
 .pytype/
 
+# Test results
+test_results.json
+
 # Flutter/Dart
 .dart_tool/
 .flutter-plugins
