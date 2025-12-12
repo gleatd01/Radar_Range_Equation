@@ -52,14 +52,17 @@ jobs:
             EQ_COUNT=$(python3 -c "import json; data=json.load(open('test_results.json')); print(data['equations']['total'])")
             SOLVER_COUNT=$(python3 -c "import json; data=json.load(open('test_results.json')); print(data['solvers']['total'])")
             
-            # Determine badge color based on pass rate
-            if [ $(echo "$PASS_RATE >= 90" | bc -l) -eq 1 ]; then
-              COLOR="brightgreen"
-            elif [ $(echo "$PASS_RATE >= 70" | bc -l) -eq 1 ]; then
-              COLOR="yellow"
-            else
-              COLOR="red"
-            fi
+            # Determine badge color based on pass rate using Python
+            COLOR=$(python3 -c "
+import sys
+pass_rate = $PASS_RATE
+if pass_rate >= 90:
+    print('brightgreen')
+elif pass_rate >= 70:
+    print('yellow')
+else:
+    print('red')
+")
             
             echo "PASS_RATE=$PASS_RATE" >> $GITHUB_ENV
             echo "EQ_COUNT=$EQ_COUNT" >> $GITHUB_ENV

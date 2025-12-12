@@ -30,8 +30,7 @@ def test_equations_and_solvers():
         
         # Get all equation attributes from equations class
         equation_names = [name for name in dir(equations) 
-                         if not name.startswith('_') and name.endswith('_sym') == False
-                         and hasattr(equations, name)]
+                         if not name.startswith('_') and not name.endswith('_sym')]
         
         # Filter to only actual equations (sympy.Eq objects)
         import sympy
@@ -86,7 +85,8 @@ def test_equations_and_solvers():
                 # Check if it's callable or a Solvable
                 if hasattr(solver, 'solve'):
                     # It's a Solvable instance
-                    assert hasattr(solver, 'status'), f"{solver_name} Solvable missing status()"
+                    assert hasattr(solver, 'status') and callable(getattr(solver, 'status')), \
+                        f"{solver_name} Solvable missing status() method"
                     assert callable(solver), f"{solver_name} Solvable is not callable"
                 elif callable(solver):
                     # It's a regular method
