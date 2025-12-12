@@ -84,6 +84,7 @@ def test_solvable():
         
         # Test 8: Test Doppler solvers
         RRE.vars.wavelength = 0.03
+        # For v=-100 m/s, λ=0.03m: f_doppler = -2*v/λ = -2*(-100)/0.03 = 6666.67 Hz
         RRE.vars.f_doppler = 6666.67
         velocity = RRE.solve.v_from_doppler()
         expected_v = -100.0
@@ -96,6 +97,7 @@ def test_solvable():
         RRE.vars.f_r = 80e3
         RRE.vars.f_m = 100
         RRE.vars.deltaf = 30e6
+        # CWFM equation: R = c*f_r/(4*f_m*Δf) = 3e8*80e3/(4*100*30e6) = 2000 m
         range_val = RRE.solve.R_cwfm()
         expected_r = 2000.0
         assert isclose(range_val, expected_r, rel_tol=1e-9), \

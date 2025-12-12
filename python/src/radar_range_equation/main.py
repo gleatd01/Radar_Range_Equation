@@ -664,6 +664,28 @@ class Solvable:
         self.target_symbol = target_symbol
         self.equation_list = equation_list if isinstance(equation_list, list) else [equation_list]
     
+    def _normalize_var_name(self, sym):
+        """Normalize a sympy symbol name to match vars attribute names.
+        
+        Handles special cases like 'lambda' -> 'wavelength' and 'Delta f' -> 'deltaf'.
+        
+        Args:
+            sym (sympy.Symbol): The symbol to normalize
+            
+        Returns:
+            str: The normalized variable name
+        """
+        var_name = sym.name
+        
+        # Handle special case for 'lambda' (wavelength)
+        if var_name == 'lambda':
+            var_name = 'wavelength'
+        # Handle 'Delta f'
+        elif str(sym) == 'Delta f':
+            var_name = 'deltaf'
+        
+        return var_name
+    
     def status(self):
         """Display a status report showing what's needed to solve for the target.
         
@@ -694,14 +716,7 @@ class Solvable:
             
             for sym in free_symbols:
                 # Try to get the value from vars
-                var_name = sym.name
-                
-                # Handle special case for 'lambda' (wavelength)
-                if var_name == 'lambda':
-                    var_name = 'wavelength'
-                # Handle 'Delta f'
-                elif str(sym) == 'Delta f':
-                    var_name = 'deltaf'
+                var_name = self._normalize_var_name(sym)
                 
                 if hasattr(vars, var_name):
                     value = getattr(vars, var_name)
@@ -761,13 +776,7 @@ class Solvable:
             all_defined = True
             
             for sym in free_symbols:
-                var_name = sym.name
-                
-                # Handle special cases
-                if var_name == 'lambda':
-                    var_name = 'wavelength'
-                elif str(sym) == 'Delta f':
-                    var_name = 'deltaf'
+                var_name = self._normalize_var_name(sym)
                 
                 if hasattr(vars, var_name):
                     value = getattr(vars, var_name)
