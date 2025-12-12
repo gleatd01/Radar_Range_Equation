@@ -1045,21 +1045,37 @@ class solve:
     # TOPIC 07: DOPPLER CW RADAR SOLVERS
     # =========================================================================
     
-    f_doppler = _solver(equations.eq_f_doppler, equations.eq_f_doppler.lhs)
-    v_from_doppler = _solver(equations.eq_v_from_doppler, equations.eq_v_from_doppler.lhs)
-    f_obs_if = _solver(equations.eq_f_obs_if, equations.eq_f_obs_if.lhs)
-    delta_v = _solver(equations.eq_delta_v, equations.eq_delta_v.lhs)
+    # Converted to Solvable instances
+    f_doppler = Solvable(equations.f_doppler_sym, [equations.eq_f_doppler])
+    v_from_doppler = Solvable(equations.v_sym, [equations.eq_v_from_doppler])
+    f_obs_if = Solvable(equations.f_obs_sym, [equations.eq_f_obs_if])
+    delta_v = Solvable(equations.delta_v_sym, [equations.eq_delta_v])
+    
+    # Legacy function-based versions
+    _f_doppler_func = _solver(equations.eq_f_doppler, equations.eq_f_doppler.lhs)
+    _v_from_doppler_func = _solver(equations.eq_v_from_doppler, equations.eq_v_from_doppler.lhs)
+    _f_obs_if_func = _solver(equations.eq_f_obs_if, equations.eq_f_obs_if.lhs)
+    _delta_v_func = _solver(equations.eq_delta_v, equations.eq_delta_v.lhs)
 
     # =========================================================================
     # TOPIC 08: CWFM RADAR SOLVERS
     # =========================================================================
     
-    R_cwfm = _solver(equations.R_cwfm, equations.R_cwfm.lhs)
-    v_cwfm = _solver(equations.v_cwfm, equations.v_cwfm.lhs)
-    f_m_cwfm = _solver(equations.f_m_cwfm, equations.f_m_cwfm.lhs)
-    f_r_cwfm = _solver(equations.f_r_cwfm, equations.f_r_cwfm.lhs)
-    f_d_cwfm = _solver(equations.f_d_cwfm, equations.f_d_cwfm.lhs)
-    f_0_cwfm = _solver(equations.f_0_cwfm, equations.f_0_cwfm.lhs)
+    # Converted to Solvable instances
+    R_cwfm = Solvable(equations.R_sym, [equations.R_cwfm])
+    v_cwfm = Solvable(equations.v_sym, [equations.v_cwfm])
+    f_m_cwfm = Solvable(equations.f_m_sym, [equations.f_m_cwfm])
+    f_r_cwfm = Solvable(equations.f_r_sym, [equations.f_r_cwfm])
+    f_d_cwfm = Solvable(equations.f_d_sym, [equations.f_d_cwfm])
+    f_0_cwfm = Solvable(equations.f_0_sym, [equations.f_0_cwfm])
+    
+    # Legacy function-based versions
+    _R_cwfm_func = _solver(equations.R_cwfm, equations.R_cwfm.lhs)
+    _v_cwfm_func = _solver(equations.v_cwfm, equations.v_cwfm.lhs)
+    _f_m_cwfm_func = _solver(equations.f_m_cwfm, equations.f_m_cwfm.lhs)
+    _f_r_cwfm_func = _solver(equations.f_r_cwfm, equations.f_r_cwfm.lhs)
+    _f_d_cwfm_func = _solver(equations.f_d_cwfm, equations.f_d_cwfm.lhs)
+    _f_0_cwfm_func = _solver(equations.f_0_cwfm, equations.f_0_cwfm.lhs)
 
     # =========================================================================
     # TOPIC 09: PULSED RADAR & RANGE AMBIGUITY SOLVERS
