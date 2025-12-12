@@ -38,6 +38,41 @@ jobs:
         run: pip install dist/*.whl
       - name: Test package
         run: python python/test_package.py
+      - name: Test equations and solvers
+        run: python python/test_equations_solvers.py
+      - name: Generate equation documentation
+        run: python python/generate_equation_docs.py
+      - name: Generate solver documentation
+        run: python python/generate_solver_docs.py
+      - name: Create badges
+        run: |
+          # Read test results and create badge data
+          if [ -f test_results.json ]; then
+            PASS_RATE=$(python3 -c "import json; data=json.load(open('test_results.json')); print(data.get('pass_rate', 0))")
+            EQ_COUNT=$(python3 -c "import json; data=json.load(open('test_results.json')); print(data['equations']['total'])")
+            SOLVER_COUNT=$(python3 -c "import json; data=json.load(open('test_results.json')); print(data['solvers']['total'])")
+            
+            # Determine badge color based on pass rate using Python
+            COLOR=$(python3 -c "
+import sys
+pass_rate = $PASS_RATE
+if pass_rate >= 90:
+    print('brightgreen')
+elif pass_rate >= 70:
+    print('yellow')
+else:
+    print('red')
+")
+            
+            echo "PASS_RATE=$PASS_RATE" >> $GITHUB_ENV
+            echo "EQ_COUNT=$EQ_COUNT" >> $GITHUB_ENV
+            echo "SOLVER_COUNT=$SOLVER_COUNT" >> $GITHUB_ENV
+            echo "BADGE_COLOR=$COLOR" >> $GITHUB_ENV
+            
+            echo "Test Results: $PASS_RATE% pass rate"
+            echo "Equations: $EQ_COUNT"
+            echo "Solvers: $SOLVER_COUNT"
+          fi
       - name: Upload package
         run: |
           python3 -m pip install --upgrade twine
