@@ -169,6 +169,11 @@ class Solvable:
                 value_sym = sym_expr.subs(subs_map)
                 value_simpl = sympy.simplify(value_sym)
                 result = float(value_simpl.evalf())
+                
+                # Automatically define the corresponding variable in vars
+                var_name = self._normalize_var_name(self.target_symbol)
+                setattr(vars, var_name, result)
+                
                 return result
         
         # No equation was solvable

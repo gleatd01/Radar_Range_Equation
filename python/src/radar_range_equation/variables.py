@@ -5,8 +5,8 @@ for all radar-related variables, including physical constants, antenna
 parameters, and topic-specific variables for different radar types.
 """
 
-import scipy.constants
 from sympy import Symbol
+from . import constants
 
 
 class vars:
@@ -80,19 +80,17 @@ class vars:
     # BASE/COMMON PHYSICAL CONSTANTS AND VARIABLES
     # =========================================================================
     
-    c = Symbol('c')                     # speed of light (symbolic)
-    c = scipy.constants.c               # speed of light (m/s)
-    k = Symbol('k')                     # Boltzmann constant (symbolic)
-    k = scipy.constants.Boltzmann       # Boltzmann constant (J/K)
-    pi = Symbol('pi')                   # pi (symbolic)
-    pi = scipy.constants.pi             # pi (numeric)
-    pi4 = Symbol('pi4')                 # 4*pi (symbolic)
-    pi4 = 4 * scipy.constants.pi        # 4*pi (numeric)
-    g = 9.80665                         # Gravitational acceleration (m/s^2)
+    # Physical constants (imported from constants module)
+    c = constants.c                     # speed of light (m/s)
+    k = constants.k                     # Boltzmann constant (J/K)
+    pi = constants.pi                   # pi (numeric)
+    pi4 = constants.pi4                 # 4*pi (numeric)
+    g = constants.g                     # Gravitational acceleration (m/s^2)
+    T_0 = constants.T_0                 # reference temperature (K)
+    
+    # Generic and base symbolic variables
     x = Symbol('x')                     # generic variable for conversions (symbolic)
     f = Symbol('f')                     # frequency (symbolic)
-    T_0 = Symbol('T_0')                 # reference temperature (symbolic)
-    T_0 = 290                           # reference temperature (K) — example
     wavelength = Symbol('lambda')       # wavelength (symbolic)
     v = Symbol('v')                     # velocity (symbolic)
     

@@ -10,13 +10,14 @@ The `radar_range_equation` package has been refactored from a single 2372-line `
 
 | Module | Lines | Description |
 |--------|-------|-------------|
-| `variables.py` | 283 | Variable definitions and physical constants |
+| `constants.py` | ~15 | Physical constants (c, k, pi, g, T_0) |
+| `variables.py` | ~270 | Variable definitions for radar parameters |
 | `equations.py` | 347 | Symbolic SymPy equations for all radar types |
-| `solvable.py` | 201 | Interactive Solvable class for parameter solving |
+| `solvable.py` | ~205 | Interactive Solvable class for parameter solving |
 | `solvers.py` | 750 | Numeric solver functions and methods |
 | `converters.py` | 293 | Unit conversion utilities |
 | `analysis.py` | 537 | Analysis helpers for pulse parsing, integration, etc. |
-| `main.py` | 54 | Orchestration module that imports and re-exports all classes |
+| `main.py` | ~55 | Orchestration module that imports and re-exports all classes |
 
 ### Supporting Modules
 
@@ -29,7 +30,8 @@ The `radar_range_equation` package has been refactored from a single 2372-line `
 
 ```
 main.py
-├── variables.py (no dependencies)
+├── constants.py (depends on: scipy)
+├── variables.py (depends on: constants, sympy)
 ├── equations.py (depends on: sympy)
 ├── solvable.py (depends on: variables, sympy)
 ├── solvers.py (depends on: solvable, equations, variables, converters)
@@ -41,8 +43,13 @@ plot.py (separate, depends on: matplotlib, numpy)
 
 ## Key Classes
 
+### constants (from constants.py)
+- Physical constants: c (speed of light), k (Boltzmann), pi, g (gravity), T_0
+- Imported from scipy.constants where applicable
+
 ### vars (from variables.py)
-- Container for all radar system variables and physical constants
+- Container for all radar system variables
+- Includes references to physical constants from constants module
 - Organized by topic (Base, Doppler, CWFM, Pulsed, Direction Finding, etc.)
 
 ### equations (from equations.py)
@@ -109,12 +116,34 @@ from radar_range_equation.solvers import solve
 vars.f = 10e9
 ```
 
+## Key Features
+
+### Auto-Variable Definition
+When using Solvable instances, the calculated result is automatically stored in the corresponding variable:
+
+```python
+RRE.vars.c = 3e8
+RRE.vars.f = 10e9
+
+# Before solving
+print(RRE.vars.wavelength)  # lambda (symbolic)
+
+# Solve
+wavelength = RRE.solve.wavelength()
+
+# After solving - automatically defined!
+print(RRE.vars.wavelength)  # 0.03 (numeric)
+```
+
+This enables chaining calculations where one solve automatically provides input for the next.
+
 ## Development Guidelines
 
-1. **Adding New Variables**: Edit `variables.py`
-2. **Adding New Equations**: Edit `equations.py`
-3. **Adding New Solvers**: Edit `solvers.py` and create Solvable instances
-4. **Adding Conversions**: Edit `converters.py`
-5. **Adding Analysis Tools**: Edit `analysis.py`
+1. **Adding New Constants**: Edit `constants.py`
+2. **Adding New Variables**: Edit `variables.py`
+3. **Adding New Equations**: Edit `equations.py`
+4. **Adding New Solvers**: Edit `solvers.py` and create Solvable instances
+5. **Adding Conversions**: Edit `converters.py`
+6. **Adding Analysis Tools**: Edit `analysis.py`
 
 Always ensure `main.py` re-exports any new classes or functions for backward compatibility.

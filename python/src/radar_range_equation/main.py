@@ -20,6 +20,7 @@ Example:
 """
 
 # Import all classes from sub-modules
+from . import constants
 from .variables import vars, v
 from .equations import equations
 from .solvable import Solvable
