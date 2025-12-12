@@ -42,6 +42,8 @@ jobs:
         run: python python/test_equations_solvers.py
       - name: Generate equation documentation
         run: python python/generate_equation_docs.py
+      - name: Generate solver documentation
+        run: python python/generate_solver_docs.py
       - name: Create badges
         run: |
           # Read test results and create badge data

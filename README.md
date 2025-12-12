@@ -139,8 +139,9 @@ This package includes **72 equations** and **76 solver functions** covering:
 - **Pulse Compression**: Range resolution and pulse compression ratio
 - **Electronic Warfare**: Chaff, jamming, false targets, and countermeasures
 
-For detailed documentation of all equations with LaTeX rendering, see:
-- [Complete Equations Reference](EQUATIONS.md) - Full list of all 72 equations
+For detailed documentation, see:
+- [Complete Equations Reference](EQUATIONS.md) - Full list of all 72 equations with LaTeX
+- [Complete Solver Reference](SOLVERS.md) - Full list of all 76 solver functions
 - [Python Package README](python/README.md) - Python-specific usage and examples
 
 ## Contributing
