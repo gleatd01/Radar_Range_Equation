@@ -35,7 +35,8 @@ from .main import vars, \
                     solve, \
                     convert, \
                     analysis, \
-                    redefine_variable
+                    redefine_variable, \
+                    Solvable
 from . import plot
 
 __all__ = ["vars",
@@ -44,5 +45,6 @@ __all__ = ["vars",
            "convert",
            "analysis",
            "plot",
-           "redefine_variable"
+           "redefine_variable",
+           "Solvable"
            ]
