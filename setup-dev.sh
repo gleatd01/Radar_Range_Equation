@@ -29,7 +29,7 @@ print_warning() {
 
 # Check if we're in the right directory
 if [ ! -f "pyproject.toml" ]; then
-    print_error "Please run this script from the root of the Radar_Range_Equation repository"
+    print_error "Please run this script from the root of the repository (the directory containing pyproject.toml)"
     exit 1
 fi
 
