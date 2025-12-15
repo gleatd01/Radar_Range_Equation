@@ -4,6 +4,7 @@ Thank you for your interest in contributing to the Radar Range Equation project!
 
 ## Table of Contents
 
+- [Code of Conduct](#code-of-conduct)
 - [Getting Started](#getting-started)
 - [Development Setup](#development-setup)
 - [How to Contribute](#how-to-contribute)
@@ -12,16 +13,40 @@ Thank you for your interest in contributing to the Radar Range Equation project!
 - [Submitting Changes](#submitting-changes)
 - [Adding a New Language Implementation](#adding-a-new-language-implementation)
 
+## Code of Conduct
+
+This project and everyone participating in it is governed by our [Code of Conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code. Please report unacceptable behavior to taylor@buzzedtop.com.
+
 ## Getting Started
 
 Before you begin:
 1. Read the [README.md](README.md) to understand the project
-2. Check existing [issues](https://github.com/gleatd01/Radar_Range_Equation/issues) and [pull requests](https://github.com/gleatd01/Radar_Range_Equation/pulls)
-3. For major changes, open an issue first to discuss your ideas
+2. Review the [Code of Conduct](CODE_OF_CONDUCT.md)
+3. Check existing [issues](https://github.com/gleatd01/Radar_Range_Equation/issues) and [pull requests](https://github.com/gleatd01/Radar_Range_Equation/pulls)
+4. For major changes, open an issue first to discuss your ideas
 
 ## Development Setup
 
-### Python Package
+### Quick Setup (Recommended)
+
+We provide a setup script that configures all language environments:
+
+```bash
+git clone https://github.com/gleatd01/Radar_Range_Equation.git
+cd Radar_Range_Equation
+./setup-dev.sh
+```
+
+This script will:
+- Install the Python package in editable mode
+- Install development dependencies
+- Set up Flutter/Dart environment (if installed)
+- Set up Rust environment (if installed)
+- Run tests to verify the setup
+
+### Manual Setup
+
+#### Python Package
 
 1. Clone the repository:
    ```bash

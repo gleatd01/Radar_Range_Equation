@@ -8,7 +8,7 @@
 
 A multi-language library providing radar range equation calculations for Python, Flutter/Dart, and Rust.
 
-**📖 [Quickstart Guide](QUICKSTART.md)** | **📚 [Documentation](python/README.md)** | **🤝 [Contributing](CONTRIBUTING.md)** | **📝 [Changelog](CHANGELOG.md)**
+**📖 [Quickstart Guide](QUICKSTART.md)** | **📚 [Documentation](python/README.md)** | **🤝 [Contributing](CONTRIBUTING.md)** | **📝 [Changelog](CHANGELOG.md)** | **📋 [Code of Conduct](CODE_OF_CONDUCT.md)**
 
 ## Overview
 
@@ -192,10 +192,11 @@ For detailed documentation, see:
 We welcome contributions! Whether you're fixing bugs, adding features, improving documentation, or implementing support for a new language, your help is appreciated.
 
 **Getting Started:**
-1. Read the [Contributing Guide](CONTRIBUTING.md)
-2. Check [open issues](https://github.com/gleatd01/Radar_Range_Equation/issues)
-3. Fork the repository and create a feature branch
-4. Submit a Pull Request
+1. Read the [Contributing Guide](CONTRIBUTING.md) and [Code of Conduct](CODE_OF_CONDUCT.md)
+2. Run the development setup script: `./setup-dev.sh`
+3. Check [open issues](https://github.com/gleatd01/Radar_Range_Equation/issues)
+4. Fork the repository and create a feature branch
+5. Submit a Pull Request
 
 **Adding a New Language:**
 1. Create a new directory for the language
