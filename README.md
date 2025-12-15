@@ -1,10 +1,14 @@
 # Radar Range Equation
 
-![Python Package Tests](https://img.shields.io/badge/tests-100%25%20passing-brightgreen)
-![Equations](https://img.shields.io/badge/equations-72-blue)
-![Solvers](https://img.shields.io/badge/solvers-76-blue)
+[![Python Package Tests](https://img.shields.io/badge/tests-100%25%20passing-brightgreen)](https://github.com/gleatd01/Radar_Range_Equation/actions)
+[![Equations](https://img.shields.io/badge/equations-72-blue)](EQUATIONS.md)
+[![Solvers](https://img.shields.io/badge/solvers-76-blue)](SOLVERS.md)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![PyPI](https://img.shields.io/badge/PyPI-radar--range--equation-blue)](https://pypi.org/project/radar-range-equation/)
 
 A multi-language library providing radar range equation calculations for Python, Flutter/Dart, and Rust.
+
+**📖 [Quickstart Guide](QUICKSTART.md)** | **📚 [Documentation](python/README.md)** | **🤝 [Contributing](CONTRIBUTING.md)** | **📝 [Changelog](CHANGELOG.md)**
 
 ## Overview
 
@@ -15,45 +19,84 @@ This repository contains implementations of radar range equation calculators in 
 
 All implementations provide the same core functionality with language-specific APIs and conventions.
 
-## Package Structure
+## 🚀 Installation
+
+Choose your preferred language:
+
+### Python
+```bash
+pip install radar-range-equation
+```
+
+### Flutter/Dart
+```yaml
+# Add to pubspec.yaml
+dependencies:
+  radar_range_equation:
+    git:
+      url: https://github.com/gleatd01/Radar_Range_Equation.git
+      path: flutter
+```
+
+### Rust
+```toml
+# Add to Cargo.toml
+[dependencies]
+radar_range_equation = { git = "https://github.com/gleatd01/Radar_Range_Equation.git", path = "rust" }
+```
+
+For detailed installation instructions, see the [Quickstart Guide](QUICKSTART.md).
+
+## 📦 Package Structure
 
 ```
 Radar_Range_Equation/
-├── python/          # Python package
-├── flutter/         # Flutter/Dart package
-├── rust/            # Rust crate
-├── README.md        # This file
-└── LICENSE          # MIT License
+├── python/              # Python package (PyPI: radar-range-equation)
+├── flutter/             # Flutter/Dart package
+├── rust/                # Rust crate
+├── .github/             # CI/CD workflows and issue templates
+├── README.md            # This file
+├── QUICKSTART.md        # Quick start guide
+├── CONTRIBUTING.md      # Contribution guidelines
+├── CHANGELOG.md         # Version history
+├── EQUATIONS.md         # Complete equations reference
+├── SOLVERS.md           # Complete solver reference
+└── LICENSE              # MIT License
 ```
 
-## Language-Specific Documentation
+## 📚 Documentation
 
-Each language implementation has its own README with detailed installation and usage instructions:
+Each language implementation has its own comprehensive documentation:
 
-- [Python Package](python/README.md) - [PyPI](https://pypi.org/project/Radar-Range-Equation/)
-- [Flutter/Dart Package](flutter/README.md)
-- [Rust Crate](rust/README.md)
+- **Python**: [README](python/README.md) • [PyPI Package](https://pypi.org/project/radar-range-equation/)
+- **Flutter/Dart**: [README](flutter/README.md)
+- **Rust**: [README](rust/README.md)
 
-## Quick Start
+## ⚡ Quick Start
 
 ### Python
 
 ```bash
-cd python
-pip install -e .
+pip install radar-range-equation
 ```
 
 ```python
-from radar_range_equation import calculate_max_range
+import radar_range_equation as RRE
 
-max_range = calculate_max_range(
-    transmit_power=1000,
-    antenna_gain=1000,
-    wavelength=0.03,
-    radar_cross_section=1.0,
-    min_detectable_signal=1e-13
-)
-print(f"Maximum range: {max_range:.2f} meters")
+# Set variables
+RRE.vars.P_t = 1000         # Transmit power (W)
+RRE.vars.G_t = 1000         # Antenna gain
+RRE.vars.G_r = 1000
+RRE.vars.wavelength = 0.03  # 30 cm wavelength
+RRE.vars.sigma = 1.0        # Radar cross-section (m²)
+RRE.vars.S_min = 1e-13      # Minimum detectable signal (W)
+
+# Calculate maximum range
+max_range = RRE.solve.R_max()
+print(f"Maximum range: {max_range/1000:.2f} km")
+
+# Visualize radar signal
+RRE.plot.pulsed_radar_signal()
 ```
 
 ### Flutter/Dart
@@ -144,31 +187,60 @@ For detailed documentation, see:
 - [Complete Solver Reference](SOLVERS.md) - Full list of all 76 solver functions
 - [Python Package README](python/README.md) - Python-specific usage and examples
 
-## Contributing
+## 🤝 Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request. When adding support for a new language:
+We welcome contributions! Whether you're fixing bugs, adding features, improving documentation, or implementing support for a new language, your help is appreciated.
 
+**Getting Started:**
+1. Read the [Contributing Guide](CONTRIBUTING.md)
+2. Check [open issues](https://github.com/gleatd01/Radar_Range_Equation/issues)
+3. Fork the repository and create a feature branch
+4. Submit a Pull Request
+
+**Adding a New Language:**
 1. Create a new directory for the language
 2. Follow the existing structure (src, tests, examples)
 3. Include comprehensive tests
 4. Add language-specific README
 5. Update this main README
 
-## License
+See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
+
+## 📋 Version History
+
+See [CHANGELOG.md](CHANGELOG.md) for detailed version history and release notes.
+
+## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## Future Expansion
+## 🎯 Roadmap
 
-The project structure is designed to easily accommodate additional language implementations. To add a new language:
+Future plans for the project:
 
-1. Create a new directory at the root level
-2. Implement the core functions following your language's conventions
-3. Add tests and examples
-4. Document installation and usage in a language-specific README
-5. Update the main README with your language
+- [ ] Publish Rust crate to crates.io
+- [ ] Publish Flutter package to pub.dev
+- [ ] Add more radar equation variants
+- [ ] Expand plotting capabilities
+- [ ] Add interactive web calculator
+- [ ] Additional language implementations (JavaScript, Java, C++)
 
-## References
+## 🆘 Getting Help
 
-- Skolnik, M. I. (2008). Radar Handbook, Third Edition. McGraw-Hill.
-- Richards, M. A. (2014). Fundamentals of Radar Signal Processing, Second Edition. McGraw-Hill.
+- **Documentation**: Start with [QUICKSTART.md](QUICKSTART.md)
+- **Examples**: Check language-specific example files
+- **Issues**: Report bugs or ask questions on [GitHub Issues](https://github.com/gleatd01/Radar_Range_Equation/issues)
+- **Discussions**: Use GitHub Discussions for general questions
+
+## 📚 References
+
+- Skolnik, M. I. (2008). *Radar Handbook, Third Edition*. McGraw-Hill.
+- Richards, M. A. (2014). *Fundamentals of Radar Signal Processing, Second Edition*. McGraw-Hill.
+
+## ⭐ Star History
+
+If you find this project useful, please consider giving it a star! It helps others discover the project.
+
+---
+
+Made with ❤️ for the radar engineering community

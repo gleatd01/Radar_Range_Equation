@@ -1,0 +1,22 @@
+# Development dependencies for Radar Range Equation Python package
+
+# Core dependencies (also in pyproject.toml)
+scipy
+numpy
+sympy
+pint
+matplotlib
+
+# Testing
+pytest>=7.0.0
+pytest-cov>=4.0.0
+
+# Code quality
+black>=23.0.0
+flake8>=6.0.0
+mypy>=1.0.0
+
+# Build tools
+hatchling>=1.26
+build
+twine
