@@ -60,6 +60,15 @@ fn main() {
 
 ## API Reference
 
+### Module Layout
+
+The crate is organized into focused modules for maintainability:
+
+- `constants` — physical constants used across calculations
+- `convert` — unit conversion helpers
+- core calculation functions re-exported at the crate root
+- `RadarError`/`Result` — shared error handling utilities
+
 ### Core Functions
 
 #### `calculate_wavelength(frequency: f64) -> Result<f64>`

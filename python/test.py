@@ -11,9 +11,15 @@ Run with: python3 test.py
 import sys
 import random
 import math
+from pathlib import Path
 from typing import List, Tuple, Dict, Any
 
 # Seed for reproducibility
+ROOT = Path(__file__).resolve().parent
+SRC_PATH = ROOT / "src"
+if str(SRC_PATH) not in sys.path:
+    sys.path.insert(0, str(SRC_PATH))
+
 RANDOM_SEED = 42
 random.seed(RANDOM_SEED)
 
