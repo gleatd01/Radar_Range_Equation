@@ -74,13 +74,13 @@ double calculateMaxRange(
   double radarCrossSection,
   double minDetectableSignal,
 ) {
-  final numerator = transmitPower *
-      math.pow(antennaGain, 2) *
-      math.pow(wavelength, 2) *
-      radarCrossSection;
-  final denominator =
-      math.pow(4 * RadarConstants.pi, 3) * minDetectableSignal;
-  return math.pow(numerator / denominator, 0.25);
+  final antennaGainSquared = math.pow(antennaGain, 2).toDouble();
+  final wavelengthSquared = math.pow(wavelength, 2).toDouble();
+  final denominatorFactor = math.pow(4 * RadarConstants.pi, 3).toDouble();
+  final numerator =
+      transmitPower * antennaGainSquared * wavelengthSquared * radarCrossSection;
+  final denominator = denominatorFactor * minDetectableSignal;
+  return math.pow(numerator / denominator, 0.25).toDouble();
 }
 
 /// Calculate received power at a given range.
@@ -102,12 +102,12 @@ double calculateReceivedPower(
   double radarCrossSection,
   double range,
 ) {
-  final numerator = transmitPower *
-      transmitGain *
-      receiveGain *
-      math.pow(wavelength, 2) *
-      radarCrossSection;
-  final denominator = math.pow(4 * RadarConstants.pi, 3) * math.pow(range, 4);
+  final wavelengthSquared = math.pow(wavelength, 2).toDouble();
+  final rangeFourth = math.pow(range, 4).toDouble();
+  final numerator =
+      transmitPower * transmitGain * receiveGain * wavelengthSquared * radarCrossSection;
+  final denominator =
+      math.pow(4 * RadarConstants.pi, 3).toDouble() * rangeFourth;
   return numerator / denominator;
 }
 
