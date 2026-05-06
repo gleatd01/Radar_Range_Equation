@@ -7,7 +7,13 @@ radar_range_equation package, including amplitude, phase, and time comparison me
 
 import sys
 import math
+from pathlib import Path
 from math import isclose
+
+ROOT = Path(__file__).resolve().parent
+SRC_PATH = ROOT / "src"
+if str(SRC_PATH) not in sys.path:
+    sys.path.insert(0, str(SRC_PATH))
 
 
 def test_angle_estimation():

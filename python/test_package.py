@@ -7,7 +7,13 @@ imports and basic functions behave as expected.
 """
 
 import sys
+from pathlib import Path
 from math import isclose
+
+ROOT = Path(__file__).resolve().parent
+SRC_PATH = ROOT / "src"
+if str(SRC_PATH) not in sys.path:
+    sys.path.insert(0, str(SRC_PATH))
 
 
 def test_package():

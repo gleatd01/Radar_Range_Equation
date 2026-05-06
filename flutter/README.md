@@ -58,6 +58,14 @@ void main() {
 
 ## API Reference
 
+### Module Layout
+
+The Dart package is organized into focused modules:
+
+- `constants.dart` — physical constants
+- `core.dart` — core calculation functions
+- `conversions.dart` — unit conversion utilities
+
 ### Core Functions
 
 #### `calculateWavelength(double frequency)`

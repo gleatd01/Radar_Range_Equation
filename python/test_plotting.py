@@ -9,7 +9,12 @@ repository without installation. In production tests, install the package first.
 """
 
 import sys
-sys.path.insert(0, 'python/src')  # For running from repo without installation
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent
+SRC_PATH = ROOT / "src"
+if str(SRC_PATH) not in sys.path:
+    sys.path.insert(0, str(SRC_PATH))
 import radar_range_equation as RRE
 import numpy as np
 import matplotlib
