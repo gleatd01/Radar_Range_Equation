@@ -1,0 +1,8 @@
+# Main dependencies for Radar Range Equation
+# Install with: pip install -r requirements.txt
+
+scipy
+numpy
+sympy
+pint
+matplotlib
