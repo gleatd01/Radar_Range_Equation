@@ -8,12 +8,13 @@ function from the radar_range_equation package.
 """
 
 import sys
-sys.path.insert(0, 'python/src')  # For running from repo without installation
+
+sys.path.insert(0, "python/src")  # For running from repo without installation
 import radar_range_equation as RRE
 
-print("="*70)
+print("=" * 70)
 print("Tactical Scenario Plot - Problem Statement Example")
-print("="*70)
+print("=" * 70)
 print("\nThis example creates the exact plot from the problem statement:")
 print("  - Radar at (10, 20) km - Blue 'x' marker")
 print("  - Target at (50, -20) km - Green solid square marker")
@@ -32,24 +33,24 @@ fig = RRE.plot.tactical_scenario(
     xlim=(0, 75),
     ylim=(-25, 25),
     figsize=(8, 6),
-    show=False
+    show=False,
 )
 
 print("\n✓ Tactical scenario plot generated successfully!")
 
 # Save the figure
-output_path = '/tmp/problem_statement_tactical_scenario.png'
-fig.savefig(output_path, dpi=150, bbox_inches='tight')
+output_path = "/tmp/problem_statement_tactical_scenario.png"
+fig.savefig(output_path, dpi=150, bbox_inches="tight")
 print(f"✓ Plot saved to {output_path}")
 
-print("\n" + "="*70)
+print("\n" + "=" * 70)
 print("The implementation successfully reproduces the exact plot")
 print("described in the problem statement using RRE.plot.tactical_scenario()!")
-print("="*70)
+print("=" * 70)
 
-print("\n" + "="*70)
+print("\n" + "=" * 70)
 print("Comparison with original problem statement code:")
-print("="*70)
+print("=" * 70)
 print("\nOriginal approach (from problem statement):")
 print("  import matplotlib.pyplot as plt")
 print("  import numpy as np")
@@ -72,4 +73,4 @@ print("  ✓ Consistent with other RRE plotting functions")
 print("  ✓ Fully customizable with optional parameters")
 print("  ✓ Returns matplotlib Figure for further customization")
 print("  ✓ Can save to file or display interactively")
-print("="*70)
+print("=" * 70)

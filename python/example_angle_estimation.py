@@ -8,8 +8,9 @@ This example demonstrates the three main angle measurement techniques:
 3. Time Comparison
 """
 
-import radar_range_equation as RRE
 import math
+
+import radar_range_equation as RRE
 
 print("=" * 70)
 print("Radar Angle Estimation Calculations")
@@ -44,7 +45,7 @@ RRE.vars.Sigma = 1.0
 RRE.vars.theta_B = 10.0
 RRE.vars.phi_s = 5.0
 phi_hat = RRE.solve.estimate_phi_hat()
-print(f"\nLinear processor angle estimate:")
+print("\nLinear processor angle estimate:")
 print(f"  Delta: {RRE.vars.Delta}, Sigma: {RRE.vars.Sigma}")
 print(f"  phi_hat: {phi_hat:.4f} degrees")
 
@@ -62,7 +63,9 @@ print(f"Angle standard deviation (amplitude comparison): {sigma_phi_amp:.4f} deg
 
 # Calculate phi_s needed for a target sigma_phi
 target_sigma_phi = 0.5  # degrees
-phi_s_needed = (RRE.vars.theta_B**2 * math.sqrt(1 / S_N_linear)) / (8 * math.sqrt(2) * target_sigma_phi * math.log(2))
+phi_s_needed = (RRE.vars.theta_B**2 * math.sqrt(1 / S_N_linear)) / (
+    8 * math.sqrt(2) * target_sigma_phi * math.log(2)
+)
 print(f"\nTo achieve sigma_phi of {target_sigma_phi} degrees:")
 print(f"  Required phi_s: {phi_s_needed:.4f} degrees")
 
@@ -89,14 +92,16 @@ RRE.vars.S_N = S_N_linear_2
 sigma_phi_phase_rad = RRE.solve.sigma_phi_phase()
 sigma_phi_phase_deg = sigma_phi_phase_rad * (180 / math.pi)
 print(f"\nAntenna separation: {RRE.vars.d} m")
-print(f"Angle standard deviation (phase comparison):")
+print("Angle standard deviation (phase comparison):")
 print(f"  {sigma_phi_phase_rad:.6f} radians")
 print(f"  {sigma_phi_phase_deg:.4f} degrees")
 
 # Calculate d needed for a target sigma_phi
 target_sigma_phi_deg = 0.5  # degrees
 target_sigma_phi_rad = target_sigma_phi_deg * (math.pi / 180)
-d_needed = (lambda_ / (2 * math.pi * target_sigma_phi_rad)) * math.sqrt(1 / S_N_linear_2)
+d_needed = (lambda_ / (2 * math.pi * target_sigma_phi_rad)) * math.sqrt(
+    1 / S_N_linear_2
+)
 print(f"\nTo achieve sigma_phi of {target_sigma_phi_deg} degrees:")
 print(f"  Required antenna separation (d): {d_needed:.4f} m")
 
@@ -111,7 +116,7 @@ sigma_phi_time_rad = RRE.solve.sigma_phi_time()
 sigma_phi_time_deg = sigma_phi_time_rad * (180 / math.pi)
 print(f"Bandwidth: {RRE.vars.B/1e6:.0f} MHz")
 print(f"Antenna separation: {RRE.vars.d} m")
-print(f"Angle standard deviation (time comparison):")
+print("Angle standard deviation (time comparison):")
 print(f"  {sigma_phi_time_rad:.4f} radians")
 print(f"  {sigma_phi_time_deg:.2f} degrees")
 
