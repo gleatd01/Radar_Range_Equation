@@ -4,22 +4,24 @@ This module defines the solve class which provides numeric solver functions
 for radar calculations using Solvable instances and direct calculations.
 """
 
-import numpy as np
 import math
+
+import numpy as np
 import sympy
-from .solvable import Solvable
-from .equations import equations
-from .variables import vars
+
 from .converters import convert
+from .equations import equations
+from .solvable import Solvable
+from .variables import vars
 
 
 class solve:
     """Numeric solver functions for radar calculations.
-    
+
     This class provides methods to solve radar equations numerically using values
     from the vars class. Functions either compute values directly using Python/NumPy
     or use the _solver helper to create callable functions from symbolic equations.
-    
+
     The solver functions are organized by topic:
         - Base/Common: Fundamental calculations (wavelength, gain, range)
         - Topic 07: Doppler CW radar solvers
@@ -27,7 +29,7 @@ class solve:
         - Topic 09: Pulsed radar solvers
         - Topic 10: Direction finding solvers
         - Topic 11: Pulse compression solvers
-    
+
     Example:
         >>> import radar_range_equation as RRE
         >>> RRE.vars.c = 3e8
@@ -35,13 +37,14 @@ class solve:
         >>> wavelength = RRE.solve.wavelength()
         >>> print(f"Wavelength: {wavelength} m")
     """
+
     def __init__():
         pass
-    
+
     # =========================================================================
     # HELPER FUNCTION
     # =========================================================================
-    
+
     def _solver(equation, solve_for_sym):
         """Internal helper to solve a SymPy equation and return a callable function."""
         try:
@@ -50,17 +53,19 @@ class solve:
         except (IndexError, Exception) as e:
             error_msg = f"Error: Could not solve equation for {solve_for_sym}: {e}"
             print(error_msg)
+
             def error_function():
                 raise ValueError(error_msg)
+
             return error_function
-            
+
         # Helper to convert Python numbers to sympy Floats but leave sympy types alone
         def _s(v):
             return v if isinstance(v, sympy.Basic) else sympy.Float(v)
 
         # Get all symbols used in the expression
         free_symbols = sym_expr.free_symbols
-        
+
         def calculate():
             """Dynamically created solver function."""
             subs_map = {}
@@ -68,65 +73,65 @@ class solve:
                 if hasattr(vars, s.name):
                     subs_map[s] = _s(getattr(vars, s.name))
                 # Handle special cases like 'lambda'
-                elif s.name == 'lambda' and hasattr(vars, 'wavelength'):
-                    subs_map[s] = _s(getattr(vars, 'wavelength'))
+                elif s.name == "lambda" and hasattr(vars, "wavelength"):
+                    subs_map[s] = _s(vars.wavelength)
                 # Handle 'Delta f'
-                elif str(s) == 'Delta f' and hasattr(vars, 'deltaf'):
-                    subs_map[s] = _s(getattr(vars, 'deltaf'))
+                elif str(s) == "Delta f" and hasattr(vars, "deltaf"):
+                    subs_map[s] = _s(vars.deltaf)
                 else:
                     # This will catch sympy constants like pi, log(2), sqrt(2)
                     # which don't need substitution.
-                    pass 
-            
+                    pass
+
             value_sym = sym_expr.subs(subs_map)
             value_simpl = sympy.simplify(value_sym)
             return float(value_simpl.evalf())
-        
+
         return calculate
 
     # =========================================================================
     # BASE/COMMON SOLVERS
     # =========================================================================
-    
+
     def A_sphere():
         """Calculate the radius of a sphere from its radar cross section.
-        
+
         Uses vars.sigma (radar cross section in m²).
-        
+
         Returns:
             float: Radius of the sphere in meters.
-        
+
         Example:
             >>> import radar_range_equation as RRE
             >>> RRE.vars.sigma = 3.14159
             >>> radius = RRE.solve.A_sphere()
         """
-        return (vars.sigma / np.pi) ** (1/2)
-    
+        return (vars.sigma / np.pi) ** (1 / 2)
+
     def sigma_sphere():
         """Calculate the radar cross section of a sphere from its area.
-        
+
         Uses vars.A (antenna area in m²).
-        
+
         Returns:
             float: Radar cross section in m².
-        
+
         Example:
             >>> import radar_range_equation as RRE
             >>> RRE.vars.A = 1.0
             >>> rcs = RRE.solve.sigma_sphere()
         """
-        return np.pi * vars.A ** 2
+        return np.pi * vars.A**2
 
     def theta_B():
         """Calculate the 3-dB beamwidth using Gaussian approximation.
-        
-        Uses vars.wavelength (wavelength in m) and vars.D_h (horizontal antenna 
+
+        Uses vars.wavelength (wavelength in m) and vars.D_h (horizontal antenna
         dimension in m). Uses the approximation: theta_B = 65° * pi/180 * lambda/D_h.
-        
+
         Returns:
             float: Beamwidth in radians.
-        
+
         Example:
             >>> import radar_range_equation as RRE
             >>> RRE.vars.wavelength = 0.03
@@ -137,13 +142,13 @@ class solve:
 
     def A_e_rect():
         """Calculate effective aperture for a rectangular antenna.
-        
+
         Uses vars.eta (antenna efficiency), vars.D_h (horizontal dimension in m),
         and vars.D_v (vertical dimension in m).
-        
+
         Returns:
             float: Effective aperture in m².
-        
+
         Example:
             >>> import radar_range_equation as RRE
             >>> RRE.vars.eta = 0.6
@@ -155,12 +160,12 @@ class solve:
 
     def A_e_circ():
         """Calculate effective aperture for a circular antenna.
-        
+
         Uses vars.eta (antenna efficiency) and vars.D (antenna diameter in m).
-        
+
         Returns:
             float: Effective aperture in m².
-        
+
         Example:
             >>> import radar_range_equation as RRE
             >>> RRE.vars.eta = 0.6
@@ -172,17 +177,17 @@ class solve:
     # Converted to Solvable instances for interactive, introspective solving
     wavelength = Solvable(equations.wavelength_sym, [equations.wavelength])
     G_t = Solvable(equations.G_t_sym, [equations.G_t])
-    
+
     # Legacy function-based versions (for direct Python calculation without sympy)
     @staticmethod
     def wavelength_func():
         """Calculate wavelength from frequency (legacy direct calculation).
-        
+
         Uses vars.c (speed of light in m/s) and vars.f (frequency in Hz).
-        
+
         Returns:
             float: Wavelength in meters.
-        
+
         Example:
             >>> import radar_range_equation as RRE
             >>> RRE.vars.c = 3e8
@@ -194,31 +199,31 @@ class solve:
     @staticmethod
     def G_t_func():
         """Calculate transmit antenna gain (legacy direct calculation).
-        
+
         Uses vars.pi (pi constant), vars.A_e (effective aperture in m²),
         and vars.wavelength (wavelength in m).
-        
+
         Returns:
             float: Antenna gain (dimensionless).
-        
+
         Example:
             >>> import radar_range_equation as RRE
             >>> RRE.vars.A_e = 1.0
             >>> RRE.vars.wavelength = 0.03
             >>> gain = RRE.solve.G_t_func()
         """
-        return 4 * vars.pi * vars.A_e / (vars.wavelength ** 2)
-    
+        return 4 * vars.pi * vars.A_e / (vars.wavelength**2)
+
     def R4():
         """Calculate R^4 from the radar range equation.
-        
+
         Uses vars.P_t (transmit power), vars.G_t (transmit gain), vars.G_r (receive gain),
         vars.wavelength (wavelength in m), vars.sigma (radar cross section in m²),
         vars.pi4 (4*pi), and vars.S_min (minimum detectable signal).
-        
+
         Returns:
             float: R^4 value. Take the fourth root to get range in meters.
-        
+
         Example:
             >>> import radar_range_equation as RRE
             >>> RRE.vars.P_t = 1000
@@ -227,13 +232,15 @@ class solve:
             >>> r4 = RRE.solve.R4()
             >>> r = r4 ** 0.25  # Get actual range
         """
-        value = (vars.P_t * vars.G_t ** 2 * vars.G_r * vars.wavelength ** 2 * vars.sigma) / ( (vars.pi4) ** 3 * vars.S_min )
+        value = (
+            vars.P_t * vars.G_t**2 * vars.G_r * vars.wavelength**2 * vars.sigma
+        ) / ((vars.pi4) ** 3 * vars.S_min)
         return value
-    
+
     # Converted to Solvable instances for interactive, introspective solving
     P_t = Solvable(equations.P_t_sym, [equations.P_t])
     R_max = Solvable(equations.R_max_sym, [equations.R_max])
-    
+
     # Legacy function-based solvers for backward compatibility
     _P_t_func = _solver(equations.P_t, equations.P_t.lhs)
     _R_max_func = _solver(equations.R_max, equations.R_max.lhs)
@@ -241,23 +248,25 @@ class solve:
     # =========================================================================
     # TOPIC 07: DOPPLER CW RADAR SOLVERS
     # =========================================================================
-    
+
     # Converted to Solvable instances
     f_doppler = Solvable(equations.f_doppler_sym, [equations.eq_f_doppler])
     v_from_doppler = Solvable(equations.v_sym, [equations.eq_v_from_doppler])
     f_obs_if = Solvable(equations.f_obs_sym, [equations.eq_f_obs_if])
     delta_v = Solvable(equations.delta_v_sym, [equations.eq_delta_v])
-    
+
     # Legacy function-based versions
     _f_doppler_func = _solver(equations.eq_f_doppler, equations.eq_f_doppler.lhs)
-    _v_from_doppler_func = _solver(equations.eq_v_from_doppler, equations.eq_v_from_doppler.lhs)
+    _v_from_doppler_func = _solver(
+        equations.eq_v_from_doppler, equations.eq_v_from_doppler.lhs
+    )
     _f_obs_if_func = _solver(equations.eq_f_obs_if, equations.eq_f_obs_if.lhs)
     _delta_v_func = _solver(equations.eq_delta_v, equations.eq_delta_v.lhs)
 
     # =========================================================================
     # TOPIC 08: CWFM RADAR SOLVERS
     # =========================================================================
-    
+
     # Converted to Solvable instances
     R_cwfm = Solvable(equations.R_sym, [equations.R_cwfm])
     v_cwfm = Solvable(equations.v_sym, [equations.v_cwfm])
@@ -265,7 +274,7 @@ class solve:
     f_r_cwfm = Solvable(equations.f_r_sym, [equations.f_r_cwfm])
     f_d_cwfm = Solvable(equations.f_d_sym, [equations.f_d_cwfm])
     f_0_cwfm = Solvable(equations.f_0_sym, [equations.f_0_cwfm])
-    
+
     # Legacy function-based versions
     _R_cwfm_func = _solver(equations.R_cwfm, equations.R_cwfm.lhs)
     _v_cwfm_func = _solver(equations.v_cwfm, equations.v_cwfm.lhs)
@@ -277,12 +286,12 @@ class solve:
     # =========================================================================
     # TOPIC 09: PULSED RADAR & RANGE AMBIGUITY SOLVERS
     # =========================================================================
-    
+
     R_un_from_fp = _solver(equations.eq_R_un_from_fp, equations.eq_R_un_from_fp.lhs)
     fp_from_R_un = _solver(equations.eq_fp_from_R_un, equations.eq_fp_from_R_un.lhs)
     R_from_time = _solver(equations.eq_R_from_time, equations.eq_R_from_time.lhs)
     tau_from_duty = _solver(equations.eq_tau_from_duty, equations.eq_tau_from_duty.lhs)
-    
+
     def S_N_n_coherent_dB():
         """Calculates integrated SNR (coherent) in dB."""
         S_N_1_lin = convert.db_to_lin(vars.S_N_1_dB)
@@ -298,7 +307,7 @@ class solve:
     # =========================================================================
     # TOPIC 10: DIRECTION FINDING SOLVERS
     # =========================================================================
-    
+
     # SymPy-based solvers
     S_N_from_dB = _solver(equations.S_N_from_dB, equations.S_N_from_dB.lhs)
     sigma_phi_amplitude = _solver(equations.sigma_phi_amp, equations.sigma_phi_amp.lhs)
@@ -311,91 +320,101 @@ class solve:
     # Legacy math-based methods (kept for backward compatibility)
     def calculate_Theta():
         """Calculates the Theta parameter from the 3-dB beamwidth.
-        
+
         Uses vars.theta_B
-        
+
         Returns:
             Theta parameter
         """
         return (4 * math.log(2)) / (vars.theta_B**2)
-    
+
     def v_phi():
         """Calculates the Gaussian beam approximation.
-        
+
         Uses vars.phi, vars.phi_s, vars.Theta
-        
+
         Returns:
             Gaussian beam approximation value
         """
-        return math.exp(-vars.Theta * (vars.phi - vars.phi_s)**2)
-    
+        return math.exp(-vars.Theta * (vars.phi - vars.phi_s) ** 2)
+
     def v_phi_full():
         """Calculates v(phi) using theta_B directly.
-        
+
         Uses vars.phi, vars.phi_s, vars.theta_B
-        
+
         Returns:
             Beam approximation value
         """
-        return math.exp((4 * math.log(2) * (vars.phi - vars.phi_s)**2) / (vars.theta_B**2))
-    
+        return math.exp(
+            (4 * math.log(2) * (vars.phi - vars.phi_s) ** 2) / (vars.theta_B**2)
+        )
+
     def estimate_phi_hat():
         """Calculates the linear processor angle estimate.
-        
+
         Uses vars.Delta, vars.Sigma, vars.theta_B, vars.phi_s
-        
+
         Returns:
             Angle estimate in degrees
         """
-        return (vars.Delta / vars.Sigma) * (vars.theta_B**2 / (8 * math.log(2) * vars.phi_s))
-    
+        return (vars.Delta / vars.Sigma) * (
+            vars.theta_B**2 / (8 * math.log(2) * vars.phi_s)
+        )
+
     def sigma_phi_amplitude():
         """Calculates the angle standard deviation for amplitude comparison.
-        
+
         Uses vars.theta_B, vars.S_N, vars.phi_s
-        
+
         Returns:
             Angle standard deviation in degrees
         """
-        return (vars.theta_B**2 * math.sqrt(1 / vars.S_N)) / (8 * math.sqrt(2) * vars.phi_s * math.log(2))
-    
+        return (vars.theta_B**2 * math.sqrt(1 / vars.S_N)) / (
+            8 * math.sqrt(2) * vars.phi_s * math.log(2)
+        )
+
     def sigma_phi_phase():
         """Calculates the angle standard deviation for phase comparison.
-        
+
         Uses vars.wavelength, vars.d, vars.S_N
-        
+
         Returns:
             Angle standard deviation in radians
         """
         return (vars.wavelength / (2 * math.pi * vars.d)) * math.sqrt(1 / vars.S_N)
-    
+
     def sigma_phi_time():
         """Calculates the angle standard deviation for time comparison.
-        
+
         Uses vars.c, vars.d, vars.B
-        
+
         Returns:
             Angle standard deviation in radians
         """
         return vars.c / (vars.d * vars.B)
-    
+
     def db_to_linear():
         """Converts SNR from dB to linear.
-        
+
         Uses vars.x (as the dB value)
-        
+
         Returns:
             Linear value
         """
-        return 10**(vars.x / 10)
+        return 10 ** (vars.x / 10)
 
     # =========================================================================
     # TOPIC 11: PULSE COMPRESSION SOLVERS
     # =========================================================================
-    
-    delta_r_uncompressed = _solver(equations.eq_delta_r_uncompressed, equations.eq_delta_r_uncompressed.lhs)
+
+    delta_r_uncompressed = _solver(
+        equations.eq_delta_r_uncompressed, equations.eq_delta_r_uncompressed.lhs
+    )
     B_chirp = _solver(equations.eq_B_chirp, equations.eq_B_chirp.lhs)
-    delta_r_compressed = _solver(equations.eq_delta_r_compressed, equations.eq_delta_r_compressed.lhs)
+    delta_r_compressed = _solver(
+        equations.eq_delta_r_compressed, equations.eq_delta_r_compressed.lhs
+    )
     PCR_from_B = _solver(equations.eq_PCR_1, equations.eq_PCR_1.lhs)
     PCR_from_gamma = _solver(equations.eq_PCR_2, equations.eq_PCR_2.lhs)
     f_range_tone = _solver(equations.eq_f_range_tone, equations.eq_f_range_tone.lhs)
@@ -435,8 +454,13 @@ class solve:
         Uses vars.N_fiber (dim), vars.wavelength (m), vars.zeta_ch (s), and t_s (s).
         Returns: float: RCS (m^2)."""
         # sigma_ch(t) = 0.15 * N * lambda^2 * (1 - e^(-t/zeta))
-        return 0.15 * vars.N_fiber * vars.wavelength**2 * (1 - math.exp(-t_s / vars.zeta_ch))
-        
+        return (
+            0.15
+            * vars.N_fiber
+            * vars.wavelength**2
+            * (1 - math.exp(-t_s / vars.zeta_ch))
+        )
+
     # =========================================================================
     # TOPIC 13: NOISE JAMMING SOLVERS
     # =========================================================================
@@ -549,9 +573,9 @@ class solve:
         Uses vars.wavelength (m) and vars.T_cpi (s).
         Returns: float: Velocity resolution (m/s)."""
         # rho_v = lambda / (2 * T_cpi)
-        if not hasattr(vars, 'T_cpi') or not vars.T_cpi:
+        if not hasattr(vars, "T_cpi") or not vars.T_cpi:
             raise ValueError("T_cpi (Coherent Processing Interval) is not set or zero.")
-        return (vars.wavelength / (2 * vars.T_cpi))
+        return vars.wavelength / (2 * vars.T_cpi)
 
     @staticmethod
     def Delta_r_max_gate():
@@ -600,11 +624,13 @@ class solve:
         Returns: float: Angle error in radians."""
         # phi_hat = (L/(2R)) * (1+a)/(1-a)
         if vars.R == 0:
-             raise ValueError("Range (R) cannot be zero.")
-        if abs(vars.a_gain_ratio - 1.0) < 1e-9: # Check for a very close to 1
+            raise ValueError("Range (R) cannot be zero.")
+        if abs(vars.a_gain_ratio - 1.0) < 1e-9:  # Check for a very close to 1
             # The denominator (1-a) approaches zero, causing the angle error to approach infinity (saturating the tracker)
-            return np.inf 
-        return (vars.L_cross / (2 * vars.R)) * ((1 + vars.a_gain_ratio) / (1 - vars.a_gain_ratio))
+            return np.inf
+        return (vars.L_cross / (2 * vars.R)) * (
+            (1 + vars.a_gain_ratio) / (1 - vars.a_gain_ratio)
+        )
 
     @staticmethod
     def L_cross_from_phi_hat():
@@ -612,30 +638,41 @@ class solve:
         Uses vars.phi_hat_ce (rad), vars.R (m), and vars.a_gain_ratio (J1/J2).
         Returns: float: Aperture separation (m)."""
         # Rearrange: L = 2 * R * phi_hat_ce * (1-a)/(1+a)
-        if abs(vars.a_gain_ratio + 1.0) < 1e-9: # Check for a very close to -1
-            return np.inf # Denominator approaches zero
-        return 2 * vars.R * vars.phi_hat_ce * ((1 - vars.a_gain_ratio) / (1 + vars.a_gain_ratio))
+        if abs(vars.a_gain_ratio + 1.0) < 1e-9:  # Check for a very close to -1
+            return np.inf  # Denominator approaches zero
+        return (
+            2
+            * vars.R
+            * vars.phi_hat_ce
+            * ((1 - vars.a_gain_ratio) / (1 + vars.a_gain_ratio))
+        )
 
     # =========================================================================
     # LEGACY: GATE STEALING / RANGE GATE PULL-OFF (RGPO) SOLVERS
     # =========================================================================
-    
-    delta_t_pull_from_range = _solver(equations.eq_delta_t_pull, equations.delta_t_pull_sym)
-    delta_R_pull_from_time = _solver(equations.eq_delta_R_from_time, equations.delta_R_pull_sym)
-    n_pulses_to_capture = _solver(equations.eq_n_pulses_rgpo, equations.n_pulses_capture_sym)
+
+    delta_t_pull_from_range = _solver(
+        equations.eq_delta_t_pull, equations.delta_t_pull_sym
+    )
+    delta_R_pull_from_time = _solver(
+        equations.eq_delta_R_from_time, equations.delta_R_pull_sym
+    )
+    n_pulses_to_capture = _solver(
+        equations.eq_n_pulses_rgpo, equations.n_pulses_capture_sym
+    )
     gate_bias_error = _solver(equations.eq_gate_bias, equations.gate_bias_sym)
     tracking_bandwidth = _solver(equations.eq_BW_track, equations.BW_track_sym)
-    
+
     @staticmethod
     def rgpo_delay_profile(R_initial, R_final, delta_R_per_pulse, n_pulses=None):
         """Generate a Range Gate Pull-Off delay profile.
-        
+
         Args:
             R_initial: Initial range (m) where jammer matches true target
             R_final: Final range (m) to pull the gate to
             delta_R_per_pulse: Range increment per pulse (m/pulse)
             n_pulses: Number of pulses (optional, calculated if not provided)
-            
+
         Returns:
             dict with keys:
                 - 'pulse_number': List of pulse indices
@@ -645,85 +682,86 @@ class solve:
                 - 'total_time_s': Total time if PRF known
         """
         import numpy as np
-        
+
         if n_pulses is None:
             n_pulses = int(np.ceil((R_final - R_initial) / delta_R_per_pulse)) + 1
-        
+
         pulse_nums = np.arange(n_pulses)
         ranges = R_initial + pulse_nums * delta_R_per_pulse
         ranges = np.minimum(ranges, R_final)  # Cap at final range
-        
+
         # Time delay is 2R/c (round-trip)
         delays_s = 2 * ranges / vars.c
         delays_us = delays_s * 1e6
-        
+
         result = {
-            'pulse_number': pulse_nums.tolist(),
-            'range_m': ranges.tolist(),
-            'range_km': (ranges / 1000).tolist(),
-            'delay_us': delays_us.tolist(),
-            'delay_s': delays_s.tolist(),
-            'n_pulses': n_pulses,
-            'delta_R_per_pulse': delta_R_per_pulse
+            "pulse_number": pulse_nums.tolist(),
+            "range_m": ranges.tolist(),
+            "range_km": (ranges / 1000).tolist(),
+            "delay_us": delays_us.tolist(),
+            "delay_s": delays_s.tolist(),
+            "n_pulses": n_pulses,
+            "delta_R_per_pulse": delta_R_per_pulse,
         }
-        
+
         # If PRF is set, calculate total time
-        if hasattr(vars, 'f_p') and vars.f_p > 0:
+        if hasattr(vars, "f_p") and vars.f_p > 0:
             total_time = n_pulses / vars.f_p
-            result['total_time_s'] = total_time
-            result['PRF_hz'] = vars.f_p
-        
+            result["total_time_s"] = total_time
+            result["PRF_hz"] = vars.f_p
+
         return result
-    
+
     @staticmethod
     def rgpo_max_pull_rate(delta_R_gate, factor=0.1):
         """Calculate maximum safe RGPO pull rate.
-        
+
         The pull rate must be slow enough that the gate doesn't lose lock.
         A common rule of thumb is to move no more than 10-20% of the gate
         width per pulse.
-        
+
         Args:
             delta_R_gate: Range gate width (m)
             factor: Fraction of gate width to move per pulse (default 0.1)
-            
+
         Returns:
             Maximum delta_R per pulse (m/pulse)
         """
         return delta_R_gate * factor
-    
+
     @staticmethod
-    def rgpo_capture_analysis(R_true, R_jammer_start, delta_R_pull, gate_width, n_pulses_max=1000):
+    def rgpo_capture_analysis(
+        R_true, R_jammer_start, delta_R_pull, gate_width, n_pulses_max=1000
+    ):
         """Analyze when/if RGPO captures the tracking gate.
-        
+
         Args:
             R_true: True target range (m)
             R_jammer_start: Initial jammer range (usually equals R_true) (m)
             delta_R_pull: Range pull increment per pulse (m/pulse)
             gate_width: Range gate width (m)
             n_pulses_max: Maximum pulses to simulate
-            
+
         Returns:
             dict with analysis results
         """
-        import numpy as np
-        
+
         # Simulate gate tracking
         gate_center = R_true  # Gate initially centered on true target
         jammer_range = R_jammer_start
-        
+
         captured = False
         capture_pulse = None
-        
+
         for pulse in range(n_pulses_max):
             # Jammer pulls off
             jammer_range += delta_R_pull
-            
+
             # Check if jammer is dominant in gate
             # (Simple model: whichever is closer to gate center)
             dist_to_true = abs(gate_center - R_true)
             dist_to_jammer = abs(gate_center - jammer_range)
-            
+
             if dist_to_jammer < dist_to_true:
                 # Gate starts tracking jammer
                 if not captured:
@@ -732,19 +770,18 @@ class solve:
                 gate_center = jammer_range  # Simplified: gate follows jammer
             else:
                 gate_center = R_true  # Gate follows true target
-        
-        result = {
-            'captured': captured,
-            'capture_pulse': capture_pulse,
-            'final_gate_position': gate_center,
-            'final_jammer_range': jammer_range,
-            'gate_error': gate_center - R_true
-        }
-        
-        if captured:
-            result['capture_time_pulses'] = capture_pulse
-            if hasattr(vars, 'f_p') and vars.f_p > 0:
-                result['capture_time_s'] = capture_pulse / vars.f_p
-        
-        return result
 
+        result = {
+            "captured": captured,
+            "capture_pulse": capture_pulse,
+            "final_gate_position": gate_center,
+            "final_jammer_range": jammer_range,
+            "gate_error": gate_center - R_true,
+        }
+
+        if captured:
+            result["capture_time_pulses"] = capture_pulse
+            if hasattr(vars, "f_p") and vars.f_p > 0:
+                result["capture_time_s"] = capture_pulse / vars.f_p
+
+        return result

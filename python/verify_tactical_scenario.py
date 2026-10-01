@@ -7,16 +7,18 @@ the same output as the original problem statement code.
 """
 
 import sys
-sys.path.insert(0, 'python/src')
+
+sys.path.insert(0, "python/src")
 import matplotlib
-matplotlib.use('Agg')  # Use non-interactive backend
+
+matplotlib.use("Agg")  # Use non-interactive backend
 import matplotlib.pyplot as plt
 import numpy as np
 import radar_range_equation as RRE
 
-print("="*70)
+print("=" * 70)
 print("Verification Test: Problem Statement Code vs New Function")
-print("="*70)
+print("=" * 70)
 
 # ============================================================================
 # PART 1: Original problem statement code
@@ -27,23 +29,31 @@ print("\n[1/3] Creating plot using ORIGINAL problem statement code...")
 fig1 = plt.figure(figsize=(8, 6))
 
 # Plot the individual data points
-plt.scatter(10, 20, marker='x', color='blue', s=80, label='Radar')
-plt.scatter(50, -20, marker='s', color='green', s=60, label='Target')
-plt.scatter(70, -10, marker='o', facecolors='none', edgecolors='red', s=80, label='Support jammer')
+plt.scatter(10, 20, marker="x", color="blue", s=80, label="Radar")
+plt.scatter(50, -20, marker="s", color="green", s=60, label="Target")
+plt.scatter(
+    70,
+    -10,
+    marker="o",
+    facecolors="none",
+    edgecolors="red",
+    s=80,
+    label="Support jammer",
+)
 
 # Customize the plot to match the image
-plt.xlabel('X (km)', fontsize=12)
-plt.ylabel('Y (km)', fontsize=12)
+plt.xlabel("X (km)", fontsize=12)
+plt.ylabel("Y (km)", fontsize=12)
 plt.xlim(0, 75)
 plt.ylim(-25, 25)
 plt.xticks(np.arange(0, 71, 10))
 plt.yticks(np.arange(-25, 26, 5))
-plt.grid(True, linestyle='--', alpha=0.7)
+plt.grid(True, linestyle="--", alpha=0.7)
 plt.legend()
 plt.tight_layout()
 
 # Save the original version
-fig1.savefig('/tmp/original_problem_statement.png', dpi=150, bbox_inches='tight')
+fig1.savefig("/tmp/original_problem_statement.png", dpi=150, bbox_inches="tight")
 print("✓ Original plot saved to /tmp/original_problem_statement.png")
 
 # ============================================================================
@@ -58,11 +68,11 @@ fig2 = RRE.plot.tactical_scenario(
     xlim=(0, 75),
     ylim=(-25, 25),
     figsize=(8, 6),
-    show=False
+    show=False,
 )
 
 # Save the new version
-fig2.savefig('/tmp/new_tactical_scenario_function.png', dpi=150, bbox_inches='tight')
+fig2.savefig("/tmp/new_tactical_scenario_function.png", dpi=150, bbox_inches="tight")
 print("✓ New plot saved to /tmp/new_tactical_scenario_function.png")
 
 # ============================================================================
@@ -131,12 +141,14 @@ print(f"✓ Both plots have {len(collections1)} scatter plot collections")
 # Verify legend labels match
 labels1 = [t.get_text() for t in legend1.get_texts()]
 labels2 = [t.get_text() for t in legend2.get_texts()]
-assert set(labels1) == set(labels2), f"Legend labels should match: {labels1} vs {labels2}"
+assert set(labels1) == set(
+    labels2
+), f"Legend labels should match: {labels1} vs {labels2}"
 print(f"✓ Legend labels match: {labels1}")
 
-print("\n" + "="*70)
+print("\n" + "=" * 70)
 print("✓ VERIFICATION SUCCESSFUL!")
-print("="*70)
+print("=" * 70)
 print("\nConclusion:")
 print("  The new tactical_scenario() function produces plots that are")
 print("  functionally equivalent to the original problem statement code.")
@@ -148,4 +160,4 @@ print("  - It integrates seamlessly with the radar_range_equation package")
 print("\nUsage comparison:")
 print("  BEFORE: ~15 lines of matplotlib code")
 print("  AFTER:  1 line: RRE.plot.tactical_scenario()")
-print("="*70)
+print("=" * 70)

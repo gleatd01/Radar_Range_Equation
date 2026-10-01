@@ -7,8 +7,8 @@ imports and basic functions behave as expected.
 """
 
 import sys
-from pathlib import Path
 from math import isclose
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
 SRC_PATH = ROOT / "src"
@@ -38,18 +38,20 @@ def test_package():
 
         # Test redefining a variable in the vars namespace
         # Use a non-reserved name that the package exposes: 'f' and 'wavelength'
-        RRE.redefine_variable('f', 10.0)
-        assert hasattr(RRE.vars, 'f'), "vars.f not present after redefine"
+        RRE.redefine_variable("f", 10.0)
+        assert hasattr(RRE.vars, "f"), "vars.f not present after redefine"
         assert float(RRE.vars.f) == 10.0, f"Expected vars.f == 10.0, got {RRE.vars.f}"
         print(f"✓ vars.f set to {RRE.vars.f}")
 
         # Compute wavelength from c and f using the provided solver
         # Set c and f to known numeric values, then call solve.wavelength()
-        RRE.redefine_variable('c', 3.0e8)
-        RRE.redefine_variable('f', 2.0e8)
+        RRE.redefine_variable("c", 3.0e8)
+        RRE.redefine_variable("f", 2.0e8)
         wl = RRE.solve.wavelength()
         expected = 3.0e8 / 2.0e8
-        assert isclose(wl, expected, rel_tol=1e-12), f"wavelength {wl} != expected {expected}"
+        assert isclose(
+            wl, expected, rel_tol=1e-12
+        ), f"wavelength {wl} != expected {expected}"
         print(f"✓ solve.wavelength() = {wl}")
 
         print("\n✓ All smoke tests passed")
@@ -64,9 +66,10 @@ def test_package():
     except Exception as e:
         print(f"✗ Unexpected error: {e}")
         import traceback
+
         traceback.print_exc()
         return 1
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(test_package())
